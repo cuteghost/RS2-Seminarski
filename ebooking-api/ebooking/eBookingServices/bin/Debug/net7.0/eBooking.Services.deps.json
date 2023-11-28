@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v7.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v7.0": {
+      "eBooking.Services/1.0.0": {
+        "dependencies": {
+          "eBooking.Model": "1.0.0"
+        },
+        "runtime": {
+          "eBooking.Services.dll": {}
+        }
+      },
+      "eBooking.Model/1.0.0": {
+        "runtime": {
+          "eBooking.Model.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "eBooking.Services/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "eBooking.Model/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

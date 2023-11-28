@@ -1,0 +1,12 @@
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\ebooking\ClassLibrary1\bin\Debug\net7.0\eBooking.Model.deps.json
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\ebooking\ClassLibrary1\bin\Debug\net7.0\eBooking.Model.dll
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\ebooking\ClassLibrary1\bin\Debug\net7.0\eBooking.Model.pdb
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\ebooking\ClassLibrary1\obj\Debug\net7.0\eBooking.Model.csproj.AssemblyReference.cache
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\ebooking\ClassLibrary1\obj\Debug\net7.0\eBooking.Model.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\ebooking\ClassLibrary1\obj\Debug\net7.0\eBooking.Model.AssemblyInfoInputs.cache
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\ebooking\ClassLibrary1\obj\Debug\net7.0\eBooking.Model.AssemblyInfo.cs
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\ebooking\ClassLibrary1\obj\Debug\net7.0\eBooking.Model.csproj.CoreCompileInputs.cache
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\ebooking\ClassLibrary1\obj\Debug\net7.0\eBooking.Model.dll
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\ebooking\ClassLibrary1\obj\Debug\net7.0\refint\eBooking.Model.dll
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\ebooking\ClassLibrary1\obj\Debug\net7.0\eBooking.Model.pdb
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\ebooking\ClassLibrary1\obj\Debug\net7.0\ref\eBooking.Model.dll
