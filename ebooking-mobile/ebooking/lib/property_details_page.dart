@@ -1,8 +1,7 @@
+import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
-import 'booking_page.dart';
+import 'package:ebooking/booking_page.dart';
+
 
 class PropertyDetailsPage extends StatelessWidget {
   final int propertyIndex;
@@ -123,22 +122,7 @@ class PropertyDetailsPage extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.flag),
-            label: 'Suggestions',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
+      bottomNavigationBar: CustomBottomNavigationBar(),
     );
   }
 }
