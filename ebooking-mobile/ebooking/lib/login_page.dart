@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
-import 'discover_page.dart';
+import 'package:ebooking/discover_page.dart';
 
 class LoginPage extends StatelessWidget {
   @override

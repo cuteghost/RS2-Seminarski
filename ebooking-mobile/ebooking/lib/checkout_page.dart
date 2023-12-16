@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'review_page.dart';
+import 'package:ebooking/review_page.dart';
 
 class CheckoutPage extends StatefulWidget {
   @override

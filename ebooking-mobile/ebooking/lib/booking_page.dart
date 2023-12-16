@@ -1,8 +1,8 @@
+import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
-import 'checkout_page.dart';
+import 'package:ebooking/checkout_page.dart';
 
 class BookingScreen extends StatefulWidget {
   @override
@@ -13,9 +13,7 @@ class _BookingScreenState extends State<BookingScreen> {
   int numberOfGuests = 1; // Initial number of guests
   DateTime? fromDate; // Selected from date
   DateTime? toDate; // Selected to date
-  DateTime _selectedDate = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.month;
-  final RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOn;
   TimeOfDay? _selectedCheckInTime;
 
   @override
@@ -76,6 +74,7 @@ class _BookingScreenState extends State<BookingScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            
             Container(
               height: MediaQuery.of(context).size.height * 0.5,
               child: TableCalendar(
@@ -90,12 +89,19 @@ class _BookingScreenState extends State<BookingScreen> {
                       fromDate = selectedDay;
                       toDate = null;
                     });
+                  } else if (selectedDay.isBefore(fromDate!)) {
+                    // If selected day is before the current from date, reset the selection
+                    setState(() {
+                      fromDate = selectedDay;
+                      toDate = null;
+                    });
                   } else {
                     // If from date is already selected, set the to date
                     setState(() {
                       toDate = selectedDay;
                     });
                   }
+                  print('fromDate: $fromDate, toDate: $toDate');
                 },
                 onFormatChanged: (format) {
                   setState(() {
@@ -103,11 +109,17 @@ class _BookingScreenState extends State<BookingScreen> {
                   });
                 },
                 selectedDayPredicate: (day) {
-                  // Highlight the selected date range
-                  return fromDate != null &&
-                      toDate != null &&
-                      day.isAfter(fromDate!) &&
-                      day.isBefore(toDate!.add(Duration(days: 1)));
+                  // Highlight the selected date and the range between from and to dates
+                  return (fromDate != null &&
+                          toDate != null &&
+                          ((day.isAfter(fromDate!) &&
+                                  day.isBefore(
+                                      toDate!.add(Duration(days: 1)))) ||
+                              isSameDay(day, fromDate!) ||
+                              isSameDay(day, toDate!))) ||
+                      (fromDate != null &&
+                          toDate == null &&
+                          isSameDay(day, fromDate!));
                 },
                 calendarStyle: CalendarStyle(
                   todayDecoration: BoxDecoration(
@@ -174,22 +186,7 @@ class _BookingScreenState extends State<BookingScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.flag),
-            label: 'Suggestions',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
+      bottomNavigationBar: CustomBottomNavigationBar()
     );
   }
 }

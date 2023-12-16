@@ -1,10 +1,24 @@
+import 'package:ebooking/search_page.dart';
+import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
-import 'property_details_page.dart';
+import 'package:ebooking/property_details_page.dart';
+import 'package:ebooking/history_page.dart';
 
-class DiscoverPropertiesPage extends StatelessWidget {
+class DiscoverPropertiesPage extends StatefulWidget {
+  @override
+  _DiscoverPropertiesPageState createState() => _DiscoverPropertiesPageState();
+}
+
+class _DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
+  void _openSearchAccommodations(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SearchAccommodationsPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,9 +33,29 @@ class DiscoverPropertiesPage extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(16.0),
               color: Colors.grey.shade200,
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search for location or property          ->',
+              child: ElevatedButton(
+                onPressed: () {
+                  // Navigate to the SearchAccommodationsPage when the button is pressed
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SearchAccommodationsPage(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.grey.shade200,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Search for location or property',
+                      style: TextStyle(fontSize: 16.0),
+                    ),
+                    SizedBox(width: 8.0), // Adjust spacing
+                    Icon(Icons.search),
+                  ],
                 ),
               ),
             ),
@@ -97,7 +131,14 @@ class DiscoverPropertiesPage extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // Handle reservation history button press
+                      // Handle reservation logic
+                      // Navigate to the BookingScreen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ReservationHistoryPage(),
+                        ),
+                      );
                     },
                     child: Text('View All'),
                   ),
@@ -107,22 +148,7 @@ class DiscoverPropertiesPage extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.flag),
-            label: 'Suggestions',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
+      bottomNavigationBar: CustomBottomNavigationBar(),
     );
   }
 }
