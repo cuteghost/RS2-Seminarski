@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Models.Models.Domain;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
 
 namespace Models.Domain;
 
-public partial class Accommodation
+public partial class Accommodation : ISoftDeleted
 {
     [Key]
     [Column(TypeName = "uniqueidentifier")]
@@ -49,7 +50,7 @@ public partial class Accommodation
     public byte[] Image { get; set; }
     public string Reviews { get; set; }
 
-    public string StateMachine { get; set; }
+    public bool IsDeleted { get; set; }
 }
 public enum TypesOfAccommodation
 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models.Models.Domain;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Models.Domain;
 
-internal class AccommodationImages
+internal class AccommodationImages : ISoftDeleted
 {
     [Key]
     [Column(TypeName = "uniqueidentifier")]
@@ -17,4 +18,5 @@ internal class AccommodationImages
     public AccommodationDetails AccommodationDetails { get; set; }
     [Required]
     public byte[] Image { get; set; }
+    public bool IsDeleted { get; set; }
 }

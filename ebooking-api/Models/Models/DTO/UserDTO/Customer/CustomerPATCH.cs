@@ -1,5 +1,5 @@
 ﻿namespace Models.DTO.UserDTO.Customer;
 
-public class CustomerPATCH
+public class CustomerPATCH : UserPATCH
 {
 }

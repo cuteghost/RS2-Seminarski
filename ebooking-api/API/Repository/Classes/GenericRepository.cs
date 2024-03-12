@@ -2,11 +2,12 @@
 using eBooking.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.DTO.CountryDTO;
+using Models.Models.Domain;
 using System.Linq.Expressions;
 
 namespace eBooking.Services.Classes;
 
-public class GenericRepository<T> : IGenericRepository<T> where T : class
+public class GenericRepository<T> : IGenericRepository<T> where T : class, ISoftDeleted
 {
     private readonly ApplicationDbContext _ctx;
     private readonly DbSet<T> _entity;
@@ -37,8 +38,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
             var entityToDelete = await _entity.SingleOrDefaultAsync(predicate);
             if (entityToDelete != null)
             {
-                _entity.Remove(entityToDelete);
-                _ctx.SaveChanges();
+                entityToDelete.IsDeleted = true;
+                await _ctx.SaveChangesAsync();
                 return true;
             }
             return false;
@@ -50,17 +51,29 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         }
     }
 
-    public async Task<IEnumerable<T>> GetAll(params Expression<Func<T, object>>[] includeProperties)
+    public async Task<IEnumerable<T>> GetAll(bool includeDeleted = false, params Expression<Func<T, object>>[] includeProperties)
     {
-        IQueryable<T> query = _entity;
+        IQueryable<T> query = _entity.Where(e => !e.IsDeleted || includeDeleted); ;
         foreach (var includeProperty in includeProperties)
             query = query.Include(includeProperty);
         return await query.ToListAsync();
     }
 
-    public async Task<T> GetById(int id)
+    public async Task<T> GetById(Expression<Func<T, bool>> predicate, bool includeDeleted = false, params Expression<Func<T, object>>[] includeProperties)
     {
-        return await _entity.FindAsync(id);
+        IQueryable<T> query = _entity.Where(e => !e.IsDeleted || includeDeleted);
+        foreach (var i in includeProperties)
+        {
+            query = query.Include(i);
+
+        }
+        var entityToReturn = await query.AsNoTracking().SingleOrDefaultAsync(predicate);
+
+        if (entityToReturn != null)
+        {
+            return entityToReturn;
+        }
+        return null;
     }
 
     public async Task<bool> Update(Expression<Func<T, bool>> predicate, T model)

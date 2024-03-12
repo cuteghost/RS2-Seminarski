@@ -2,7 +2,7 @@ import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
-import 'package:ebooking/checkout_page.dart';
+import 'package:ebooking/screens/checkout_screen.dart';
 
 class BookingScreen extends StatefulWidget {
   @override
@@ -179,7 +179,7 @@ class _BookingScreenState extends State<BookingScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                primary: Colors.lightBlue,
+                backgroundColor: Colors.lightBlue,
               ),
               child: Text('Confirm Booking'),
             ),

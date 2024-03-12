@@ -1,6 +1,6 @@
 import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
 import 'package:flutter/material.dart';
-import 'package:ebooking/feedback_page.dart';
+import 'package:ebooking/screens/feedback_screen.dart';
 
 class ReservationHistoryPage extends StatelessWidget {
   @override

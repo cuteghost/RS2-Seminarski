@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:ebooking/utils/navigation_utils.dart';
 import 'package:ebooking/maps.dart';
-import 'package:ebooking/profile_page.dart';
-import 'package:ebooking/suggestions_page.dart';
+import 'package:ebooking/profile_screen.dart';
+import 'package:ebooking/suggestions_screen.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final List<Widget> _pages = [

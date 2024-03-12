@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Models.Models.Domain;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Domain;
 
-public class Location
+public class Location : ISoftDeleted
 {
     [Key]
     [Column(TypeName = "bigint")]
@@ -19,4 +20,5 @@ public class Location
     public long? CityId { get; set; }
     [ForeignKey("CityId")]
     public virtual City? City { get; set; }
+    public bool IsDeleted { get; set; }
 }

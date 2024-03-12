@@ -31,7 +31,7 @@ public class LocationController : Controller
     [Route("GetLocations")]
     public IActionResult GetLocations()
     {
-        var rawLocations = _locationRepo.GetAll(l => l.City, l => l.City.Country);
+        var rawLocations = _locationRepo.GetAll(false, l => l.City, l => l.City.Country);
         var locations = _mapper.Map<List<LocationGet>>(rawLocations);
 
         return Json(locations);

@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Models.Models.Domain;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Domain;
 
-public class Review
+public class Review : ISoftDeleted
 {
     [Required]
     [Key]
@@ -31,5 +32,5 @@ public class Review
 
     public virtual Customer Customer { get; set; }
     public virtual Accommodation Accommodation { get; set; }
-
+    public bool IsDeleted { get; set; }
 }

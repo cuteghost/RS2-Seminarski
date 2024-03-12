@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Models.Models.Domain;
+using System.ComponentModel.DataAnnotations;
 
 namespace Models.Domain;
 
-public class Customer
+public class Customer : ISoftDeleted
 {
     [Required]
     [Key]
@@ -13,5 +14,5 @@ public class Customer
 
     [Required]
     public User User { get; set; }
-
+    public bool IsDeleted { get; set; }
 }

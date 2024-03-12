@@ -28,7 +28,7 @@ public class CountryController : Controller
     }
     [HttpGet]
     [Route("GetCountries")]
-    public async Task<IActionResult> GetCities()
+    public async Task<IActionResult> GetCountries()
     {
         return Json(await _countryRepo.GetAll());
     }

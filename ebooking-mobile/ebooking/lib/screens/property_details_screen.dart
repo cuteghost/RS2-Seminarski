@@ -1,6 +1,6 @@
 import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
 import 'package:flutter/material.dart';
-import 'package:ebooking/booking_page.dart';
+import 'package:ebooking/screens/booking_screen.dart';
 
 
 class PropertyDetailsPage extends StatelessWidget {

@@ -198,7 +198,7 @@ Widget _buildFilterSection(String header, List<String> buttonNames, List<bool> b
     onPressed: onPressed,
     child: Text(label),
     style: ElevatedButton.styleFrom(
-      primary: isToggled ? Colors.blue : null,
+      backgroundColor: isToggled ? Colors.blue : null,
     ),
   );
 }

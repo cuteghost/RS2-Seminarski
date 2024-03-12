@@ -30,7 +30,7 @@ public class CityController : Controller
     [Route("GetCities")]
     public IActionResult GetCities()
     {
-        var rawCities = _cityRepo.GetAll(c => c.Country);
+        var rawCities = _cityRepo.GetAll(false, c => c.Country);
         var cities = _mapper.Map<List<CityGET>>(rawCities);
         return Json(cities);
     }

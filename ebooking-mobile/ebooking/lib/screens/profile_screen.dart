@@ -230,7 +230,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ElevatedButton(
                         onPressed: null,
                         style: ElevatedButton.styleFrom(
-                          primary: Colors.red,
+                          backgroundColor: Colors.red,
                         ),
                         child: Text('Disconnect'),
                       ),

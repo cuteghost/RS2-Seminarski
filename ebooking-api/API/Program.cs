@@ -7,6 +7,13 @@ using Repository.Interfaces;
 using Repository.Classes;
 using Services.HashService;
 using TaxiHDbContext;
+using Services.TokenHandlerService;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using API.Repository.Classes;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Services.FacebookService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,8 +39,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     ServiceRegistry.ConfigureDbContext(options, dbConnectionString);
 });
 #endregion
-builder.Services.AddScoped<IHashService, HashService>();
 
+/*--------------------------------------------------------------------------------------*/
+builder.Services.AddScoped<IHashService, HashService>();
+/*--------------------------------------------------------------------------------------*/
+builder.Services.AddScoped<ITokenHandlerService, TokenHandlerService>();
+/*--------------------------------------------------------------------------------------*/
+builder.Services.AddScoped<IFacebook, Facebook>();
+/*--------------------------------------------------------------------------------------*/
+
+builder.Services.AddScoped<ILoginRepository, LoginRepository>();
 builder.Services.AddTransient<IGenericRepository<City>, GenericRepository<City>>();
 builder.Services.AddTransient<IGenericRepository<Country>, GenericRepository<Country>>();
 builder.Services.AddTransient<IGenericRepository<Location>, GenericRepository<Location>>();
@@ -43,9 +58,46 @@ builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
 builder.Services.AddTransient<IGenericRepository<Partner>, GenericRepository<Partner>>();
 builder.Services.AddTransient<IGenericRepository<Administrator>, GenericRepository<Administrator>>();
 
+#region AuthConfiguration
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    }).AddFacebook(facebookOptions =>
+    {
+        facebookOptions.AppId = configuration["Authentication:Facebook:AppId"];
+        facebookOptions.AppSecret = configuration["Authentication:Facebook:AppSecret"];
+        facebookOptions.SaveTokens = true;
+        facebookOptions.Events = new OAuthEvents
+        {
+            OnCreatingTicket = async context =>
+            {
+
+            }
+        };
+    });
+#endregion
+
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
+//CORS solution
+builder.Services.AddCors(option =>
+{
+    option.AddPolicy("FirstPolicy", builder =>
+    {
+        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+
+    });
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -61,8 +113,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("FirstPolicy");
+
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

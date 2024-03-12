@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Models.Models.Domain;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Domain;
 
-public class Administrator
+public class Administrator : ISoftDeleted
 {
     [Key]
     [Required]
@@ -19,4 +20,5 @@ public class Administrator
     public DateTime Joined { get; set; }
     
     public virtual Administrator Creator { get; set; }
+    public bool IsDeleted { get; set; }
 }
