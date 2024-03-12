@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Models.Models.Domain;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Domain;
 
-internal class ReviewImage
+internal class ReviewImage : ISoftDeleted
 {
     [Key]
     [Column(TypeName = "uniqueidentifier")]
@@ -14,4 +15,7 @@ internal class ReviewImage
     public byte[] Image { get; set; }
 
     public virtual Review Review { get; set; }
+
+    public bool IsDeleted { get; set; }
+
 }

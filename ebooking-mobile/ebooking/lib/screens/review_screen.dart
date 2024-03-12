@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'reservation_confirmation_page.dart';
+import 'reservation_confirmation_screen.dart';
 
 class ReviewPage extends StatelessWidget {
   @override
@@ -146,7 +146,7 @@ class ReviewPage extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.lightBlue,
+                      backgroundColor: Colors.lightBlue,
                     ),
                     child: Text('Submit'),
                   ),

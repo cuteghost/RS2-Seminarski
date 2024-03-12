@@ -1,8 +1,8 @@
-import 'package:ebooking/search_page.dart';
+import 'package:ebooking/screens/search_screen.dart';
 import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
 import 'package:flutter/material.dart';
-import 'package:ebooking/property_details_page.dart';
-import 'package:ebooking/history_page.dart';
+import 'package:ebooking/screens/property_details_screen.dart';
+import 'package:ebooking/screens/history_screen.dart';
 
 class DiscoverPropertiesPage extends StatefulWidget {
   @override
@@ -44,7 +44,7 @@ class _DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.grey.shade200,
+                  backgroundColor: Colors.grey.shade200,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,

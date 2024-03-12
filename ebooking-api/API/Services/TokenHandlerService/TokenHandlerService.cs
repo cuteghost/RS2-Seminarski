@@ -26,7 +26,7 @@ public class TokenHandlerService : ITokenHandlerService
         var claims = new List<Claim>();
         claims.Add(new Claim(ClaimTypes.Email, user.Email));
         claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
-
+        Console.Write(role.ToString());
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
             _configuration["Jwt:Issuer"],
@@ -37,6 +37,25 @@ public class TokenHandlerService : ITokenHandlerService
             );
         return await Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
         
+    }
+    public async Task<string> RefreshTokenAsync(string jwt)
+    {
+        var email = GetEmailFromJWT(jwt);
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:key"]));
+        var role = CheckRole(email);
+        var claims = new List<Claim>();
+        claims.Add(new Claim(ClaimTypes.Email, email));
+        claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
+        Console.Write(role.ToString());
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var token = new JwtSecurityToken(
+            _configuration["Jwt:Issuer"],
+            _configuration["Jwt:Audience"],
+            claims,
+            expires: DateTime.Now.AddMinutes(15),
+            signingCredentials: credentials
+            );
+        return await Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
     }
 
     public string GetEmailFromJWT(string token)

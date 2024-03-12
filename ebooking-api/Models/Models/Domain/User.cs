@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Models.Models.Domain;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Domain;
 
-public class User
+public class User : ISoftDeleted
 {
     [Required]
     [Key]
@@ -43,6 +44,8 @@ public class User
     public byte[]? Image { get; set; }
 
     public bool IsActive { get; set; } = true;
+
+    public bool IsDeleted { get; set; } = false;
 }
 public enum Gender
 {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:ebooking/results_page.dart';
+import 'package:ebooking/screens/results_screen.dart';
 class SearchAccommodationsPage extends StatefulWidget {
   @override
   _SearchAccommodationsPageState createState() =>

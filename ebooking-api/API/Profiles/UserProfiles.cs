@@ -1,4 +1,5 @@
 ﻿using Models.Domain;
+using Models.DTO.AuthDTO;
 using Models.DTO.UserDTO.Administrator;
 using Models.DTO.UserDTO.Customer;
 using Models.DTO.UserDTO.Partner;
@@ -13,6 +14,7 @@ public class UserProfiles : AutoMapper.Profile
         CreateMap<AdministratorPOST, User>().ReverseMap();
         CreateMap<AdministratorPATCH, User>().ReverseMap();
 
+        CreateMap<CustomerGET, User>().ReverseMap();
         CreateMap<CustomerPOST, User>().ReverseMap();
         CreateMap<CustomerPATCH, User>().ReverseMap();
 
@@ -31,6 +33,8 @@ public class UserProfiles : AutoMapper.Profile
         CreateMap<Partner, PartnerGET>().ReverseMap();
         CreateMap<Partner, PartnerPOST>().ReverseMap();
         CreateMap<Partner, PartnerPATCH>().ReverseMap();
+
+        CreateMap<User, LoginDTO>().ReverseMap();
 
     }
 }

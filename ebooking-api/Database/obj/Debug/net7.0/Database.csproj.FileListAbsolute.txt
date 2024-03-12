@@ -85,3 +85,4 @@ C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\Database\bin\Debug\net7.
 C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\Database\bin\Debug\net7.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\Database\bin\Debug\net7.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\Database\obj\Debug\net7.0\Database.genruntimeconfig.cache
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\Database\bin\Debug\net7.0\Newtonsoft.Json.dll

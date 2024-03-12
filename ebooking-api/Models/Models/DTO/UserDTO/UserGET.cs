@@ -4,19 +4,13 @@ namespace Models.DTO.UserDTO;
 
 public class UserGET
 {
-    
-    public long Id { get; set; }
-    public Role Role { get; set; }
-    public string DisplayName { get; set; } = string.Empty;
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public DateTime BirthDate { get; set; }
-    public Gender Gender { get; set; }
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public byte[]? Image { get; set; }
-    public bool isActive { get; set; } = true;
-    public virtual Location location { get; set; }
+    public string UserDisplayName { get; set; } = string.Empty;
+    public string UserFirstName { get; set; } = string.Empty;
+    public string UserLastName { get; set; } = string.Empty;
+    public DateTime UserBirthDate { get; set; }
+    public Gender UserGender { get; set; }
+    public string UserEmail { get; set; } = string.Empty;
+    public bool UserisActive { get; set; } = true;
 }
 public enum Gender
 {

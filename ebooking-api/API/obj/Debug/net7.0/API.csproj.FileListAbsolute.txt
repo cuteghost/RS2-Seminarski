@@ -183,3 +183,7 @@ C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\API\obj\Debug\net7.0\ref
 C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\API\bin\Debug\net7.0\Database.deps.json
 C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\API\bin\Debug\net7.0\Database.runtimeconfig.json
 C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\API\bin\Debug\net7.0\Database.exe
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\API\bin\Debug\net7.0\JWT.dll
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\API\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\API\bin\Debug\net7.0\Newtonsoft.Json.dll
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\ebooking-api\API\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.Facebook.dll

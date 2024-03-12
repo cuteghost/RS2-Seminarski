@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Models.Models.Domain;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Domain;
 
-public class AccommodationDetails
+public class AccommodationDetails : ISoftDeleted
 {
     [Key]
     [Column(TypeName = "uniqueidentifier")]
@@ -22,5 +23,6 @@ public class AccommodationDetails
     public bool SpaTub { get; set; }
     public bool SoundProof { get; set; }
     public bool Breakfast { get; set; }
+    public bool IsDeleted { get; set; }
 }
 

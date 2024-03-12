@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Models.Models.Domain;
+using System.ComponentModel.DataAnnotations;
 
 namespace Models.Domain;
 
-public class Partner
+public class Partner : ISoftDeleted
 {
     [Required]
     [Key]
@@ -13,6 +14,6 @@ public class Partner
 
     [Required]
     public DateTime DateJoined { get; set; }
-
+    public bool IsDeleted { get; set; }
 
 }

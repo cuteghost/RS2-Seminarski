@@ -1,9 +1,75 @@
+import 'package:ebooking/services/auth_provider.dart';
+import 'package:ebooking/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:ebooking/discover_page.dart';
+import 'package:ebooking/screens/discover_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  Map<String, dynamic>? _userData;
+  AccessToken? _accessToken;
+  bool _checking = true;
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+  void initState(){
+    super.initState();
+    _checkIfIsLoggedIn();
+  }
+
+    _checkIfIsLoggedIn() async {
+    final accessToken = await FacebookAuth.instance.accessToken;
+
+    setState(() {
+      _checking = false;
+    });
+
+    if (accessToken != null) {
+      print(accessToken.toJson());
+      final userData = await FacebookAuth.instance.getUserData();
+      _accessToken = accessToken;
+      setState(() {
+        _userData = userData;
+      });
+    } else {
+      _login();
+    }
+  }
+
+  _login() async {
+    final LoginResult result = await FacebookAuth.instance.login();
+
+    if (result.status == LoginStatus.success) {
+      _accessToken = result.accessToken;
+      final userData = await FacebookAuth.instance.getUserData();
+      _userData = userData;
+    } else {
+      print(result.status);
+      print(result.message);
+    }
+    setState(() {
+      _checking = false;
+    });
+  }
+
+  _logout() async {
+    await FacebookAuth.instance.logOut();
+    _accessToken = null;
+    _userData = null;
+    setState(() {});
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
@@ -70,12 +136,14 @@ class LoginPage extends StatelessWidget {
                   ),
                   SizedBox(height: 20.0),
                   TextField(
+                    controller: _emailController,
                     decoration: InputDecoration(
                       labelText: 'Email',
                     ),
                   ),
                   SizedBox(height: 15.0),
                   TextField(
+                    controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       labelText: 'Password',
@@ -83,15 +151,27 @@ class LoginPage extends StatelessWidget {
                   ),
                   SizedBox(height: 20.0),
                   ElevatedButton(
-                    onPressed: () {
-                      // Perform login logic here
-                      // Navigate to DiscoverPropertiesPage on success
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DiscoverPropertiesPage(),
-                        ),
-                      );
+                    onPressed: () async {
+                      final email = _emailController.text;
+                      final password = _passwordController.text;
+                      bool loginSuccess = await Provider.of<AuthProvider>(
+                              context,
+                              listen: false)
+                          .login(email, password);
+
+                      if (loginSuccess) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DiscoverPropertiesPage(),
+                          ),
+                        );
+                      } else {
+                        // Show an error message
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Login Failed'),
+                        ));
+                      }
                     },
                     child: Text('CONTINUE'),
                   ),
@@ -101,7 +181,12 @@ class LoginPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SocialMediaButton(icon: Icons.facebook, onPressed: () {}),
+                      SocialMediaButton(
+                        icon: Icons.facebook,
+                        onPressed: () async {
+                          await _login();
+                        },
+                      ),
                       SocialMediaButton(icon: Icons.apple, onPressed: () {}),
                       SocialMediaButton(
                         icon: MdiIcons.google,
@@ -118,6 +203,7 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
+
 class SocialMediaButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;

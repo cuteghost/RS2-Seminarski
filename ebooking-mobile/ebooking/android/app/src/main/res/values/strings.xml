@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ebooking</string>
+    <string name="facebook_app_id">927259088932602</string>
+    <string name="fb_login_protocol_scheme">fb927259088932602</string>
+    <string name="facebook_client_token">9440f832dfaa0d73cbbb0e55af05be64</string>
+</resources>
+

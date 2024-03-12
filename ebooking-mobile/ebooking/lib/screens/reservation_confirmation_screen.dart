@@ -54,7 +54,7 @@ class ReservationConfirmationPage extends StatelessWidget {
                 // Handle button click (navigate back home, for example)
               },
               style: ElevatedButton.styleFrom(
-                primary: Colors.lightBlue,
+                backgroundColor: Colors.lightBlue,
               ),
               child: Text('Back Home'),
             ),
