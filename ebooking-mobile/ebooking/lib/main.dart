@@ -1,8 +1,8 @@
-import 'package:ebooking/discover_screen.dart';
+import 'package:ebooking/screens/discover_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:ebooking/login_screen.dart';
+import 'package:ebooking/screens/login_screen.dart';
 import 'package:ebooking/services/auth_service.dart';
-import 'package:ebooking/services/auth_provider.dart';
+import 'package:ebooking/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 void main() => runApp(MyApp());
 
