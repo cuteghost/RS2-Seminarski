@@ -1,3 +1,11 @@
 # Ignore folders within ebooking-api directory
-ebooking-api/obj/
-ebooking-api/.vs/
+ebooking-api/API/obj/
+ebooking-api/API/.vs/
+ebooking-api/Database/obj/
+ebooking-api/Database/.vs/
+ebooking-api/Models/obj/
+ebooking-api/Models/.vs/
+ebooking-api/PaymentService/obj/
+ebooking-api/PaymentService/.vs/
+ebooking-api/PayPalService/obj/
+ebooking-api/PayPalService/.vs/
