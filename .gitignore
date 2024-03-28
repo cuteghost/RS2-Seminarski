@@ -1,0 +1,3 @@
+# Ignore folders within ebooking-api directory
+ebooking-api/obj/
+ebooking-api/.vs/
