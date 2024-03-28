@@ -1,5 +1,6 @@
 # Ignore folders within ebooking-api directory
 ebooking-api/.vs/
+ebooking-api/.vs/API/v17/.suo
 ebooking-api/API/obj/
 ebooking-api/API/bin/
 ebooking-api/API/.vs/
