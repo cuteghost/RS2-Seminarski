@@ -7,7 +7,7 @@ public class Customer : ISoftDeleted
 {
     [Required]
     [Key]
-    public long Id { get; set; }
+    public Guid Id { get; set; }
     
     [Required]
     public DateTime Joined { get; set; }

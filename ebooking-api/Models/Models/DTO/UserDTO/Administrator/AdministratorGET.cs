@@ -5,7 +5,7 @@ namespace Models.DTO.UserDTO.Administrator;
 public class AdministratorGET
 {
     
-    public long Id { get; set; }
+    public Guid Id { get; set; }
     public Role Role { get; set; }
     public string DisplayName { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
@@ -15,8 +15,8 @@ public class AdministratorGET
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public byte[]? Image { get; set; }
-    public bool isActive { get; set; } = true;
-    public virtual Location location { get; set; }
+    public bool IsActive { get; set; } = true;
+    public virtual Location Location { get; set; }
 }
 public enum Gender
 {

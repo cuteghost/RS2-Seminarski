@@ -57,7 +57,7 @@ builder.Services.AddTransient<IGenericRepository<Customer>, GenericRepository<Cu
 builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
 builder.Services.AddTransient<IGenericRepository<Partner>, GenericRepository<Partner>>();
 builder.Services.AddTransient<IGenericRepository<Administrator>, GenericRepository<Administrator>>();
-
+builder.Services.AddTransient<IGenericRepository<Accommodation>, GenericRepository<Accommodation>>();
 #region AuthConfiguration
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -71,19 +71,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-    }).AddFacebook(facebookOptions =>
-    {
-        facebookOptions.AppId = configuration["Authentication:Facebook:AppId"];
-        facebookOptions.AppSecret = configuration["Authentication:Facebook:AppSecret"];
-        facebookOptions.SaveTokens = true;
-        facebookOptions.Events = new OAuthEvents
-        {
-            OnCreatingTicket = async context =>
-            {
-
-            }
-        };
     });
+    //.AddFacebook(facebookOptions =>
+    //{
+    //    facebookOptions.AppId = configuration["Authentication:Facebook:AppId"];
+    //    facebookOptions.AppSecret = configuration["Authentication:Facebook:AppSecret"];
+    //    facebookOptions.SaveTokens = true;
+    //    facebookOptions.Events = new OAuthEvents
+    //    {
+    //        OnCreatingTicket = async context =>
+    //        {
+
+    //        }
+    //    };
+    //});
 #endregion
 
 

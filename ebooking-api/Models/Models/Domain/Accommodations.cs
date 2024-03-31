@@ -1,7 +1,6 @@
 ﻿using Models.Models.Domain;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.CompilerServices;
 
 namespace Models.Domain;
 
@@ -9,7 +8,7 @@ public partial class Accommodation : ISoftDeleted
 {
     [Key]
     [Column(TypeName = "uniqueidentifier")]
-    public Guid AccommodationId { get; set; } = new Guid();
+    public Guid Id { get; set; }
 
     [Required]
     [Column(TypeName = "nvarchar")]
@@ -18,7 +17,7 @@ public partial class Accommodation : ISoftDeleted
     public string Name { get; set; } = string.Empty;
 
     [Required]
-    public bool status { get; set; }
+    public bool Status { get; set; }
 
     [Required]
     public TypesOfAccommodation TypeOfAccommodation { get; set; }
@@ -27,28 +26,28 @@ public partial class Accommodation : ISoftDeleted
     public double PricePerNight { get; set; }
 
     [Required]
-    public byte[] ImageThumb { get; set; }
+    public byte[]? ImageThumb { get; set; }
 
     [Required]
     [Column(TypeName = "nvarchar")]
     [MinLength(50)]
     [MaxLength(1000)]
-    public string Description { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     [Column(TypeName = "decimal(3,1)")]
     public float ReviewScore { get; set; }
 
     [Required]
-    public User Owner { get; set; }
+    public Partner? Owner { get; set; }
 
     [Required]
-    public Location Location { get; set; }
+    public Location? Location { get; set; }
 
     [Required]
-    public AccommodationDetails AccommodationDetails { get; set; }
+    public AccommodationDetails? AccommodationDetails { get; set; }
     
-    public byte[] Image { get; set; }
-    public string Reviews { get; set; }
+    public byte[]? Image { get; set; }
+    public string Reviews { get; set; } = string.Empty;
 
     public bool IsDeleted { get; set; }
 }

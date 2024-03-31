@@ -6,9 +6,9 @@ namespace Models.Domain;
 
 public class Review : ISoftDeleted
 {
-    [Required]
     [Key]
-    public long Id { get; set; }
+    [Column(TypeName = "uniqueidentifier")]
+    public Guid Id { get; set; }
 
     [Required]
     [ForeignKey("Customer")]

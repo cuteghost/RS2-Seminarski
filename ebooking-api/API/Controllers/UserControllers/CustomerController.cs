@@ -46,7 +46,7 @@ public class CustomerController : Controller
     [Authorize]
     [HttpGet]
     [Route("details/{id}")]
-    public async Task<IActionResult> GetCustomerDetails([FromRoute] int id, [FromHeader] string Authorization)
+    public async Task<IActionResult> GetCustomerDetails([FromRoute] Guid id, [FromHeader] string Authorization)
     {
         try
         {
@@ -64,7 +64,7 @@ public class CustomerController : Controller
     [Authorize]
     [HttpDelete]
     [Route("Delete/{id}")]
-    public async Task<IActionResult> DeleteUser([FromRoute] int id, [FromHeader] string Authorization)
+    public async Task<IActionResult> DeleteUser([FromRoute] Guid id, [FromHeader] string Authorization)
     {
         if (await _customerRepo.Delete(id, Authorization))
             return Content("OK");
@@ -75,7 +75,7 @@ public class CustomerController : Controller
     [Authorize]
     [HttpPatch]
     [Route("update/{id}")]
-    public async Task<IActionResult> UpdateUser([FromBody] CustomerPATCH customerDto, [FromRoute] int id)
+    public async Task<IActionResult> UpdateUser([FromBody] CustomerPATCH customerDto, [FromRoute] Guid id)
     {
         var customer = await _customerRepo.GetCustomerById(id);
          
