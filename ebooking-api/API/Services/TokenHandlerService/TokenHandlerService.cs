@@ -67,7 +67,7 @@ public class TokenHandlerService : ITokenHandlerService
         return tokenEmail;
     }
 
-    public long GetAdministratorIdFromJWT(string token)
+    public Guid GetAdministratorIdFromJWT(string token)
     {
         var email = GetEmailFromJWT(token);
         var query = from administrators in _dbContext.Administrators
@@ -76,7 +76,7 @@ public class TokenHandlerService : ITokenHandlerService
                 select  administrators.Id;
          return query.FirstOrDefault();
     }
-    public long GetCustomerIdFromJWT(string token)
+    public Guid GetCustomerIdFromJWT(string token)
     {
         var email = GetEmailFromJWT(token);
         var query = from customer in _dbContext.Customers
@@ -86,7 +86,7 @@ public class TokenHandlerService : ITokenHandlerService
          return query.FirstOrDefault();
     }
     
-    public long GetPartnerIdFromJWT(string token)
+    public Guid GetPartnerIdFromJWT(string token)
     {
         var email = GetEmailFromJWT(token);
         var query = from partner in _dbContext.Partners

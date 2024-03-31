@@ -35,7 +35,7 @@ public class AdministratorController : Controller
     }
     [HttpDelete]
     [Route("Delete/{id}")]
-    public async Task<IActionResult> DeleteUser([FromRoute] int id)
+    public async Task<IActionResult> DeleteUser([FromRoute] Guid id)
     {
         if (await _userRepo.Delete(u => u.Id == id))
             return Content("OK");

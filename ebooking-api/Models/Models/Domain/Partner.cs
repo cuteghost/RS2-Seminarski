@@ -1,13 +1,14 @@
 ﻿using Models.Models.Domain;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Domain;
 
 public class Partner : ISoftDeleted
 {
-    [Required]
     [Key]
-    public long Id { get; set; }
+    [Column(TypeName = "uniqueidentifier")]
+    public Guid Id { get; set; }
 
     [Required]
     public User User { get; set; }

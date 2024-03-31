@@ -16,5 +16,6 @@ public class ApplicationDbContext : DbContext
     public DbSet<Administrator> Administrators { get; set; }
     public DbSet<Partner> Partners { get; set; }
     public DbSet<Customer> Customers { get; set; }
-
+    public DbSet<Accommodation> Accommodations { get; set;}
+    public DbSet<AccommodationDetails> AccommodationDetails { get; set; }
 }

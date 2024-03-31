@@ -6,9 +6,9 @@ namespace Services.TokenHandlerService
         public Task<string> CreateTokenAsync(LoginDTO user);
         public Task<string> RefreshTokenAsync(string jwt);
         public string GetEmailFromJWT(string token);
-        public long GetAdministratorIdFromJWT (string token);
-        public long GetCustomerIdFromJWT (string token);
-        public long GetPartnerIdFromJWT(string token);
+        public Guid GetAdministratorIdFromJWT (string token);
+        public Guid GetCustomerIdFromJWT (string token);
+        public Guid GetPartnerIdFromJWT(string token);
         public Task<int> CheckRole(string email);
     }
 }

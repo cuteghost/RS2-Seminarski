@@ -8,11 +8,11 @@ namespace Models.DTO.PayPalDTOs.Request.Catalog
 {
     public class CreateProduct
     {
-        public string name { get; set; }
-        public string type { get; set; }
-        public string description { get; set; }
-        public string category { get; set; }
-        public string image_url { get; set; }
-        public string home_url { get; set; }
+        public string name { get; set; } = string.Empty;
+        public string type { get; set; } = string.Empty;
+        public string description { get; set; } = string.Empty;
+        public string category { get; set; } = string.Empty;
+        public string image_url { get; set; } = string.Empty;
+        public string home_url { get; set; } = string.Empty;
     }
 }
