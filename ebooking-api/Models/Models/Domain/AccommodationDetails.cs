@@ -8,7 +8,7 @@ public class AccommodationDetails : ISoftDeleted
 {
     [Key]
     [Column(TypeName = "uniqueidentifier")]
-    public Guid AccommodationDetailId { get; set; }
+    public Guid Id { get; set; }
     public bool Bathub { get; set; }
     public bool Balcony { get; set; }
     public bool PrivateBathroom { get; set; }

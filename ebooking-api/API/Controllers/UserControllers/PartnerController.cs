@@ -33,11 +33,17 @@ public class PartnerController : Controller
     {
         return Json(await _userRepo.GetAll());
     }
+    [HttpGet]
+    [Route("GetUser")]
+    public async Task<IActionResult> GetById(Guid userId)
+    {
+        return Json(await _userRepo.GetById(c => c.User.Id == userId, false));
+    }
     [HttpDelete]
     [Route("Delete/{id}")]
-    public async Task<IActionResult> DeleteUser([FromRoute] int id)
+    public async Task<IActionResult> DeleteUser([FromRoute] Guid id)
     {
-        if (await _userRepo.Delete(u => u.Id == id))
+        if (await _userRepo.Delete(u => u.User.Id == id))
             return Content("OK");
         else
             return Content("Not Found");

@@ -2,7 +2,7 @@
 {
     public class AccommodationDetailsGET
     {
-        public int Id { get; set; }        
+        public Guid Id { get; set; }        
         public bool Bathub { get; set; }
         public bool Balcony { get; set; }
         public bool PrivateBathroom { get; set; }
