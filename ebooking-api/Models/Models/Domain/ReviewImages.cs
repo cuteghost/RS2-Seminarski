@@ -8,7 +8,7 @@ internal class ReviewImage : ISoftDeleted
 {
     [Key]
     [Column(TypeName = "uniqueidentifier")]
-    public long ReviewImagesId { get; set; }
+    public Guid Id { get; set; }
     [ForeignKey("Review")]
     public Review ReviewId { get; set; }
     [Required]

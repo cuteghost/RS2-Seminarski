@@ -22,16 +22,132 @@ namespace Database.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Models.Domain.Accommodation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccommodationDetailsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<byte[]>("Image")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("ImageThumb")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("PricePerNight")
+                        .HasColumnType("float");
+
+                    b.Property<decimal>("ReviewScore")
+                        .HasColumnType("decimal(3,1)");
+
+                    b.Property<string>("Reviews")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TypeOfAccommodation")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccommodationDetailsId");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("Accommodations");
+                });
+
+            modelBuilder.Entity("Models.Domain.AccommodationDetails", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("AC")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Balcony")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Bathub")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Breakfast")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CoffeeMachine")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Kitchen")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("PrivateBathroom")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("PrivatePool")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("SeaView")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("SoundProof")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("SpaTub")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Terrace")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("View")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("WashingMachine")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AccommodationDetails");
+                });
+
             modelBuilder.Entity("Models.Domain.Administrator", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CreatorId")
-                        .HasColumnType("bigint");
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -39,8 +155,8 @@ namespace Database.Migrations
                     b.Property<DateTime>("Joined")
                         .HasColumnType("datetime");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -53,14 +169,12 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Models.Domain.City", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long?>("CountryId")
-                        .HasColumnType("bigint");
+                    b.Property<Guid?>("CountryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -78,11 +192,9 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Models.Domain.Country", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -98,11 +210,9 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Models.Domain.Customer", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -110,8 +220,8 @@ namespace Database.Migrations
                     b.Property<DateTime>("Joined")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -122,18 +232,16 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Models.Domain.Location", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Address")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("CityId")
-                        .HasColumnType("bigint");
+                    b.Property<Guid?>("CityId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -156,11 +264,9 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Models.Domain.Partner", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DateJoined")
                         .HasColumnType("datetime2");
@@ -168,8 +274,8 @@ namespace Database.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -180,11 +286,9 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Models.Domain.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("date");
@@ -227,6 +331,33 @@ namespace Database.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Models.Domain.Accommodation", b =>
+                {
+                    b.HasOne("Models.Domain.AccommodationDetails", "AccommodationDetails")
+                        .WithMany()
+                        .HasForeignKey("AccommodationDetailsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Models.Domain.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Models.Domain.Partner", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AccommodationDetails");
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Models.Domain.Administrator", b =>

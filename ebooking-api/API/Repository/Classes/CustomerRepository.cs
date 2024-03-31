@@ -63,7 +63,7 @@ public class CustomerRepository : ICustomerRepository
         }
     }
 
-    public async Task<Customer> GetCustomerDetails(int id, string JWT)
+    public async Task<Customer> GetCustomerDetails(Guid id, string JWT)
     {
         try
         {
@@ -88,7 +88,7 @@ public class CustomerRepository : ICustomerRepository
         await _customerRepository.Update(c => c.Id == customer.Id, customer);
         return true;
     }
-    public async Task<Customer> GetCustomerById(int id)
+    public async Task<Customer> GetCustomerById(Guid id)
     {
         return await _customerRepository.GetById(c => c.Id == id, false, c => c.User);
     }
@@ -98,7 +98,7 @@ public class CustomerRepository : ICustomerRepository
         return await _dbContext.Customers.Include(c => c.User).Where(u => u.User.Email == email).AsNoTracking().FirstOrDefaultAsync();
     }
 
-    public async Task<bool> Delete(int id, string JWT)
+    public async Task<bool> Delete(Guid id, string JWT)
     {
         var customer = await GetCustomerById(id);
         if (customer == null) return false;

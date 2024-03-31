@@ -8,10 +8,10 @@ public class Administrator : ISoftDeleted
 {
     [Key]
     [Required]
-    public long Id { get; set; }
+    public Guid Id { get; set; }
     
     [ForeignKey("Creator")]
-    public long? CreatorId { get; set; }
+    public Guid? CreatorId { get; set; }
 
     [Required]
     public User User { get; set; }

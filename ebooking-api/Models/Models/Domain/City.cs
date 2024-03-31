@@ -7,11 +7,11 @@ namespace Models.Domain;
 public class City : ISoftDeleted
 {
     [Key]
-    [Column(TypeName = "bigint")]
-    public long Id { get; set; }
+    [Column(TypeName = "uniqueidentifier")]
+    public Guid Id { get; set; }
     [Required]
     public string Name { get; set; } = string.Empty;
-    public long? CountryId { get; set; }
+    public Guid? CountryId { get; set; }
     [ForeignKey("CountryId")]
     public virtual Country? Country { get; set; }
     public bool IsDeleted { get; set; }

@@ -34,7 +34,7 @@ public class CountryController : Controller
     }
     [HttpDelete]
     [Route("Delete/{id}")]
-    public async Task<IActionResult> DeleteCountry([FromRoute] long  id)
+    public async Task<IActionResult> DeleteCountry([FromRoute] Guid  id)
     {
         if (await _countryRepo.Delete(c => c.Id == id))
             return Content("OK");

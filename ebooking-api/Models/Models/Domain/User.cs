@@ -6,9 +6,9 @@ namespace Models.Domain;
 
 public class User : ISoftDeleted
 {
-    [Required]
     [Key]
-    public int Id { get; set; }
+    [Column(TypeName = "uniqueidentifier")]
+    public Guid Id { get; set; }
 
     [Required]
     public string Email { get; set; }

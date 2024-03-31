@@ -19,18 +19,18 @@ public class CityController : Controller
     }
     [HttpPost]
     [Route("Add")]
-    public IActionResult Add([FromBody]CityPOST cityDto )
+    public async Task<IActionResult> Add([FromBody]CityPOST cityDto )
     {   
         var city = _mapper.Map<City>(cityDto);
-        _cityRepo.Add(city);
+        await _cityRepo.Add(city);
 
         return Content("Ok");
     }
     [HttpGet]
     [Route("GetCities")]
-    public IActionResult GetCities()
+    public async Task<IActionResult> GetCities()
     {
-        var rawCities = _cityRepo.GetAll(false, c => c.Country);
+        var rawCities = await _cityRepo.GetAll(false, c => c.Country);
         var cities = _mapper.Map<List<CityGET>>(rawCities);
         return Json(cities);
     }
