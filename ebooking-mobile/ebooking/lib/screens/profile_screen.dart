@@ -1,6 +1,8 @@
+import 'package:ebooking/screens/suggestions_screen.dart';
 import 'package:ebooking/widgets/edit_email_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:ebooking/screens/add_accommodation_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -237,6 +239,23 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ],
+              ),
+            ),
+            SafeArea(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue, // Button color
+                  shadowColor: Colors.white, // Text color
+                  minimumSize: Size(double.infinity, 50), // Button size
+                ),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          AddAccommodationScreen()));
+                },
+                child: Text('BECOME A PARTNER'),
               ),
             ),
           ],
