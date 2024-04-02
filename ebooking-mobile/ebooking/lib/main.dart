@@ -24,15 +24,11 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        Provider<LocationProvider>(
-          create: (_) => LocationProvider(),
-        ),
-      ],
-      child: MaterialApp(
+    return ChangeNotifierProvider(
+      create:(context) => LocationProvider(),
+      child: MaterialApp (
         home: AddAccommodationScreen(),
-      ),
+      )
     );
   }
 }

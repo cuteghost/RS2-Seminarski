@@ -35,7 +35,6 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final locationProvider = Provider.of<LocationProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Accommodation'),
