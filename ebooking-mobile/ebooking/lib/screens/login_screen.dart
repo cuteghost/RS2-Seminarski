@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 class LoginPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  final AuthProvider _authProvider = AuthProvider();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,19 +107,17 @@ class LoginPage extends StatelessWidget {
                         icon: Icons.facebook,
                         onPressed: () {
                           // Invoke Facebook login through provider
-                          Provider.of<AuthProvider>(context, listen: false)
-                              .loginWithFacebook()
-                              .then((loggedIn) {
-                            if (loggedIn) {
+                            _authProvider.loginWithFacebook();
+                            if(_authProvider.checkLoggedInStatus() == true){
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
                                           DiscoverPropertiesPage()));
-                            } else {
+                            }
+                            else{
                               // Handle login failure
                             }
-                          });
                         },
                       ),
                       SocialMediaButton(
