@@ -1,0 +1,30 @@
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 as base
+WORKDIR /app
+
+FROM mcr.microsoft.com/dotnet/sdk:7.0 as build
+COPY . /src
+WORKDIR /src
+ARG DB_SERVER_ARG
+ARG DB_NAME_ARG
+ARG DB_USER_ARG
+ARG DB_PASSWORD_ARG
+ARG JWT_KEY_ARG
+ARG JWT_ISSUER_ARG
+ARG JWT_AUDIENCE_ARG
+RUN dotnet build "API/API.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "API/API.csproj" -c Release -o /app/publish
+
+FROM base as final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENV DB_SERVER=$DB_SERVER_ARG
+ENV DB_NAME=$DB_NAME_ARG
+ENV DB_USER=$DB_USER_ARG
+ENV DB_PASSWORD=$DB_PASSWORD_ARG
+ENV JWT_KEY=$JWT_KEY_ARG
+ENV JWT_ISSUER=$JWT_ISSUER_ARG
+ENV JWT_AUDIENCE=$JWT_AUDIENCE_ARG
+
+ENTRYPOINT [ "dotnet", "API.dll" ]

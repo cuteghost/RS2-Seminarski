@@ -249,11 +249,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   minimumSize: Size(double.infinity, 50), // Button size
                 ),
                 onPressed: () {
-                  Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          AddAccommodationScreen()));
+                  // Navigator.pushReplacement(
+                                  // context,
+                                  // MaterialPageRoute(
+                                      // builder: (context) =>
+                                          // AddAccommodationScreen()));
                 },
                 child: Text('BECOME A PARTNER'),
               ),
