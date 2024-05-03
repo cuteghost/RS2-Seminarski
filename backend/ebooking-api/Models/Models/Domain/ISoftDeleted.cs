@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Models.Models.Domain;
+namespace Models.Domain;
 
 public interface ISoftDeleted
 {

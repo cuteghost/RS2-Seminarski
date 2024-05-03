@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using eBooking.Services.Interfaces;
+using Repository.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Models.Domain;
 using Models.DTO.LocationDTO;
@@ -25,7 +25,7 @@ public class LocationController : Controller
     {
         var location = _mapper.Map<Location>(locationDto);
         _locationRepo.Add(location);
-        return Content("Ok");
+        return Content(location.Id.ToString());
     }
     [HttpGet]
     [Route("GetLocations")]

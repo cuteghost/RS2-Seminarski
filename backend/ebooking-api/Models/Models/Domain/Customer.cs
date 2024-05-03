@@ -8,11 +8,9 @@ public class Customer : ISoftDeleted
     [Required]
     [Key]
     public Guid Id { get; set; }
-    
-    [Required]
-    public DateTime Joined { get; set; }
 
     [Required]
     public User User { get; set; }
-    public bool IsDeleted { get; set; }
+
+    public bool IsDeleted { get; set; } = false;
 }

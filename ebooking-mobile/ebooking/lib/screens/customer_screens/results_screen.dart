@@ -1,7 +1,7 @@
-import 'package:ebooking/screens/property_details_screen.dart';
+import 'package:ebooking/screens/customer_screens/property_details_screen.dart';
 import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
 import 'package:flutter/material.dart';
-import 'package:ebooking/screens/filters_screen.dart';
+import 'package:ebooking/screens/customer_screens/filters_screen.dart';
 
 class SearchResultsPage extends StatelessWidget {
   @override

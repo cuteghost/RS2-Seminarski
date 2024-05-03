@@ -1,6 +1,10 @@
 ﻿namespace Models.DTO.UserDTO.Partner;
 
-public class PartnerGET : UserGET
+public class PartnerGET
 {
-
+    public Guid UserId { get; set; }
+    public long TaxId { get; set; }
+    public string TaxName { get; set; }
+    public long PhoneNumber { get; set; }
+    public Guid CountryId { get; set; }
 }

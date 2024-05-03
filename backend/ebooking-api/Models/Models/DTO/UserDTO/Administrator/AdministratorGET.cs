@@ -18,14 +18,5 @@ public class AdministratorGET
     public bool IsActive { get; set; } = true;
     public virtual Location Location { get; set; }
 }
-public enum Gender
-{
-    Male = 0,
-    Female = 1
-}
-public enum Role
-{
-    Administrator,
-    Customer,
-    Partner,
-}
+
+

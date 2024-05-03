@@ -19,14 +19,16 @@ public class TokenHandlerService : ITokenHandlerService
         this._configuration = configuration;
         this._dbContext = dbContext;
     }
-    public async Task<string> CreateTokenAsync(LoginDTO user)
+    public async Task<string> CreateTokenAsync(User user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:key"]));
-        var role = CheckRole(user.Email);
-        var claims = new List<Claim>();
-        claims.Add(new Claim(ClaimTypes.Email, user.Email));
-        claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
-        Console.Write(role.ToString());
+        var role = await CheckRole(user.Email);
+        if (role == "") return null;
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, role)
+        };
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
             _configuration["Jwt:Issuer"],
@@ -42,10 +44,12 @@ public class TokenHandlerService : ITokenHandlerService
     {
         var email = GetEmailFromJWT(jwt);
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:key"]));
-        var role = CheckRole(email);
-        var claims = new List<Claim>();
-        claims.Add(new Claim(ClaimTypes.Email, email));
-        claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
+        var role = await CheckRole(email);
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Role, role)
+        };
         Console.Write(role.ToString());
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
@@ -68,7 +72,7 @@ public class TokenHandlerService : ITokenHandlerService
     }
 
     public Guid GetAdministratorIdFromJWT(string token)
-    {
+    { 
         var email = GetEmailFromJWT(token);
         var query = from administrators in _dbContext.Administrators
                 join user in _dbContext.Users on administrators.User.Email equals user.Email
@@ -96,14 +100,25 @@ public class TokenHandlerService : ITokenHandlerService
         return query.FirstOrDefault();
     }
 
-    public async Task<int> CheckRole(string email)
+    public async Task<string> CheckRole(string email)
     {
-        var a = await _dbContext.Administrators.Include(s => s.User).Where(u => u.User.Email == email).AsNoTracking().FirstOrDefaultAsync();
-        var s = await _dbContext.Partners.Include(s => s.User).Where(u => u.User.Email == email).AsNoTracking().FirstOrDefaultAsync();
-        var b = await _dbContext.Customers.Include(s => s.User).Where(u => u.User.Email == email).AsNoTracking().FirstOrDefaultAsync();
-        if (a != null) return 0;
-        if (s != null) return 1;
-        if (b != null) return 2;
-        return -1;
+        var administrators = await _dbContext.Administrators.Include(s => s.User).AsNoTracking().ToListAsync();
+        var partners = await _dbContext.Partners.Include(s => s.User).AsNoTracking().ToListAsync();
+        var customers = await _dbContext.Customers.Include(s => s.User).AsNoTracking().ToListAsync();
+
+        if (administrators.Any(a => a.User.Email == email)) return "Administrator";
+        if (partners.Any(p => p.User.Email == email)) return "Partner";
+        if (customers.Any(c => c.User.Email == email)) return "Customer";
+
+        return "";
+    }
+
+    public Guid GetUserIdFromJWT(string token)
+    {
+        var email = GetEmailFromJWT(token);
+        var query = from user in _dbContext.Users
+                    where email == user.Email
+                    select user.Id;
+        return query.FirstOrDefault();
     }
 }

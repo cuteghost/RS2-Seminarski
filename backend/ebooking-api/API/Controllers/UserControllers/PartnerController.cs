@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
-using eBooking.Services.Interfaces;
+using Repository.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Models.Domain;
 using Models.DTO.UserDTO.Partner;
+using Services.TokenHandlerService;
 
 namespace API.Controllers.UserControllers;
 
@@ -10,51 +11,62 @@ namespace API.Controllers.UserControllers;
 [Route("/api/[controller]")]
 public class PartnerController : Controller
 {
-    private readonly IGenericRepository<Partner> _userRepo;
+    private readonly IGenericRepository<Partner> _partnerRepo;
     private readonly IMapper _mapper;
-    public PartnerController(IGenericRepository<Partner> userRepo, IMapper mapper)
+    private readonly ITokenHandlerService _tokenHandler;
+    private readonly IUserRepository _userRepository;
+    public PartnerController(IGenericRepository<Partner> partnerRepo, IMapper mapper, ITokenHandlerService tokenHandler, IUserRepository userRepository)
     {
-        _userRepo = userRepo;
+        _tokenHandler = tokenHandler;
+        _partnerRepo = partnerRepo;
         _mapper = mapper;
+        _userRepository = userRepository;
     }
 
     [HttpPost]
     [Route("Add")]
-    public async Task<IActionResult> RegisterAsCustomer([FromBody] PartnerPOST userDto)
+    public async Task<IActionResult> RegisterAsPartner([FromBody] PartnerPOST userDto, [FromHeader] string Authorization)
     {
         var user = _mapper.Map<Partner>(userDto);
-        await _userRepo.Add(user);
+        if (!await _partnerRepo.Add(user))
+            return BadRequest();
+        var userWithUpdatedRole = await _userRepository.UpdateRole(Role.PartnerRole, Authorization);
+        if (userWithUpdatedRole == null)
+            return BadRequest();
+        return Content(await _tokenHandler.CreateTokenAsync(userWithUpdatedRole));
 
-        return Content("Ok");
     }
+
     [HttpGet]
-    [Route("GetUsers")]
-    public async Task<IActionResult> GetUsers()
+    [Route("PartnerDetails")]
+    public async Task<IActionResult> GetPartnerDetails([FromHeader] string Authorization)
     {
-        return Json(await _userRepo.GetAll());
+        var userId = _tokenHandler.GetUserIdFromJWT(Authorization);
+        if (userId == Guid.Empty)
+            return BadRequest();
+        var partner = await _partnerRepo.Get(c => c.UserId == userId, false);
+        if (partner == null)
+            return BadRequest();
+        return Json(_mapper.Map<PartnerGET>(partner));
     }
-    [HttpGet]
-    [Route("GetUser")]
-    public async Task<IActionResult> GetById(Guid userId)
-    {
-        return Json(await _userRepo.GetById(c => c.User.Id == userId, false));
-    }
+
     [HttpDelete]
     [Route("Delete/{id}")]
     public async Task<IActionResult> DeleteUser([FromRoute] Guid id)
     {
-        if (await _userRepo.Delete(u => u.User.Id == id))
+        if (await _partnerRepo.Delete(u => u.User.Id == id))
             return Content("OK");
         else
             return Content("Not Found");
     }
+
     [HttpPatch]
     [Route("Update")]
-    public async Task<IActionResult> UpdateUser([FromBody] PartnerPATCH userDto)
+    public async Task<IActionResult> UpdateUser([FromBody] PartnerPATCH partnerDto, [FromHeader] string Authorization)
     {
-
-        var user = _mapper.Map<Partner>(userDto);
-        if (await _userRepo.Update(c => c.Id == user.Id, user))
+        var validUserId = _tokenHandler.GetUserIdFromJWT(Authorization);
+        var partner = _mapper.Map<Partner>(partnerDto);
+        if (await _partnerRepo.Update(c => (c.UserId == partner.UserId && partner.UserId == validUserId), partner))
             return Content("OK");
         else
             return Content("Not Found");

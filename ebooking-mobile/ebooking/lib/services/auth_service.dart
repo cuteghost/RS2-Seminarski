@@ -1,18 +1,25 @@
+import 'dart:io';
+
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:ebooking/config/config.dart' as config;
 
 
 class AuthService {
-  final SecureStorage _secureStorage = SecureStorage();
+  final SecureStorage _secureStorage;
+  
+  AuthService({required SecureStorage secureStorage}) : _secureStorage = secureStorage;
 
   Future<bool> login(String email, String password) async {
-    final url = Uri.parse('${config.AppConfig.baseUrl}/api/Login/customer');
+    await _secureStorage.deleteToken();
+    final url = Uri.parse('${config.AppConfig.baseUrl}/api/Auth/login');
     final response = await http.post(url,
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': email, 'password': password}));
-
+    
     if (response.statusCode == 200) {
       await _secureStorage.saveToken(response.body); // Assuming the token is the entire response body
       return true;
@@ -22,11 +29,29 @@ class AuthService {
   }
 
   Future<bool> loginWithFacebook() async {
-    // Placeholder for actual Facebook login implementation
-    // For demonstration, we'll assume the login is successful and a token is received
-    String fakeFacebookToken = "fake_facebook_token";
-    await _secureStorage.saveToken(fakeFacebookToken);
-    return true;
+    await _secureStorage.deleteToken();
+    final LoginResult result = await FacebookAuth.instance.login();
+    
+    if(result.status == LoginStatus.success)
+    {
+      final AccessToken accessToken = result.accessToken!;
+      final response = await http.post(
+        Uri.parse('${config.AppConfig.baseUrl}/api/Auth/facebook-login'),
+        body: json.encode({'accessToken': accessToken.token}),
+        headers: {'Content-Type': 'application/json'},
+      );
+      print("AuthService => response:  ${response.body}");
+      print("AuthService => Response:  ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        await _secureStorage.saveToken(response.body); // Assuming the token is the entire response body
+        return true;
+      } else {
+        return false;
+      }
+
+    }
+    return false;
   }
 
   Future<void> logout() async {
@@ -39,6 +64,7 @@ class AuthService {
       Uri.parse('${config.AppConfig.baseUrl}/api/Auth/status'),
       headers: {'Authorization': 'Bearer $token'}
     );
+    print("Response:  ${response.statusCode}");
     if (response.statusCode == 200) {
       await _secureStorage.saveToken(response.body);
       return true;
@@ -47,6 +73,117 @@ class AuthService {
       await _secureStorage.deleteToken();
       return false;
     }
+  }
+  //Fill with the requireq parameters
+
+  Future<bool> register(String email, String password, String displayName, String firstName, String lastName, String birthDate, File image) async {
+    final url = Uri.parse('${config.AppConfig.baseUrl}/api/Customer/register');
+    List<int> imageBytes = image.readAsBytesSync();
+    String base64image = base64Encode(imageBytes);
+    
+    final response = await http.post(url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'displayName': displayName, 
+          'firstName': firstName, 
+          'lastName': lastName,  
+          'birthDate': birthDate, 
+          'image': base64image, 
+          'email': email, 
+          'password': password}));
+    if (response.statusCode == 200) {
+      await _secureStorage.saveToken(response.body); // Assuming the token is the entire response body
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  void deleteAccount() async {
+    final url = Uri.parse('${config.AppConfig.baseUrl}/api/Customer/Delete');
+    String? token = await _secureStorage.getToken();
+    print("Token: $token");
+    final response = await http.delete(url, headers: {'Authorization': 'Bearer $token'});
+    if (response.statusCode == 200) {
+      await _secureStorage.deleteToken();
+    }
+    else {
+      throw Exception('Failed to delete account');
+    }
+  }
+
+  Future<bool> loginWithGoogle() async{
+    await _secureStorage.deleteToken();
+    GoogleSignIn googleSignIn = GoogleSignIn(
+      scopes: [
+        'email',
+        'https://www.googleapis.com/auth/userinfo.profile',
+
+      ],
+      serverClientId: "29969402007-rrhvn645jvpelod7s187o7flse02u87h.apps.googleusercontent.com"
+      );
+    GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+    if(googleUser == null) return false;
+    GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    print("Google Auth ID: ${googleAuth.idToken}");
+    print("Google Auth ACCESS: ${googleAuth.accessToken}");
+    final response = await http.post(
+      Uri.parse('${config.AppConfig.baseUrl}/api/Auth/google-login'),
+      body: json.encode({'IdToken': googleAuth.idToken, 'AccessToken': googleAuth.accessToken} ),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    print("AuthService Google => response:  ${response.body}");
+    print("AuthService Google => Response:  ${response.statusCode}");
+
+    if (response.statusCode == 200) {
+      await _secureStorage.saveToken(response.body); // Assuming the token is the entire response body
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<bool> registerPartner(partner) async {
+    String? token = await _secureStorage.getToken();
+    final response = await http.post(
+      Uri.parse('${config.AppConfig.baseUrl}/api/Partner/Add'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(partner)
+    );
+    print('Response: ${response.body}');
+    if (response.statusCode == 200) {
+      await _secureStorage.deleteToken();
+      await _secureStorage.saveToken(response.body);
+      return false;
+    }
+    else {
+      throw Exception('Failed to register partner');
+    }
+  }
+
+  roleCheck() async{
+    // Implement role check
+    String? authToken = await _secureStorage.getToken();
+    if (authToken != null) {
+      // Check the role of the user
+      // authToken is the JWT token. It holds the claim Role. Decode the token and check the role
+      var payload = authToken.split('.')[1];
+      print('Payload: $payload');
+      var normalizedPayload = base64Url.normalize(payload);
+      var stringPayload = utf8.decode(base64Url.decode(normalizedPayload));
+      var payloadMap = json.decode(stringPayload);
+      if (payloadMap['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] == 'Partner') {
+        return 'Partner';
+      }
+      else {
+        return 'Customer';
+      }
+    }
+  
   }
 }
 class SecureStorage

@@ -1,8 +1,11 @@
-import 'package:ebooking/screens/search_screen.dart';
+import 'package:ebooking/screens/login_screen.dart';
+import 'package:ebooking/screens/customer_screens/search_screen.dart';
 import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
 import 'package:flutter/material.dart';
-import 'package:ebooking/screens/property_details_screen.dart';
-import 'package:ebooking/screens/history_screen.dart';
+import 'package:ebooking/screens/customer_screens/property_details_screen.dart';
+import 'package:ebooking/screens/customer_screens/history_screen.dart';
+import 'package:ebooking/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class DiscoverPropertiesPage extends StatefulWidget {
   @override
@@ -24,6 +27,17 @@ class _DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Discover Properties'),
+        actions: //logout button
+        [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () {
+              Provider.of<AuthProvider>(context, listen: false).logout();
+              // Navigate to the LoginScreen
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

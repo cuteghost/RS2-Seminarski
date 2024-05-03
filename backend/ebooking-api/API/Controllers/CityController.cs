@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using eBooking.Services.Interfaces;
+using Repository.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Models.Domain;
 using Models.DTO.CityDTO;
@@ -33,5 +33,22 @@ public class CityController : Controller
         var rawCities = await _cityRepo.GetAll(false, c => c.Country);
         var cities = _mapper.Map<List<CityGET>>(rawCities);
         return Json(cities);
+    }
+    [HttpGet]
+    [Route("GetCityByCountry/{countryId}")]
+    public async Task<IActionResult> GetCityByCountry([FromRoute]Guid countryId)
+    {
+        try
+        {
+            var rawCities = await _cityRepo.GetAll(predicate: c => c.Country.Id == countryId);
+            var cities = _mapper.Map<List<CityGET>>(rawCities);
+            return Json(cities);
+
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
     }
 }

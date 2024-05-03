@@ -20,5 +20,6 @@ public class Administrator : ISoftDeleted
     public DateTime Joined { get; set; }
     
     public virtual Administrator Creator { get; set; }
-    public bool IsDeleted { get; set; }
+
+    public bool IsDeleted { get; set; } = false;
 }
