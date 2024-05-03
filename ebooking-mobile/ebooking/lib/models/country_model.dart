@@ -10,4 +10,10 @@ class Country {
       name: json['name'] as String,
     );
   }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+    };
+  }
 }

@@ -271,6 +271,28 @@
         }
       }
     },
+    "/api/Auth/status": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/City/Add": {
       "post": {
         "tags": [
@@ -455,23 +477,13 @@
         }
       }
     },
-    "/api/Customer/details/{id}": {
+    "/api/Customer/Details": {
       "get": {
         "tags": [
           "Customer"
         ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "style": "simple",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
             "name": "Authorization",
             "in": "header",
             "style": "simple",
@@ -487,23 +499,13 @@
         }
       }
     },
-    "/api/Customer/Delete/{id}": {
+    "/api/Customer/Delete": {
       "delete": {
         "tags": [
           "Customer"
         ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "style": "simple",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
             "name": "Authorization",
             "in": "header",
             "style": "simple",
@@ -519,20 +521,18 @@
         }
       }
     },
-    "/api/Customer/update/{id}": {
+    "/api/Customer/Update": {
       "patch": {
         "tags": [
           "Customer"
         ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
+            "name": "Authorization",
+            "in": "header",
             "style": "simple",
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -1110,7 +1110,8 @@
           },
           "birthDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "email": {
             "type": "string",
@@ -1124,9 +1125,6 @@
             "type": "string",
             "format": "byte",
             "nullable": true
-          },
-          "isActive": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -1162,13 +1160,6 @@
             "type": "string",
             "format": "byte",
             "nullable": true
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "joined": {
-            "type": "string",
-            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -1276,7 +1267,8 @@
           },
           "birthDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "email": {
             "type": "string",
@@ -1290,9 +1282,6 @@
             "type": "string",
             "format": "byte",
             "nullable": true
-          },
-          "isActive": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -1328,9 +1317,6 @@
             "type": "string",
             "format": "byte",
             "nullable": true
-          },
-          "isActive": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false

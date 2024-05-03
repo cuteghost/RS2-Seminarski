@@ -5,7 +5,7 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     ports: 
-      - "8080:8080"
+      - "80:80"
       - "443:443"
     depends_on:
       - webapi
@@ -13,8 +13,6 @@ services:
     build:
       context: ./ebooking-api
       dockerfile: Dockerfile
-    ports:
-      - "80"
     environment:
       DB_SERVER: db
       DB_NAME: 170171

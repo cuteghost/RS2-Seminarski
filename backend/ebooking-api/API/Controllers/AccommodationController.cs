@@ -1,10 +1,10 @@
 using AutoMapper;
-using eBooking.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Domain;
 using Models.DTO.AccommodationDTO;
 using Services.TokenHandlerService;
+using Repository.Interfaces;
 
 namespace Controllers;
 [ApiController]
@@ -29,7 +29,7 @@ public class AccommodationController : Controller
     public async Task<IActionResult> Add([FromBody]AccommodationPOST accommodationDto, [FromHeader] string Authorize)
     {
         var partnerId = _tokenHandlerService.GetPartnerIdFromJWT(Authorize);
-        var partner = await _partnerRepo.GetById(c => c.Id == partnerId, false);
+        var partner = await _partnerRepo.Get(c => c.Id == partnerId, false);
         if (partner == null)
             return BadRequest("Partner doens't exist!");
 

@@ -1,8 +1,6 @@
 using Models.Domain;
 using eBooking.Services.Classes;
 using Database;
-using eBooking.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Repository.Interfaces;
 using Repository.Classes;
 using Services.HashService;
@@ -12,8 +10,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using API.Repository.Classes;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Services.FacebookService;
+using Services.Google;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +21,8 @@ var configuration = builder.Configuration;
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? configuration["JWT:key"];
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? configuration["JWT:issuer"];
 var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? configuration["JWT:audience"];
+var facebookAppId = Environment.GetEnvironmentVariable("FacebookAppId") ?? configuration["FacebookAppId"];
+var facebookAppSecret = Environment.GetEnvironmentVariable("FacebookAppSecret") ?? configuration["FacebookAppSecret"];
 
 configuration["JWT:key"] = jwtKey;
 configuration["JWT:issuer"] = jwtIssuer;
@@ -45,8 +45,6 @@ builder.Services.AddScoped<IHashService, HashService>();
 /*--------------------------------------------------------------------------------------*/
 builder.Services.AddScoped<ITokenHandlerService, TokenHandlerService>();
 /*--------------------------------------------------------------------------------------*/
-builder.Services.AddScoped<IFacebook, Facebook>();
-/*--------------------------------------------------------------------------------------*/
 
 builder.Services.AddScoped<ILoginRepository, LoginRepository>();
 builder.Services.AddTransient<IGenericRepository<City>, GenericRepository<City>>();
@@ -58,6 +56,10 @@ builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
 builder.Services.AddTransient<IGenericRepository<Partner>, GenericRepository<Partner>>();
 builder.Services.AddTransient<IGenericRepository<Administrator>, GenericRepository<Administrator>>();
 builder.Services.AddTransient<IGenericRepository<Accommodation>, GenericRepository<Accommodation>>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IAdministratorRepository, AdministratorRepository>();
+builder.Services.AddSingleton<IFacebookAuthService, FacebookAuthService>();
+
 #region AuthConfiguration
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -72,21 +74,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     });
-    //.AddFacebook(facebookOptions =>
-    //{
-    //    facebookOptions.AppId = configuration["Authentication:Facebook:AppId"];
-    //    facebookOptions.AppSecret = configuration["Authentication:Facebook:AppSecret"];
-    //    facebookOptions.SaveTokens = true;
-    //    facebookOptions.Events = new OAuthEvents
-    //    {
-    //        OnCreatingTicket = async context =>
-    //        {
 
-    //        }
-    //    };
-    //});
 #endregion
 
+builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+builder.Services.Configure<GoogleAuthConfig>(builder.Configuration.GetSection("Google"));
+
+builder.Services.Configure<FacebookAuthConfig>(configuration.GetSection("Facebook"));
+builder.Services.AddHttpClient("Facebook", c =>
+{
+    c.BaseAddress = new Uri("https://graph.facebook.com/v11.0/");
+    c.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
@@ -116,7 +115,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("FirstPolicy");
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();

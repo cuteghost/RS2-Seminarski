@@ -38,18 +38,24 @@ public partial class Accommodation : ISoftDeleted
     public float ReviewScore { get; set; }
 
     [Required]
-    public Partner? Owner { get; set; }
+    [ForeignKey("Owner")]
+    public Guid OwnerId { get; set; }
 
     [Required]
-    public Location? Location { get; set; }
+    [ForeignKey("Location")]
+    public Guid LocationId { get; set; }
 
-    [Required]
-    public AccommodationDetails? AccommodationDetails { get; set; }
+    [ForeignKey("AccommodationDetails")]
+    public Guid AccommodationDetailsId { get; set; }
     
     public byte[]? Image { get; set; }
     public string Reviews { get; set; } = string.Empty;
 
     public bool IsDeleted { get; set; }
+    public virtual Partner? Owner { get; set; }
+    public virtual Location? Location { get; set; }
+    public virtual AccommodationDetails? AccommodationDetails { get; set; }
+
 }
 public enum TypesOfAccommodation
 {

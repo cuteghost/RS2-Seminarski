@@ -1,14 +1,9 @@
 ﻿using Database;
-using eBooking.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Models.Domain;
-using Models.DTO.UserDTO;
-using Models.DTO.UserDTO.Customer;
 using Repository.Interfaces;
 using Services.HashService;
 using Services.TokenHandlerService;
-using System.Linq.Expressions;
 
 namespace Repository.Classes;
 
@@ -33,6 +28,7 @@ public class CustomerRepository : ICustomerRepository
     {
         try
         {
+            if (await _userRepository.Get(u => u.Email == user.Email) != null) return false;
             user.Password = _hasher.Hash(user.Password);
             await _userRepository.Add(user);
 
@@ -49,26 +45,11 @@ public class CustomerRepository : ICustomerRepository
         }
     }
 
-    public async Task<IEnumerable<Customer>> GetAllCustomers()
-    {
-        try
-        {
-            
-            return await _customerRepository.GetAll(false, c => c.User);
-        }
-        catch (Exception)
-        {
-
-            throw;
-        }
-    }
-
     public async Task<Customer> GetCustomerDetails(Guid id, string JWT)
     {
         try
         {
-            ;
-            var customer = await _customerRepository.GetById(c => c.Id == id, false, c => c.User);
+            var customer = await _customerRepository.Get(c => c.Id == id, false, c => c.User);
             
             if (customer == null) return null;
             if (_tokenHandler.GetEmailFromJWT(JWT) != customer.User.Email) return null;
@@ -84,13 +65,14 @@ public class CustomerRepository : ICustomerRepository
 
     public async Task<bool> UpdateCustomer(Customer customer)
     {
-        
-        await _customerRepository.Update(c => c.Id == customer.Id, customer);
-        return true;
+        if (await _customerRepository.Update(c => c.Id == customer.Id, customer))
+            if (await _userRepository.Update(c => c.Id == customer.User.Id, customer.User))
+                return true;
+        return false;
     }
     public async Task<Customer> GetCustomerById(Guid id)
     {
-        return await _customerRepository.GetById(c => c.Id == id, false, c => c.User);
+        return await _customerRepository.Get(c => c.Id == id, false, c => c.User);
     }
 
     public async Task<Customer> GetCustomerByEmail(string email)
@@ -103,7 +85,10 @@ public class CustomerRepository : ICustomerRepository
         var customer = await GetCustomerById(id);
         if (customer == null) return false;
         if (customer.User.Email != _tokenHandler.GetEmailFromJWT(JWT)) return false;
-        if (await _customerRepository.Delete(c => c.Id == id)) return true;
+        if (await _customerRepository.Delete(c => c.Id == id))
+            if (await _userRepository.Delete(c => c.Id == customer.User.Id))
+                return true;
+
         return false;
     }
 }

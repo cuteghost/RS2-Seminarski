@@ -1,13 +1,16 @@
 import 'package:ebooking/providers/auth_provider.dart';
+import 'package:ebooking/screens/customer_screens/customer_register_screen.dart';
+import 'package:ebooking/screens/partner_screens/partner_dashboard_screen.dart';
+import 'package:ebooking/screens/partner_screens/partner_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:ebooking/screens/discover_screen.dart';
+import 'package:ebooking/screens/customer_screens/discover_screen.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthProvider _authProvider = AuthProvider();
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,7 +71,7 @@ class LoginPage extends StatelessWidget {
                 children: [
                   SizedBox(height: 20.0),
                   Text(
-                    'Sign in or create account',
+                    'Sign in',
                     style: TextStyle(
                       fontSize: 16.0,
                       fontWeight: FontWeight.bold,
@@ -91,9 +94,22 @@ class LoginPage extends StatelessWidget {
                   ),
                   SizedBox(height: 20.0),
                   ElevatedButton(
-                    onPressed: () {
-                      // Redirect or perform an action upon login
-                      // Assumes a method in AuthProvider handles navigation post-login
+                    onPressed: () async {
+                      if( await Provider.of<AuthProvider>(context, listen:false).login(_emailController.text, _passwordController.text) == true ){
+                       if(await Provider.of<AuthProvider>(context, listen:false).roleCheck() == "Customer"){
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          DiscoverPropertiesPage()));
+                              }
+                              else{
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PartnerDashboardScreen()));
+                              }
+                      }
+                      else{
+                        // Handle login failure
+                      }
                     },
                     child: Text('CONTINUE'),
                   ),
@@ -105,15 +121,20 @@ class LoginPage extends StatelessWidget {
                     children: [
                       SocialMediaButton(
                         icon: Icons.facebook,
-                        onPressed: () {
+                        onPressed: () async{
                           // Invoke Facebook login through provider
-                            _authProvider.loginWithFacebook();
-                            if(_authProvider.checkLoggedInStatus() == true){
+                            await Provider.of<AuthProvider>(context, listen:false).loginWithFacebook();
+                            if(await Provider.of<AuthProvider>(context, listen:false).checkLoggedInStatus() == true){
+                              if(await Provider.of<AuthProvider>(context, listen:false).roleCheck() == "Customer"){
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
                                           DiscoverPropertiesPage()));
+                              }
+                              else{
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PartnerDashboardScreen()));
+                              }
                             }
                             else{
                               // Handle login failure
@@ -122,13 +143,43 @@ class LoginPage extends StatelessWidget {
                       ),
                       SocialMediaButton(
                         icon: MdiIcons.google,
-                        onPressed: () {
-                          // Placeholder for Google login
+                        onPressed: () async {
+                          await  Provider.of<AuthProvider>(context, listen:false).loginWithGoogle();
+                          if(await Provider.of<AuthProvider>(context, listen:false).checkLoggedInStatus() == true){
+                            if(await Provider.of<AuthProvider>(context, listen:false).roleCheck() == "Customer"){
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          DiscoverPropertiesPage()));
+                              }
+                              else{
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PartnerDashboardScreen()));
+                              }
+                          }
+                          else{
+                            // Handle login failure
+                          }
                         },
                       ),
                     ],
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Want to start booking?'),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => CustomerRegisterScreen()));
+                        },
+                        child: Text('Sign up'),
+                      ),
+                    ],
+                  ),
                 ],
+
               ),
             ),
           ],

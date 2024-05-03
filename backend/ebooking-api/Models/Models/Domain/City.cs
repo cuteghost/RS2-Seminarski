@@ -9,11 +9,16 @@ public class City : ISoftDeleted
     [Key]
     [Column(TypeName = "uniqueidentifier")]
     public Guid Id { get; set; }
+    
     [Required]
     public string Name { get; set; } = string.Empty;
+    
+    [Required]
     public Guid? CountryId { get; set; }
+    
     [ForeignKey("CountryId")]
     public virtual Country? Country { get; set; }
-    public bool IsDeleted { get; set; }
+    
+    public bool IsDeleted { get; set; } = false;
 
 }

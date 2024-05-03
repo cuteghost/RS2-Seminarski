@@ -1,5 +1,4 @@
-﻿using Models.Models.Domain;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Domain;
@@ -18,7 +17,7 @@ public class User : ISoftDeleted
 
     [Required]
     [Column(TypeName = "nvarchar")]
-    [MaxLength(15)]
+    [MaxLength(50)]
     [MinLength(3)]
     public string DisplayName { get; set; } = string.Empty;
 
@@ -41,14 +40,28 @@ public class User : ISoftDeleted
     [Column(TypeName = "smallint")]
     public Gender Gender { get; set; }
 
+    public string SocialLink { get; set; } = string.Empty;
+
+    [Required]
+    public DateTime Joined { get; set; }
+
     public byte[]? Image { get; set; }
 
     public bool IsActive { get; set; } = true;
 
     public bool IsDeleted { get; set; } = false;
+
+    public Role Role { get; set; } = 0;
 }
 public enum Gender
 {
     Male = 0,
     Female = 1
+}
+public enum Role
+{
+    AdministratorRole=1337,
+    CustomerRole = 0,
+    PartnerRole = 1,
+
 }

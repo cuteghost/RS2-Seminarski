@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using eBooking.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Models.Domain;
 using Models.DTO.UserDTO;
 using Models.DTO.UserDTO.Customer;
+using Models.Models.DTO.UserDTO;
 using Repository.Interfaces;
 using Services.TokenHandlerService;
 
@@ -29,63 +29,86 @@ public class CustomerController : Controller
     [Route("Register")]
     public async Task<IActionResult> Register([FromBody] CustomerPOST customerDto)
     {
-        var user = _mapper.Map<User>(customerDto);
-        var customer = _mapper.Map<Customer>(customerDto);
-        await _customerRepo.AddCustomer(user, customer);
+        try
+        {
+            var user = _mapper.Map<User>(customerDto);
+            var customer = _mapper.Map<Customer>(customerDto);
 
-        return Content("Ok");
+            if (await _customerRepo.AddCustomer(user, customer))
+                return Content("Ok");
+            else
+                return Content("Error");
+        }
+        catch (Exception e)
+        {
+            return Content("Error: " + e.Message);
+        }
     }
-    
-    [HttpGet]
-    [Route("GetUsers")]
-    public async Task<IActionResult> GetUsers()
-    {
-        return Json(await _customerRepo.GetAllCustomers());
-    }
-    
+
     [Authorize]
     [HttpGet]
-    [Route("details/{id}")]
-    public async Task<IActionResult> GetCustomerDetails([FromRoute] Guid id, [FromHeader] string Authorization)
+    [Route("Details")]
+    public async Task<IActionResult> GetCustomerDetails([FromHeader] string Authorization)
     {
         try
         {
+            var id = _tokenHandler.GetCustomerIdFromJWT(Authorization);
             var customer = await _customerRepo.GetCustomerDetails(id, Authorization);
             if(customer == null) return Unauthorized();
             var toReturn = _mapper.Map<CustomerGET>(customer); 
             return Json(toReturn);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Unauthorized();
-            throw;
+            return Content("Error: " + e);
         }
-    }
+    }   
+    
     [Authorize]
     [HttpDelete]
-    [Route("Delete/{id}")]
-    public async Task<IActionResult> DeleteUser([FromRoute] Guid id, [FromHeader] string Authorization)
+    [Route("Delete")]
+    public async Task<IActionResult> DeleteCustomer([FromHeader] string Authorization)
     {
-        if (await _customerRepo.Delete(id, Authorization))
-            return Content("OK");
-        else
-            return Content("Not Found");
+        try
+        {
+            var id = _tokenHandler.GetCustomerIdFromJWT(Authorization);
+            if (await _customerRepo.Delete(id, Authorization))
+                return Content("OK");
+            else
+                return Content("Not Found");
+        }
+        catch (Exception e)
+        {
+            return Content("Error: " + e.Message);
+        }
     }
 
     [Authorize]
     [HttpPatch]
-    [Route("update/{id}")]
-    public async Task<IActionResult> UpdateUser([FromBody] CustomerPATCH customerDto, [FromRoute] Guid id)
+    [Route("UpdateDetails")]
+    public async Task<IActionResult> UpdateCustomer([FromBody] CustomerPATCH customerDto, [FromHeader]string Authorization)
     {
-        var customer = await _customerRepo.GetCustomerById(id);
-         
+        try
+        {
+            var id = _tokenHandler.GetCustomerIdFromJWT(Authorization);
+            var customer = await _customerRepo.GetCustomerById(id);
+            
+            
+            var userDomain = _mapper.Map<User>(customerDto);
+            userDomain.Id = customer.User.Id;
+            userDomain.Password = customer.User.Password;
+            userDomain.Email = customer.User.Email;
+            customer.User = userDomain;
+            if(await _customerRepo.UpdateCustomer(customer))
+                return Content("OK");
+            else
+                return Content("Error");
+        }
+        catch (Exception e)
+        {
+            
+            return Content("Error: " + e.Message);
+        }
 
-        var userDomain = _mapper.Map<User>(customerDto);
-        userDomain.Id = customer.User.Id;
-        userDomain.Password = customer.User.Password;
-        customer.User = userDomain;
-        await _customerRepo.UpdateCustomer(customer);
-
-        return Ok();
     }
 }

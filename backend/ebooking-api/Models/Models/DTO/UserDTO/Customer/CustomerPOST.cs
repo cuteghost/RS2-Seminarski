@@ -2,7 +2,6 @@
 
 public class CustomerPOST : UserPOST
 {
-    public DateTime Joined { get; set; }
 }
 
 

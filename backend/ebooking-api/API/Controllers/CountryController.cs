@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using eBooking.Services.Interfaces;
+using Repository.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Models.Domain;
 using Models.DTO.CountryDTO;
@@ -32,6 +32,14 @@ public class CountryController : Controller
     {
         return Json(await _countryRepo.GetAll());
     }
+
+    [HttpGet]
+    [Route("Get/{id}")]
+    public async Task<IActionResult> GetCountry([FromRoute] Guid id)
+    {
+        return Json(await _countryRepo.Get(c=> c.Id == id, false));
+    }
+
     [HttpDelete]
     [Route("Delete/{id}")]
     public async Task<IActionResult> DeleteCountry([FromRoute] Guid  id)

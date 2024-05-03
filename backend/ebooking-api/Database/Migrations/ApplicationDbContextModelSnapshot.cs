@@ -174,6 +174,7 @@ namespace Database.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("CountryId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -217,9 +218,6 @@ namespace Database.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("Joined")
-                        .HasColumnType("datetime2");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -252,9 +250,6 @@ namespace Database.Migrations
                     b.Property<double>("Longitude")
                         .HasColumnType("float");
 
-                    b.Property<int>("ZipCode")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CityId");
@@ -268,16 +263,34 @@ namespace Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("DateJoined")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid?>("CountryId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid?>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("PhoneNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TaxId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TaxName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CountryId");
+
+                    b.HasIndex("LocationId");
 
                     b.HasIndex("UserId");
 
@@ -295,7 +308,7 @@ namespace Database.Migrations
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasMaxLength(15)
+                        .HasMaxLength(50)
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("Email")
@@ -319,12 +332,22 @@ namespace Database.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("Joined")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar");
 
                     b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SocialLink")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -381,7 +404,9 @@ namespace Database.Migrations
                 {
                     b.HasOne("Models.Domain.Country", "Country")
                         .WithMany()
-                        .HasForeignKey("CountryId");
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Country");
                 });
@@ -408,11 +433,23 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Models.Domain.Partner", b =>
                 {
-                    b.HasOne("Models.Domain.User", "User")
+                    b.HasOne("Models.Domain.Country", "Country")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Models.Domain.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId");
+
+                    b.HasOne("Models.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Country");
+
+                    b.Navigation("Location");
 
                     b.Navigation("User");
                 });

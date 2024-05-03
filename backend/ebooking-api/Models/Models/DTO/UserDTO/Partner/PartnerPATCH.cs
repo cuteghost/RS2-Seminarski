@@ -1,5 +1,12 @@
-﻿namespace Models.DTO.UserDTO.Partner;
+﻿using Models.Domain;
 
-public class PartnerPATCH : UserPATCH
+namespace Models.DTO.UserDTO.Partner;
+
+public class PartnerPATCH
 {
+    public Guid UserId { get; set; }
+    public long? TaxId { get; set; }
+    public string? TaxName { get; set; }
+    public long? PhoneNumber { get; set; }
+    public Guid CountryId { get; set; }
 }
