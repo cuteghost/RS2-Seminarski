@@ -143,7 +143,7 @@ class _PartnerRegisterScreenState extends State<PartnerRegisterScreen> {
                         if (_selectedCountry != null && _selectedCountry?.id != null) {
                           Country toPass = _selectedCountry!;
                           Partner partner = Partner(
-                            id: userId,
+                            userId: userId,
                             countryId: toPass.id,
                             taxName: taxNameController.text,
                             taxId: int.parse(taxIdController.text),

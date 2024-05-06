@@ -26,15 +26,15 @@ public class AccommodationController : Controller
     [HttpPost]
     [Route("Add")]
     [Authorize]
-    public async Task<IActionResult> Add([FromBody]AccommodationPOST accommodationDto, [FromHeader] string Authorize)
+    public async Task<IActionResult> Add([FromBody]AccommodationPOST accommodationDto, [FromHeader] string Authorization)
     {
-        var partnerId = _tokenHandlerService.GetPartnerIdFromJWT(Authorize);
+        var partnerId = _tokenHandlerService.GetPartnerIdFromJWT(Authorization);
         var partner = await _partnerRepo.Get(c => c.Id == partnerId, false);
         if (partner == null)
             return BadRequest("Partner doens't exist!");
 
         var accommodation = _mapper.Map<Accommodation>(accommodationDto);
-        accommodation.Owner = partner;
+        accommodation.OwnerId = partner.Id;
 
         await _accommodationRepo.Add(accommodation);
 

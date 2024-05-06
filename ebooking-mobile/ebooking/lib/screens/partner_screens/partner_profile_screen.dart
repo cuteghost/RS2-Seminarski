@@ -19,29 +19,18 @@ class PartnerProfilePage extends StatefulWidget {
 
 class _PartnerProfilePageState extends State<PartnerProfilePage> {
   ValueNotifier<bool> hasChanges = ValueNotifier<bool>(false);
-  Country? _selectedCountry;
-  Partner? partnerProfile;
-  @override
-  void initState(){
-    super.initState();
-    loadData();
-  }
 
-  Future<void> loadData() async {
-  partnerProfile = await Provider.of<ProfileProvider>(context, listen: false).getPartner();
-  var fetchedCountry = await Provider.of<LocationProvider>(context, listen: false).getCountry(partnerProfile!.countryId);
-  setState(() {
-      _selectedCountry = fetchedCountry;
-  });
-}
+  
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<dynamic>>(
-      future: Future.wait([
-        Provider.of<ProfileProvider>(context, listen: false).getProfile(),
-        Provider.of<LocationProvider>(context, listen: false).fetchCountries(),
-
-      ]), 
+      future: () async {
+        var profile = await Provider.of<ProfileProvider>(context, listen: false).getProfile();
+        var countries = await Provider.of<LocationProvider>(context, listen: false).fetchCountries();
+        var partner = await Provider.of<ProfileProvider>(context, listen: false).getPartner();
+        var country = await Provider.of<LocationProvider>(context, listen: false).getCountry(partner.countryId);
+        return [profile, countries, partner, country];
+      }(), 
       builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -56,7 +45,9 @@ class _PartnerProfilePageState extends State<PartnerProfilePage> {
         }
         
         final profile = snapshot.data?[0] as Profile?;
-
+        final partnerProfile = snapshot.data?[2] as Partner?;
+        var _selectedCountry = snapshot.data?[3] as Country?;
+        print('Partner Id ${partnerProfile!.id}');
         if (profile == null) {
           return const Center(
             child: Text('No profile or partner profile found!'),
@@ -78,8 +69,6 @@ class _PartnerProfilePageState extends State<PartnerProfilePage> {
             ),
           );
         }
-
-        
 
         void editPassword() {
           showModalBottomSheet(
@@ -299,7 +288,7 @@ class _PartnerProfilePageState extends State<PartnerProfilePage> {
                         ),
                         onChanged: (value) {
                           hasChanges.value = true;
-                          profile.firstName = value;
+                          partnerProfile.taxName = value;
                         },
                         initialValue: partnerProfile!.taxName,
                       ),
@@ -310,7 +299,7 @@ class _PartnerProfilePageState extends State<PartnerProfilePage> {
                         ),
                         onChanged: (value) { 
                           hasChanges.value = true;
-                          partnerProfile!.taxId = value as int;
+                          partnerProfile.taxId = value as int;
                         },
                         initialValue: partnerProfile!.taxId.toString(),
                       ),
@@ -321,7 +310,7 @@ class _PartnerProfilePageState extends State<PartnerProfilePage> {
                         ),
                         onChanged: (value) { 
                           hasChanges.value = true;
-                          partnerProfile!.phoneNumber = value as int;
+                          partnerProfile.phoneNumber = value as int;
                         },
                         initialValue: partnerProfile!.taxId.toString(),
                       ),
@@ -338,13 +327,9 @@ class _PartnerProfilePageState extends State<PartnerProfilePage> {
                                     Text(_selectedCountry!.name) : 
                                     Text("Select Country"),
                               onChanged: (Country? newValue) {
-                                setState(() {
                                   if (newValue != null) {
-                                  hasChanges.value = true;
-                                  _selectedCountry = newValue;
-                                  selectedCountry.value = newValue;
+                                    partnerProfile.countryId = newValue.id;
                                   }
-                                });
                               },
                               items: (Provider.of<LocationProvider>(context, listen: true).countries).map<DropdownMenuItem<Country>>((Country country) {
                                 return DropdownMenuItem<Country>(value: country, child: Text(country.name));

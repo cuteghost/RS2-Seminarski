@@ -3,16 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{84FDF54D-23A5-4E58-BFEA-F9FA430AAD68}|API\\API.csproj|c:\\users\\dzeva\\desktop\\faks\\rs2\\seminarski\\backend\\ebooking-api\\api\\controllers\\usercontrollers\\partnercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{84FDF54D-23A5-4E58-BFEA-F9FA430AAD68}|API\\API.csproj|solutionrelative:api\\controllers\\usercontrollers\\partnercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1F4E5194-6FCE-4651-9C53-1DF3358F1C5A}|Models\\Models.csproj|c:\\users\\dzeva\\desktop\\faks\\rs2\\seminarski\\backend\\ebooking-api\\models\\models\\domain\\accommodations.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1F4E5194-6FCE-4651-9C53-1DF3358F1C5A}|Models\\Models.csproj|solutionrelative:models\\models\\domain\\accommodations.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1F4E5194-6FCE-4651-9C53-1DF3358F1C5A}|Models\\Models.csproj|c:\\users\\dzeva\\desktop\\faks\\rs2\\seminarski\\backend\\ebooking-api\\models\\models\\dto\\userdto\\partner\\partnerpatch.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1F4E5194-6FCE-4651-9C53-1DF3358F1C5A}|Models\\Models.csproj|solutionrelative:models\\models\\dto\\userdto\\partner\\partnerpatch.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1F4E5194-6FCE-4651-9C53-1DF3358F1C5A}|Models\\Models.csproj|c:\\users\\dzeva\\desktop\\faks\\rs2\\seminarski\\backend\\ebooking-api\\models\\models\\dto\\userdto\\partner\\partnerget.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1F4E5194-6FCE-4651-9C53-1DF3358F1C5A}|Models\\Models.csproj|solutionrelative:models\\models\\dto\\userdto\\partner\\partnerget.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1F4E5194-6FCE-4651-9C53-1DF3358F1C5A}|Models\\Models.csproj|c:\\users\\dzeva\\desktop\\faks\\rs2\\seminarski\\backend\\ebooking-api\\models\\models\\domain\\accommodationimages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1F4E5194-6FCE-4651-9C53-1DF3358F1C5A}|Models\\Models.csproj|solutionrelative:models\\models\\domain\\accommodationimages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,45 +18,32 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "PartnerGET.cs",
-              "DocumentMoniker": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\Models\\Models\\DTO\\UserDTO\\Partner\\PartnerGET.cs",
-              "RelativeDocumentMoniker": "Models\\Models\\DTO\\UserDTO\\Partner\\PartnerGET.cs",
-              "ToolTip": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\Models\\Models\\DTO\\UserDTO\\Partner\\PartnerGET.cs",
-              "RelativeToolTip": "Models\\Models\\DTO\\UserDTO\\Partner\\PartnerGET.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAMAAAABAAAA",
+              "DocumentIndex": 0,
+              "Title": "Accommodations.cs",
+              "DocumentMoniker": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\Models\\Models\\Domain\\Accommodations.cs",
+              "RelativeDocumentMoniker": "Models\\Models\\Domain\\Accommodations.cs",
+              "ToolTip": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\Models\\Models\\Domain\\Accommodations.cs",
+              "RelativeToolTip": "Models\\Models\\Domain\\Accommodations.cs",
+              "ViewState": "AQIAABsAAAAAAAAAAAAAACgAAAAEAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-03T22:01:08.028Z",
+              "WhenOpened": "2024-05-05T20:27:22.641Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "PartnerPATCH.cs",
-              "DocumentMoniker": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\Models\\Models\\DTO\\UserDTO\\Partner\\PartnerPATCH.cs",
-              "RelativeDocumentMoniker": "Models\\Models\\DTO\\UserDTO\\Partner\\PartnerPATCH.cs",
-              "ToolTip": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\Models\\Models\\DTO\\UserDTO\\Partner\\PartnerPATCH.cs",
-              "RelativeToolTip": "Models\\Models\\DTO\\UserDTO\\Partner\\PartnerPATCH.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAAQAAAA",
+              "Title": "AccommodationImages.cs",
+              "DocumentMoniker": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\Models\\Models\\Domain\\AccommodationImages.cs",
+              "RelativeDocumentMoniker": "Models\\Models\\Domain\\AccommodationImages.cs",
+              "ToolTip": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\Models\\Models\\Domain\\AccommodationImages.cs",
+              "RelativeToolTip": "Models\\Models\\Domain\\AccommodationImages.cs",
+              "ViewState": "AQIAAAgAAAAAAAAAAAAwwAsAAAAGAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-03T21:18:40.746Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "PartnerController.cs",
-              "DocumentMoniker": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\API\\Controllers\\UserControllers\\PartnerController.cs",
-              "RelativeDocumentMoniker": "API\\Controllers\\UserControllers\\PartnerController.cs",
-              "ToolTip": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\API\\Controllers\\UserControllers\\PartnerController.cs",
-              "RelativeToolTip": "API\\Controllers\\UserControllers\\PartnerController.cs",
-              "ViewState": "AQIAACgAAAAAAAAAAAAgwCsAAAAIAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-01T09:04:30.239Z",
+              "WhenOpened": "2024-05-05T20:24:38.101Z",
               "EditorCaption": ""
             }
           ]

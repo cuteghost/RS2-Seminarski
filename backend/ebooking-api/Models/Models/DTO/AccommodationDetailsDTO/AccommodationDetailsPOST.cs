@@ -2,6 +2,7 @@ namespace API.Models.DTO.AccommodationDetailsDTO
 {
     public class AccommodationDetailsPOST
     {
+        public int  NumberOfBeds { get; set; }
         public bool Bathub { get; set; }
         public bool Balcony { get; set; }
         public bool PrivateBathroom { get; set; }

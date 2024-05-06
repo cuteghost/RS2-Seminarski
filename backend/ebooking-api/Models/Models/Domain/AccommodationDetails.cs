@@ -9,6 +9,7 @@ public class AccommodationDetails : ISoftDeleted
     [Key]
     [Column(TypeName = "uniqueidentifier")]
     public Guid Id { get; set; }
+    public int NumberOfBeds { get; set; }
     public bool Bathub { get; set; }
     public bool Balcony { get; set; }
     public bool PrivateBathroom { get; set; }

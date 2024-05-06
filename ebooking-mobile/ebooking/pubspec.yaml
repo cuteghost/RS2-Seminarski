@@ -50,6 +50,7 @@ dependencies:
   carousel_slider: ^4.0.0
   fl_chart: ^0.36.0
   syncfusion_flutter_charts: ^19.3.47
+  wechat_assets_picker: ^9.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
