@@ -101,7 +101,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class, ISoft
 
         }
         var entityToReturn = await query.AsNoTracking().SingleOrDefaultAsync(predicate);
-
+        
         if (entityToReturn != null)
         {
             return entityToReturn;

@@ -6,7 +6,6 @@ namespace Models.DTO.AccommodationDTO;
 
 public class AccommodationPOST
 {
-    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public bool Status { get; set; }
     public TypesOfAccommodation TypeOfAccommodation { get; set; }

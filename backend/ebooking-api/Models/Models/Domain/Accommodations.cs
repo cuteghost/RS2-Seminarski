@@ -26,9 +26,6 @@ public partial class Accommodation : ISoftDeleted
     public double PricePerNight { get; set; }
 
     [Required]
-    public byte[]? ImageThumb { get; set; }
-
-    [Required]
     [Column(TypeName = "nvarchar")]
     [MinLength(50)]
     [MaxLength(1000)]
@@ -40,26 +37,22 @@ public partial class Accommodation : ISoftDeleted
     [Required]
     [ForeignKey("Owner")]
     public Guid OwnerId { get; set; }
-
-    [Required]
-    [ForeignKey("Location")]
-    public Guid LocationId { get; set; }
-
-    [ForeignKey("AccommodationDetails")]
-    public Guid AccommodationDetailsId { get; set; }
     
-    public byte[]? Image { get; set; }
+    [Required]
+    public AccommodationImages AccommodationImages { get; set; }
+
+    public Location? Location { get; set; }
+
+    public AccommodationDetails? AccommodationDetails { get; set; }
+    
     public string Reviews { get; set; } = string.Empty;
 
     public bool IsDeleted { get; set; }
     public virtual Partner? Owner { get; set; }
-    public virtual Location? Location { get; set; }
-    public virtual AccommodationDetails? AccommodationDetails { get; set; }
-
 }
 public enum TypesOfAccommodation
 {
-    House,
+    House = 1,
     Hotel,
     Resort,
     Apartment,

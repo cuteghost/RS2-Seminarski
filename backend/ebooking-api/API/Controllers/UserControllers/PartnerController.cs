@@ -64,9 +64,9 @@ public class PartnerController : Controller
     [Route("Update")]
     public async Task<IActionResult> UpdateUser([FromBody] PartnerPATCH partnerDto, [FromHeader] string Authorization)
     {
-        var validUserId = _tokenHandler.GetUserIdFromJWT(Authorization);
+        var validPartnerId = _tokenHandler.GetPartnerIdFromJWT(Authorization);
         var partner = _mapper.Map<Partner>(partnerDto);
-        if (await _partnerRepo.Update(c => (c.UserId == partner.UserId && partner.UserId == validUserId), partner))
+        if (await _partnerRepo.Update(c => (c.Id == partner.Id && partner.Id == validPartnerId), partner))
             return Content("OK");
         else
             return Content("Not Found");

@@ -1,12 +1,14 @@
 class Partner {
-  String id;
+  String? id;
+  String userId;
   String countryId;
   String taxName;
   int taxId;
   int phoneNumber;
 
   Partner({
-    required this.id,
+    this.id,
+    required this.userId,
     required this.countryId,
     required this.taxName,
     required this.taxId,
@@ -16,7 +18,8 @@ class Partner {
   static Future<Partner> fromJson(jsonDecode) async {
     return Future.value(
       Partner(
-        id: jsonDecode['userId'],
+        id: jsonDecode['id'],
+        userId: jsonDecode['userId'],
         countryId: jsonDecode['countryId'],
         taxName: jsonDecode['taxName'],
         taxId: jsonDecode['taxId'],
@@ -27,7 +30,8 @@ class Partner {
 
   Map<String, dynamic> toJson() {
     return {
-      'userId': id,
+      'id': id,
+      'userId': userId,
       'countryId': countryId,
       'taxName': taxName,
       'taxId': taxId,

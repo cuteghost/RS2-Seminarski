@@ -104,6 +104,7 @@ class ProfileService {
                     'Accept': 'application/json', 
                     'Authorization': 'Bearer ${await _secureStorage.getToken()}'} );
     if (response.statusCode == 200) {
+      print('Partner Response: ${response.body}');
       return Partner.fromJson(jsonDecode(response.body));
     }
     else {
@@ -125,6 +126,8 @@ class ProfileService {
       return true;
     }
     else {
+      print('Update Partner Response: ${response.body}');
+      print('PartnerID ${partner.id}');
       throw Exception('Failed to update partner');
     }
   }

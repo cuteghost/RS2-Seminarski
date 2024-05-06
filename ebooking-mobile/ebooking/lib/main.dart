@@ -1,5 +1,7 @@
+import 'package:ebooking/providers/accommodation_provider.dart';
 import 'package:ebooking/providers/location_provider.dart';
 import 'package:ebooking/providers/profile_provider.dart';
+import 'package:ebooking/services/accommodation_service.dart';
 import 'package:ebooking/services/auth_service.dart';
 import 'package:ebooking/services/profile_service.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,7 @@ void main() {
       ChangeNotifierProvider(create: (context) => LocationProvider()),
       ChangeNotifierProvider(create: (context) => AuthProvider(authService: AuthService(secureStorage: secureStorage)),),
       ChangeNotifierProvider(create: (context) => ProfileProvider(profileService: ProfileService(secureStorage: secureStorage))),
+      ChangeNotifierProvider(create: (context) => AccommodationProvider(accommodationService: AccommodationService(secureStorage: secureStorage))),
     ],
     child: MyApp(),
   ));
