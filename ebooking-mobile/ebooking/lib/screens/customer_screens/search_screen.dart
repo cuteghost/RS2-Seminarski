@@ -1,21 +1,41 @@
+import 'package:ebooking/models/city_model.dart';
+import 'package:ebooking/models/country_model.dart';
+import 'package:ebooking/providers/location_provider.dart';
+import 'package:ebooking/providers/search_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:ebooking/screens/customer_screens/results_screen.dart';
-class SearchAccommodationsPage extends StatefulWidget {
+class SearchAccommodationsScreen extends StatefulWidget {
   @override
-  _SearchAccommodationsPageState createState() =>
-      _SearchAccommodationsPageState();
+  _SearchAccommodationsScreenState createState() =>
+      _SearchAccommodationsScreenState();
 }
 
-class _SearchAccommodationsPageState extends State<SearchAccommodationsPage> {
+class _SearchAccommodationsScreenState extends State<SearchAccommodationsScreen> {
   DateTime? fromDate; // Selected from date
   DateTime? toDate; // Selected to date
   CalendarFormat _calendarFormat = CalendarFormat.month;
+  City? _selectedCity;
+  Country? _selectedCountry;
 
   int numberOfGuests = 1; // Initial number of guests
-  int counter1 = 0;
-  int counter2 = 0;
+  int priceFrom = 0;
+  int priceTo = 0;
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<LocationProvider>(context, listen: false).fetchCountries();
+    });
+  }
 
+  @override 
+  void dispose() {
+    super.dispose();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,58 +52,69 @@ class _SearchAccommodationsPageState extends State<SearchAccommodationsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.symmetric(vertical: 8.0),
-                      height: 1.0,
-                      color: Colors.black,
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.0),
+                  
+                ),
+                child: Column(
+                  children:[
+                    Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 8.0),
+                          height: 1.0,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Icon(Icons.money),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 8.0),
+                          height: 1.0,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Price Range
+                    Text(
+                      'Price Range',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Icon(Icons.money),
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.symmetric(vertical: 8.0),
-                      height: 1.0,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              // Price Range
-              Text(
-                'Price Range',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
+                    Row(children: [
+                      Expanded(
+                        child: TextField(
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            setState(() {
+                              priceFrom = int.tryParse(value) ?? 0;
+                            });
+                          },
+                          decoration: InputDecoration(labelText: 'From', labelStyle: TextStyle(fontWeight:FontWeight.bold, fontSize: 18.0,), suffixText: '\$', floatingLabelAlignment: FloatingLabelAlignment.center),
+                        ),
+                      ),
+                      Spacer(),
+                      Expanded(
+                        child: TextField(
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            setState(() {
+                              priceTo = int.tryParse(value) ?? 0;
+                            });
+                          },
+                          decoration: InputDecoration(labelText: 'To', labelStyle: TextStyle(fontWeight:FontWeight.bold, fontSize: 18.0,), suffixText: '\$', floatingLabelAlignment: FloatingLabelAlignment.center),
+                        ),
+                      ),
+                    ]),
+                  ],
                 ),
               ),
-              Row(children: [
-                Expanded(
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      setState(() {
-                        counter1 = int.tryParse(value) ?? 0;
-                      });
-                    },
-                    decoration: InputDecoration(labelText: 'From', labelStyle: TextStyle(fontWeight:FontWeight.bold, fontSize: 18.0,)),
-                  ),
-                ),
-                Spacer(),
-                Expanded(
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      setState(() {
-                        counter2 = int.tryParse(value) ?? 0;
-                      });
-                    },
-                    decoration: InputDecoration(labelText: 'To', labelStyle: TextStyle(fontWeight:FontWeight.bold, fontSize: 18.0,)),
-                  ),
-                ),
-              ]),
+              SizedBox(height: 30.0,),
               // Map Icon in the center of the break line
               Row(
                 children: [
@@ -105,11 +136,37 @@ class _SearchAccommodationsPageState extends State<SearchAccommodationsPage> {
                 ],
               ),
               // Location Input
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Location',
-                  labelStyle: TextStyle(fontWeight:FontWeight.bold, fontSize: 18.0,)
-                ),
+              DropdownButtonFormField(
+                  value: _selectedCountry,
+                  hint: const Text('Select Country'),
+                  onChanged: (Country? newValue) async {
+                    setState(() {
+                      if (newValue != null) {
+                      _selectedCountry = newValue;
+                      _selectedCity = null;
+                      }
+                    });
+
+                    if(_selectedCountry != null){
+                      await Provider.of<LocationProvider>(context, listen: false).fetchCities(_selectedCountry?.id);
+                    }
+                  },
+                  //fill items with countries from provider
+                  items: (Provider.of<LocationProvider>(context, listen: true).countries).map<DropdownMenuItem<Country>>((Country country) {
+                    return DropdownMenuItem<Country>(value: country, child: Text(country.name));
+                  }).toList(),
+               ),
+                DropdownButtonFormField(
+                  value: _selectedCity,
+                  hint: const Text('Select City'),
+                  onChanged: (City? newValue) {
+                    setState(() {
+                      _selectedCity = newValue;
+                    });
+                  },
+                items: (Provider.of<LocationProvider>(context ,listen: true).cities).map<DropdownMenuItem<City>>((City city) {
+                  return DropdownMenuItem<City>(value: city, child: Text(city.name));
+                }).toList(),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -202,7 +259,7 @@ class _SearchAccommodationsPageState extends State<SearchAccommodationsPage> {
               ),
               // Calendar Input Field
               Container(
-                height: MediaQuery.of(context).size.height * 0.437,
+                height: MediaQuery.of(context).size.height * 0.5,
                 child: TableCalendar(
                   firstDay: DateTime.now(),
                   lastDay: DateTime.now().add(Duration(days: 365)),
@@ -261,8 +318,9 @@ class _SearchAccommodationsPageState extends State<SearchAccommodationsPage> {
               ),
               // Search Button
               ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => SearchResultsPage()));
+                onPressed: () async {
+                  var results = await Provider.of<SearchProvider>(context, listen: false).search(priceFrom.toDouble(), priceTo.toDouble(), _selectedCity!.name, fromDate!, toDate!);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SearchResultPage(accommodations: results, numberOfDays: (toDate!.difference(fromDate!).inDays)+1)));
                 },
                 icon: Icon(Icons.search),
                 label: Text('Search'),

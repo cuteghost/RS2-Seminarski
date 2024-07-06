@@ -1,9 +1,11 @@
 import 'package:ebooking_desktop/models/country.dart';
-import 'package:ebooking_desktop/services/http.dart';
+import 'package:ebooking_desktop/services/location_service.dart';
 import 'package:ebooking_desktop/pages/countries/modals/editCountryModal.dart';
 import 'package:flutter/material.dart';
 
 class ManageCountryPage extends StatefulWidget {
+  const ManageCountryPage({super.key});
+
   @override
   _ManageCountryPageState createState() => _ManageCountryPageState();
 }
@@ -33,7 +35,7 @@ class _ManageCountryPageState extends State<ManageCountryPage> {
     }
   }
 
-  Future<void> _deleteCountry(int countryId) async {
+  Future<void> _deleteCountry(String countryId) async {
     try {
       await CountryHttpService.deleteCountry(countryId);
       // After successfully deleting a country, update the list of countries.
@@ -44,7 +46,7 @@ class _ManageCountryPageState extends State<ManageCountryPage> {
     }
   }
 
-  Future<void> _updateCountry(BuildContext context, int id, String name) async {
+  Future<void> _updateCountry(BuildContext context, String id, String name) async {
     try {
       await showEditCountryModal(context, id, name);
       await _fetchCountries();  
@@ -58,7 +60,7 @@ class _ManageCountryPageState extends State<ManageCountryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Manage Countries"),
+        title: const Text("Manage Countries"),
       ),
       body: Column(
         children: [
@@ -69,7 +71,7 @@ class _ManageCountryPageState extends State<ManageCountryPage> {
               children: <Widget>[
                 TextFormField(
                   controller: _nameController,
-                  decoration: InputDecoration(labelText: 'Country Name'),
+                  decoration: const InputDecoration(labelText: 'Country Name'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a country name';
@@ -93,7 +95,7 @@ class _ManageCountryPageState extends State<ManageCountryPage> {
                       }
                     }
                   },
-                  child: Text('Submit'),
+                  child: const Text('Submit'),
                 ),
               ],
             ),
@@ -109,13 +111,13 @@ class _ManageCountryPageState extends State<ManageCountryPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       IconButton(
-                        icon: Icon(Icons.edit),
+                        icon: const Icon(Icons.edit),
                         onPressed: (){
                           _updateCountry(context, countries[index].id, countries[index].name);
                         }
                       ),
                       IconButton(
-                        icon: Icon(Icons.delete),
+                        icon: const Icon(Icons.delete),
                         onPressed: () {
                           // Call the deleteCountry function when the trash icon is pressed
                           _deleteCountry(countries[index].id);

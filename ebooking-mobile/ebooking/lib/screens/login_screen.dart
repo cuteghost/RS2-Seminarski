@@ -1,8 +1,10 @@
 import 'package:ebooking/providers/auth_provider.dart';
+import 'package:ebooking/providers/message_provider.dart';
+import 'package:ebooking/providers/profile_provider.dart';
 import 'package:ebooking/screens/customer_screens/customer_register_screen.dart';
-import 'package:ebooking/screens/partner_screens/partner_dashboard_screen.dart';
-import 'package:ebooking/screens/partner_screens/partner_profile_screen.dart';
+import 'package:ebooking/screens/partner_screens/partner_discover_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:ebooking/screens/customer_screens/discover_screen.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +12,13 @@ import 'package:provider/provider.dart';
 class LoginPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  
+
+  void initState() {
+    Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,16 +104,23 @@ class LoginPage extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () async {
                       if( await Provider.of<AuthProvider>(context, listen:false).login(_emailController.text, _passwordController.text) == true ){
-                       if(await Provider.of<AuthProvider>(context, listen:false).roleCheck() == "Customer"){
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          DiscoverPropertiesPage()));
-                              }
-                              else{
-                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PartnerDashboardScreen()));
-                              }
+                        await Provider.of<MessageProvider>(context, listen: false).startSignalR().then(
+                          (_) async => await Provider.of<MessageProvider>(context, listen: false).getChats().then((_) async =>{
+                            for(var c in Provider.of<MessageProvider>(context, listen: false).chats){
+                                print('CHAT ID: ${c.Id}'),
+                                await Provider.of<MessageProvider>(context, listen: false).getMessages(c.Id).then((_) async => {
+                                await Provider.of<MessageProvider>(context, listen: false).addToChat(c.Id)
+                              })
+                            },
+                            await Provider.of<ProfileProvider>(context, listen: false).getProfile(),
+                          })
+                        );
+                        if(await Provider.of<AuthProvider>(context, listen:false).roleCheck() == "Customer"){
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DiscoverPropertiesPage()));
+                        }
+                        else{
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PartnerDiscoverPage()));  
+                        }
                       }
                       else{
                         // Handle login failure
@@ -125,15 +140,22 @@ class LoginPage extends StatelessWidget {
                           // Invoke Facebook login through provider
                             await Provider.of<AuthProvider>(context, listen:false).loginWithFacebook();
                             if(await Provider.of<AuthProvider>(context, listen:false).checkLoggedInStatus() == true){
+                              await Provider.of<MessageProvider>(context, listen: false).startSignalR().then(
+                                (_) async => await Provider.of<MessageProvider>(context, listen: false).getChats().then((_) async =>{
+                                  for(var c in Provider.of<MessageProvider>(context, listen: false).chats){
+                                      print('CHAT ID: ${c.Id}'),
+                                      await Provider.of<MessageProvider>(context, listen: false).getMessages(c.Id).then((_) async => {
+                                      await Provider.of<MessageProvider>(context, listen: false).addToChat(c.Id)
+                                    })
+                                  },
+                                  await Provider.of<ProfileProvider>(context, listen: false).getProfile(),
+                                })
+                              );
                               if(await Provider.of<AuthProvider>(context, listen:false).roleCheck() == "Customer"){
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          DiscoverPropertiesPage()));
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DiscoverPropertiesPage()));
                               }
                               else{
-                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PartnerDashboardScreen()));
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PartnerDiscoverPage()));  
                               }
                             }
                             else{
@@ -146,16 +168,23 @@ class LoginPage extends StatelessWidget {
                         onPressed: () async {
                           await  Provider.of<AuthProvider>(context, listen:false).loginWithGoogle();
                           if(await Provider.of<AuthProvider>(context, listen:false).checkLoggedInStatus() == true){
+                            await Provider.of<MessageProvider>(context, listen: false).startSignalR().then(
+                              (_) async => await Provider.of<MessageProvider>(context, listen: false).getChats().then((_) async =>{
+                                for(var c in Provider.of<MessageProvider>(context, listen: false).chats){
+                                    print('CHAT ID: ${c.Id}'),
+                                    await Provider.of<MessageProvider>(context, listen: false).getMessages(c.Id).then((_) async => {
+                                    await Provider.of<MessageProvider>(context, listen: false).addToChat(c.Id)
+                                  })
+                                },
+                                await Provider.of<ProfileProvider>(context, listen: false).getProfile(),
+                              })
+                            );
                             if(await Provider.of<AuthProvider>(context, listen:false).roleCheck() == "Customer"){
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          DiscoverPropertiesPage()));
-                              }
-                              else{
-                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PartnerDashboardScreen()));
-                              }
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DiscoverPropertiesPage()));
+                            }
+                            else{
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PartnerDiscoverPage()));  
+                            }
                           }
                           else{
                             // Handle login failure

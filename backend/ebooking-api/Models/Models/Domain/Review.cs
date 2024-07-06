@@ -1,5 +1,4 @@
-﻿using Models.Models.Domain;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Domain;
@@ -12,11 +11,11 @@ public class Review : ISoftDeleted
 
     [Required]
     [ForeignKey("Customer")]
-    public long CustomerId { get; set; }
+    public Guid CustomerId { get; set; }
 
     [Required]
     [ForeignKey("Accommodation")]
-    public long AccommodationId { get; set; }
+    public Guid AccommodationId { get; set; }
 
     [Required]
     public int Rating { get; set; }

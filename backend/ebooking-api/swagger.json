@@ -12,7 +12,7 @@
         ],
         "parameters": [
           {
-            "name": "Authorize",
+            "name": "Authorization",
             "in": "header",
             "style": "simple",
             "schema": {
@@ -51,6 +51,16 @@
         "tags": [
           "Accommodation"
         ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -81,6 +91,127 @@
       "get": {
         "tags": [
           "Accommodation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Accommodation/GetMyAccommodation": {
+      "get": {
+        "tags": [
+          "Accommodation"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Accommodation/GetAccommodationById": {
+      "get": {
+        "tags": [
+          "Accommodation"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Accommodation/GetNearby": {
+      "get": {
+        "tags": [
+          "Accommodation"
+        ],
+        "parameters": [
+          {
+            "name": "latitude",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Administrator/GetCustomers": {
+      "get": {
+        "tags": [
+          "Administrator"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Administrator/GetPartners": {
+      "get": {
+        "tags": [
+          "Administrator"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -187,6 +318,90 @@
         }
       }
     },
+    "/api/Administrator/Details": {
+      "get": {
+        "tags": [
+          "Administrator"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Administrator/Rents": {
+      "get": {
+        "tags": [
+          "Administrator"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Administrator/Accommodations": {
+      "get": {
+        "tags": [
+          "Administrator"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Auth/login": {
       "post": {
         "tags": [
@@ -249,17 +464,48 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string"
+                "$ref": "#/components/schemas/FacebookSignInDTO"
               }
             },
             "text/json": {
               "schema": {
-                "type": "string"
+                "$ref": "#/components/schemas/FacebookSignInDTO"
               }
             },
             "application/*+json": {
               "schema": {
-                "type": "string"
+                "$ref": "#/components/schemas/FacebookSignInDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Auth/google-login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleSignInVM"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleSignInVM"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleSignInVM"
               }
             }
           }
@@ -336,6 +582,30 @@
         }
       }
     },
+    "/api/City/GetCityByCountry/{countryId}": {
+      "get": {
+        "tags": [
+          "City"
+        ],
+        "parameters": [
+          {
+            "name": "countryId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Country/Add": {
       "post": {
         "tags": [
@@ -371,6 +641,30 @@
       "get": {
         "tags": [
           "Country"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Country/Get/{id}": {
+      "get": {
+        "tags": [
+          "Country"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -465,18 +759,6 @@
         }
       }
     },
-    "/api/Customer/GetUsers": {
-      "get": {
-        "tags": [
-          "Customer"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
     "/api/Customer/Details": {
       "get": {
         "tags": [
@@ -521,7 +803,7 @@
         }
       }
     },
-    "/api/Customer/Update": {
+    "/api/Customer/UpdateDetails": {
       "patch": {
         "tags": [
           "Customer"
@@ -551,6 +833,47 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/CustomerPATCH"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Feedback": {
+      "post": {
+        "tags": [
+          "Feedback"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewPOST"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewPOST"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewPOST"
               }
             }
           }
@@ -622,6 +945,16 @@
         "tags": [
           "Partner"
         ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -648,31 +981,18 @@
         }
       }
     },
-    "/api/Partner/GetUsers": {
-      "get": {
-        "tags": [
-          "Partner"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Partner/GetUser": {
+    "/api/Partner/PartnerDetails": {
       "get": {
         "tags": [
           "Partner"
         ],
         "parameters": [
           {
-            "name": "userId",
-            "in": "query",
-            "style": "form",
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -712,6 +1032,16 @@
         "tags": [
           "Partner"
         ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -737,16 +1067,246 @@
           }
         }
       }
+    },
+    "/api/Reservation/Create": {
+      "post": {
+        "tags": [
+          "Reservation"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationPOST"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationPOST"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationPOST"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Reservation/CheckAvailability": {
+      "get": {
+        "tags": [
+          "Reservation"
+        ],
+        "parameters": [
+          {
+            "name": "accommodationId",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Reservation/Customer/GetReservations": {
+      "get": {
+        "tags": [
+          "Reservation"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Search": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "parameters": [
+          {
+            "name": "priceFrom",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "priceTo",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "checkIn",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "checkOut",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/User/UpdateEmail": {
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserEmailPATCH"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserEmailPATCH"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserEmailPATCH"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/User/UpdatePassword": {
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPasswordPATCH"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPasswordPATCH"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPasswordPATCH"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
-      "AccommodationDetails": {
+      "AccommodationDetailsPATCH": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
+          },
+          "numberOfBeds": {
+            "type": "integer",
+            "format": "int32"
           },
           "bathub": {
             "type": "boolean"
@@ -788,9 +1348,6 @@
             "type": "boolean"
           },
           "breakfast": {
-            "type": "boolean"
-          },
-          "isDeleted": {
             "type": "boolean"
           }
         },
@@ -799,6 +1356,10 @@
       "AccommodationDetailsPOST": {
         "type": "object",
         "properties": {
+          "numberOfBeds": {
+            "type": "integer",
+            "format": "int32"
+          },
           "bathub": {
             "type": "boolean"
           },
@@ -840,6 +1401,218 @@
           },
           "breakfast": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AccommodationImagesPATCH": {
+        "type": "object",
+        "properties": {
+          "image1": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image2": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image3": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image4": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image5": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image6": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image7": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image8": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image9": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image10": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image11": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image12": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image13": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image14": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image15": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image16": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image17": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image18": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image19": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image20": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AccommodationImagesPOST": {
+        "type": "object",
+        "properties": {
+          "image1": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image2": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image3": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image4": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image5": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image6": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image7": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image8": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image9": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image10": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image11": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image12": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image13": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image14": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image15": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image16": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image17": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image18": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image19": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          },
+          "image20": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -865,40 +1638,15 @@
             "type": "number",
             "format": "double"
           },
-          "imageThumb": {
-            "type": "string",
-            "format": "byte",
-            "nullable": true
-          },
           "description": {
             "type": "string",
             "nullable": true
           },
-          "reviewScore": {
-            "type": "number",
-            "format": "float"
-          },
-          "owner": {
-            "$ref": "#/components/schemas/User"
-          },
-          "location": {
-            "$ref": "#/components/schemas/Location"
-          },
           "accommodationDetails": {
-            "$ref": "#/components/schemas/AccommodationDetails"
+            "$ref": "#/components/schemas/AccommodationDetailsPATCH"
           },
-          "image": {
-            "type": "string",
-            "format": "byte",
-            "nullable": true
-          },
-          "reviews": {
-            "type": "string",
-            "nullable": true
-          },
-          "stateMachine": {
-            "type": "string",
-            "nullable": true
+          "accommodationImages": {
+            "$ref": "#/components/schemas/AccommodationImagesPATCH"
           }
         },
         "additionalProperties": false
@@ -906,16 +1654,9 @@
       "AccommodationPOST": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
           "name": {
             "type": "string",
             "nullable": true
-          },
-          "status": {
-            "type": "boolean"
           },
           "typeOfAccommodation": {
             "$ref": "#/components/schemas/TypesOfAccommodation"
@@ -933,24 +1674,14 @@
             "type": "string",
             "nullable": true
           },
-          "reviewScore": {
-            "type": "number",
-            "format": "float"
+          "accommodationImages": {
+            "$ref": "#/components/schemas/AccommodationImagesPOST"
           },
           "location": {
             "$ref": "#/components/schemas/LocationPOST"
           },
           "accommodationDetails": {
             "$ref": "#/components/schemas/AccommodationDetailsPOST"
-          },
-          "image": {
-            "type": "string",
-            "format": "byte",
-            "nullable": true
-          },
-          "reviews": {
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -997,34 +1728,6 @@
         },
         "additionalProperties": false
       },
-      "City": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "countryId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "country": {
-            "$ref": "#/components/schemas/Country"
-          },
-          "isDeleted": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
       "CityPOST": {
         "type": "object",
         "properties": {
@@ -1037,26 +1740,6 @@
           "countryId": {
             "type": "string",
             "format": "uuid"
-          }
-        },
-        "additionalProperties": false
-      },
-      "Country": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "isDeleted": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -1113,14 +1796,6 @@
             "format": "date-time",
             "nullable": true
           },
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "password": {
-            "type": "string",
-            "nullable": true
-          },
           "image": {
             "type": "string",
             "format": "byte",
@@ -1164,27 +1839,40 @@
         },
         "additionalProperties": false
       },
-      "Gender": {
-        "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
-      "Location": {
+      "FacebookSignInDTO": {
         "required": [
-          "address",
-          "latitude",
-          "longitude",
-          "zipCode"
+          "accessToken"
         ],
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
+          "accessToken": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GoogleSignInVM": {
+        "required": [
+          "accessToken",
+          "idToken"
+        ],
+        "type": "object",
+        "properties": {
+          "idToken": {
+            "minLength": 1,
+            "type": "string"
           },
+          "accessToken": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LocationPOST": {
+        "type": "object",
+        "properties": {
           "longitude": {
             "type": "number",
             "format": "double"
@@ -1194,33 +1882,6 @@
             "format": "double"
           },
           "address": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "zipCode": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "cityId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "city": {
-            "$ref": "#/components/schemas/City"
-          },
-          "isDeleted": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "LocationPOST": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "maxLength": 50,
-            "minLength": 5,
             "type": "string",
             "nullable": true
           },
@@ -1253,35 +1914,31 @@
       "PartnerPATCH": {
         "type": "object",
         "properties": {
-          "displayName": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taxId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "taxName": {
             "type": "string",
             "nullable": true
           },
-          "firstName": {
-            "type": "string",
+          "phoneNumber": {
+            "type": "integer",
+            "format": "int64",
             "nullable": true
           },
-          "lastName": {
+          "countryId": {
             "type": "string",
-            "nullable": true
-          },
-          "birthDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "password": {
-            "type": "string",
-            "nullable": true
-          },
-          "image": {
-            "type": "string",
-            "format": "byte",
-            "nullable": true
+            "format": "uuid"
           }
         },
         "additionalProperties": false
@@ -1289,107 +1946,119 @@
       "PartnerPOST": {
         "type": "object",
         "properties": {
-          "displayName": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "countryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taxId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "taxName": {
             "type": "string",
             "nullable": true
           },
-          "firstName": {
-            "type": "string",
-            "nullable": true
+          "phoneNumber": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReservationPOST": {
+        "required": [
+          "accommodationId",
+          "endDate",
+          "numberOfGuests",
+          "startDate"
+        ],
+        "type": "object",
+        "properties": {
+          "numberOfGuests": {
+            "type": "integer",
+            "format": "int32"
           },
-          "lastName": {
-            "type": "string",
-            "nullable": true
-          },
-          "birthDate": {
+          "startDate": {
             "type": "string",
             "format": "date-time"
           },
-          "email": {
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "accommodationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReviewPOST": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "satisfaction": {
+            "type": "boolean"
+          },
+          "wouldRecommend": {
+            "type": "boolean"
+          },
+          "comment": {
             "type": "string",
             "nullable": true
           },
-          "password": {
+          "accommodationId": {
             "type": "string",
-            "nullable": true
-          },
-          "image": {
-            "type": "string",
-            "format": "byte",
-            "nullable": true
+            "format": "uuid"
           }
         },
         "additionalProperties": false
       },
       "TypesOfAccommodation": {
         "enum": [
-          0,
           1,
           2,
           3,
           4,
           5,
           6,
-          7
+          7,
+          8
         ],
         "type": "integer",
         "format": "int32"
       },
-      "User": {
-        "required": [
-          "birthDate",
-          "displayName",
-          "email",
-          "firstName",
-          "lastName",
-          "password"
-        ],
+      "UserEmailPATCH": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "email": {
-            "minLength": 1,
-            "type": "string"
-          },
           "password": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "displayName": {
-            "maxLength": 15,
-            "minLength": 3,
-            "type": "string"
-          },
-          "firstName": {
-            "maxLength": 15,
-            "minLength": 3,
-            "type": "string"
-          },
-          "lastName": {
-            "maxLength": 30,
-            "minLength": 3,
-            "type": "string"
-          },
-          "birthDate": {
             "type": "string",
-            "format": "date-time"
-          },
-          "gender": {
-            "$ref": "#/components/schemas/Gender"
-          },
-          "image": {
-            "type": "string",
-            "format": "byte",
             "nullable": true
           },
-          "isActive": {
-            "type": "boolean"
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserPasswordPATCH": {
+        "type": "object",
+        "properties": {
+          "oldPassword": {
+            "type": "string",
+            "nullable": true
           },
-          "isDeleted": {
-            "type": "boolean"
+          "newPassword": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

@@ -1,32 +1,32 @@
-import 'package:ebooking_desktop/services/http.dart';
+import 'package:ebooking_desktop/services/location_service.dart';
 import 'package:flutter/material.dart';
 
-Future <void> showEditCountryModal(BuildContext context, int countryId, String countryName) async {
+Future <void> showEditCountryModal(BuildContext context, String countryId, String countryName) async {
   String selectedCountryName = countryName;
 
   showModalBottomSheet<void> (
     context: context,
     builder: (BuildContext context) {
       return Container(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text(
+            const Text(
               'Edit Country',
               style: TextStyle(fontSize: 20.0),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextFormField(
               initialValue: countryName,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'New Country Name',
               ),
               onChanged: (value) {
                 selectedCountryName = value;
               },
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () async {
                 try {
@@ -40,7 +40,7 @@ Future <void> showEditCountryModal(BuildContext context, int countryId, String c
                   print('Error editing country: $e');
                 }
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         ),

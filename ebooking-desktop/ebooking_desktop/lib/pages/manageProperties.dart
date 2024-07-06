@@ -1,33 +1,27 @@
+import 'package:ebooking_desktop/models/accomodation_model.dart';
+import 'package:ebooking_desktop/providers/admin_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking_desktop/widgets/drawer.dart';
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Property Management',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.blue,
-      ),
-      home: PropertyManagementPage(),
-    );
-  }
-}
+import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 
 class PropertyManagementPage extends StatelessWidget {
+  const PropertyManagementPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     // Using MediaQuery to get the screen width and calculate the number of items in a row
     final screenWidth = MediaQuery.of(context).size.width;
-    final cardWidth = 150.0; // Desired width of each card
-    final crossAxisCount = 6;
+    const cardWidth = 150.0; // Desired width of each card
+    const crossAxisCount = 6;
+    final accommodations = Provider.of<AdminProvider>(context, listen: false).accommodations;
     return Scaffold(
-    drawer: CustomDrawer(),
+    drawer: const CustomDrawer(),
       appBar: AppBar(
-        title: Text('Property Management'),
+        title: const Text('Property Management'),
         actions: [
           IconButton(
-            icon: Icon(Icons.search),
+            icon: const Icon(Icons.search),
             onPressed: () {
               // Handle search action
             },
@@ -36,15 +30,15 @@ class PropertyManagementPage extends StatelessWidget {
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(8.0),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount, // Adjust based on screen size
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,
           childAspectRatio: 1 / 1.2, // Adjust the aspect ratio of the card
         ),
-        itemCount: 20, // The number of items to show
+        itemCount: accommodations.length, // The number of items to show
         itemBuilder: (context, index) {
-          return PropertyCard();
+          return PropertyCard(accommodation: accommodations[index]);
         },
       ),
     );
@@ -52,6 +46,10 @@ class PropertyManagementPage extends StatelessWidget {
 }
 
 class PropertyCard extends StatelessWidget {
+  final AccommodationGET accommodation;
+  
+  const PropertyCard({super.key, required this.accommodation});
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -61,67 +59,67 @@ class PropertyCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
+        children: [
           Expanded(
-            child: Image.network(
-              'https://via.placeholder.com/150', // Replace with your image URL
+            child: Image(
+              image: FileImage(accommodation.images.images[0]!),
               fit: BoxFit.cover,
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8.0),
             child: Text(
-              'Property X', // Replace with actual property name
-              style: TextStyle(
+              accommodation.name,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text('Sarajevo'), // Replace with actual property location
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text(accommodation.location.address), // Replace with actual property location
           ),
           ButtonBar(
             alignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
+              // IconButton(
+              //   icon: const Icon(Icons.edit),
+              //   onPressed: () {
+              //     // Handle play action
+              //   },
+              // ),
               IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () {
-                  // Handle play action
-                },
-              ),
-              IconButton(
-                icon: Icon(Icons.delete),
+                icon: const Icon(Icons.delete),
                 onPressed: () {
                   // Handle directions action
                 },
               ),
-              PopupMenuButton<String>(
-                onSelected: (String result) {},
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                      value: 'Block', child: Row(children: [
-                        Icon(Icons.block),
-                        SizedBox(width: 8),
-                        Text('Block')
-                      ])),
-                  const PopupMenuItem<String>(
-                      value: 'Reports',
-                      child: Row(children: [
-                        Icon(Icons.report),
-                        SizedBox(width: 8),
-                        Text('Reports')
-                      ])),
-                  const PopupMenuItem<String>(
-                      value: 'Promote', child: Row(children: [
-                        Icon(Icons.upgrade_outlined),
-                        SizedBox(width: 8),
-                        Text('Promote')
-                      ])),
-                ],
-                icon: Icon(Icons.more_vert),
-              )
+              // PopupMenuButton<String>(
+              //   onSelected: (String result) {},
+              //   itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              //     const PopupMenuItem<String>(
+              //         value: 'Block', child: Row(children: [
+              //           Icon(Icons.block),
+              //           SizedBox(width: 8),
+              //           Text('Block')
+              //         ])),
+              //     const PopupMenuItem<String>(
+              //         value: 'Reports',
+              //         child: Row(children: [
+              //           Icon(Icons.report),
+              //           SizedBox(width: 8),
+              //           Text('Reports')
+              //         ])),
+              //     const PopupMenuItem<String>(
+              //         value: 'Promote', child: Row(children: [
+              //           Icon(Icons.upgrade_outlined),
+              //           SizedBox(width: 8),
+              //           Text('Promote')
+              //         ])),
+              //   ],
+              //   icon: const Icon(Icons.more_vert),
+              // )
             ],
           ),
         ],

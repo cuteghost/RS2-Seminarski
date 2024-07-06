@@ -2,8 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Models.Domain;
 using Repository.Interfaces;
-using Services.HashService;
-using Services.TokenHandlerService;
+using Authentication.Services.HashService;
+using Authentication.Services.TokenHandlerService;
 
 namespace Repository.Classes;
 

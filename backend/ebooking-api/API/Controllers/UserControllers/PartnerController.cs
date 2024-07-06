@@ -3,7 +3,7 @@ using Repository.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Models.Domain;
 using Models.DTO.UserDTO.Partner;
-using Services.TokenHandlerService;
+using Authentication.Services.TokenHandlerService;
 
 namespace API.Controllers.UserControllers;
 

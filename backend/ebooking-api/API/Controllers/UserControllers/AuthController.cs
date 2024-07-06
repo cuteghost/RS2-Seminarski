@@ -7,7 +7,7 @@ using Models.DTO.GoogleDTO;
 using Repository.Interfaces;
 using Services.FacebookService;
 using Services.Google;
-using Services.TokenHandlerService;
+using Authentication.Services.TokenHandlerService;
 
 namespace Controllers.UserControllers;
 

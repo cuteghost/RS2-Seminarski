@@ -1,12 +1,9 @@
+import 'package:ebooking/screens/customer_screens/discover_screen.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MaterialApp(
-    home: ReservationConfirmationPage(),
-  ));
-}
-
 class ReservationConfirmationPage extends StatelessWidget {
+  final String accommodationName;
+  ReservationConfirmationPage({required this.accommodationName});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +28,7 @@ class ReservationConfirmationPage extends StatelessWidget {
 
             // Success message
             Text(
-              'You have successfully paid your stay at Cityscape.',
+              'You have successfully paid your stay at ${accommodationName}.',
               style: TextStyle(
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,
@@ -51,7 +48,7 @@ class ReservationConfirmationPage extends StatelessWidget {
             // Back Home button
             ElevatedButton(
               onPressed: () {
-                // Handle button click (navigate back home, for example)
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DiscoverPropertiesPage()));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.lightBlue,

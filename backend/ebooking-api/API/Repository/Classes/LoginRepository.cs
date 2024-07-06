@@ -6,7 +6,7 @@ using Models.Domain;
 using Models.DTO.AuthDTO;
 using Models.Models.Domain;
 using Repository.Interfaces;
-using Services.HashService;
+using Authentication.Services.HashService;
 using System.Globalization;
 using static Google.Apis.Auth.GoogleJsonWebSignature;
 

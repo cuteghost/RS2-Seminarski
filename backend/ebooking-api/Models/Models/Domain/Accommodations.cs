@@ -16,7 +16,6 @@ public partial class Accommodation : ISoftDeleted
     [MaxLength(50)]
     public string Name { get; set; } = string.Empty;
 
-    [Required]
     public bool Status { get; set; }
 
     [Required]
@@ -38,14 +37,11 @@ public partial class Accommodation : ISoftDeleted
     [ForeignKey("Owner")]
     public Guid OwnerId { get; set; }
     
-    [Required]
-    public AccommodationImages AccommodationImages { get; set; }
+    public AccommodationImages? AccommodationImages { get; set; }
 
     public Location? Location { get; set; }
 
     public AccommodationDetails? AccommodationDetails { get; set; }
-    
-    public string Reviews { get; set; } = string.Empty;
 
     public bool IsDeleted { get; set; }
     public virtual Partner? Owner { get; set; }

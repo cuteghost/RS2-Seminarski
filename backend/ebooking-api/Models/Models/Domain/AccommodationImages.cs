@@ -1,11 +1,5 @@
-﻿using Models.Models.Domain;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Models.Domain;
 
@@ -29,6 +23,7 @@ public class AccommodationImages : ISoftDeleted
     public byte[]? Image7 { get; set; }
     public byte[]? Image8 { get; set; }
     public byte[]? Image9 { get; set; }
+    public byte[]? Image11 { get; set; }
     public byte[]? Image10 { get; set; }
     public byte[]? Image12 { get; set; }
     public byte[]? Image13 { get; set; }

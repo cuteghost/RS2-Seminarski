@@ -21,7 +21,7 @@ class AuthService {
         body: json.encode({'email': email, 'password': password}));
     
     if (response.statusCode == 200) {
-      await _secureStorage.saveToken(response.body); // Assuming the token is the entire response body
+      await _secureStorage.saveToken(response.body);
       return true;
     } else {
       return false;
@@ -37,14 +37,12 @@ class AuthService {
       final AccessToken accessToken = result.accessToken!;
       final response = await http.post(
         Uri.parse('${config.AppConfig.baseUrl}/api/Auth/facebook-login'),
-        body: json.encode({'accessToken': accessToken.token}),
+        body: json.encode({'accessToken': accessToken.tokenString}),
         headers: {'Content-Type': 'application/json'},
       );
-      print("AuthService => response:  ${response.body}");
-      print("AuthService => Response:  ${response.statusCode}");
 
       if (response.statusCode == 200) {
-        await _secureStorage.saveToken(response.body); // Assuming the token is the entire response body
+        await _secureStorage.saveToken(response.body);
         return true;
       } else {
         return false;
@@ -64,7 +62,6 @@ class AuthService {
       Uri.parse('${config.AppConfig.baseUrl}/api/Auth/status'),
       headers: {'Authorization': 'Bearer $token'}
     );
-    print("Response:  ${response.statusCode}");
     if (response.statusCode == 200) {
       await _secureStorage.saveToken(response.body);
       return true;
@@ -92,7 +89,7 @@ class AuthService {
           'email': email, 
           'password': password}));
     if (response.statusCode == 200) {
-      await _secureStorage.saveToken(response.body); // Assuming the token is the entire response body
+      await _secureStorage.saveToken(response.body);
       return true;
     } else {
       return false;
@@ -102,7 +99,6 @@ class AuthService {
   void deleteAccount() async {
     final url = Uri.parse('${config.AppConfig.baseUrl}/api/Customer/Delete');
     String? token = await _secureStorage.getToken();
-    print("Token: $token");
     final response = await http.delete(url, headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200) {
       await _secureStorage.deleteToken();
@@ -125,16 +121,12 @@ class AuthService {
     GoogleSignInAccount? googleUser = await googleSignIn.signIn();
     if(googleUser == null) return false;
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    print("Google Auth ID: ${googleAuth.idToken}");
-    print("Google Auth ACCESS: ${googleAuth.accessToken}");
     final response = await http.post(
       Uri.parse('${config.AppConfig.baseUrl}/api/Auth/google-login'),
       body: json.encode({'IdToken': googleAuth.idToken, 'AccessToken': googleAuth.accessToken} ),
       headers: {'Content-Type': 'application/json'},
     );
 
-    print("AuthService Google => response:  ${response.body}");
-    print("AuthService Google => Response:  ${response.statusCode}");
 
     if (response.statusCode == 200) {
       await _secureStorage.saveToken(response.body); // Assuming the token is the entire response body
@@ -182,7 +174,9 @@ class AuthService {
       else {
         return 'Customer';
       }
+
     }
+    return '';
   
   }
 }

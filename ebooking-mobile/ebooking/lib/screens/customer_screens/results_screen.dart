@@ -1,17 +1,30 @@
-import 'package:ebooking/screens/customer_screens/property_details_screen.dart';
+import 'dart:io';
+
+import 'package:ebooking/models/accomodation_model.dart';
+import 'package:ebooking/screens/customer_screens/accommodation_details_screen.dart';
 import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking/screens/customer_screens/filters_screen.dart';
 
-class SearchResultsPage extends StatelessWidget {
+class SearchResultPage extends StatefulWidget {
+  final List<AccommodationGET> accommodations;
+  final int numberOfDays;
+
+  SearchResultPage({required this.accommodations, required this.numberOfDays});
+
+  @override
+  _SearchResultsState createState() => _SearchResultsState();
+}
+
+
+class _SearchResultsState extends State<SearchResultPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Search Results'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
+      body: Column(
           children: [
             // Filters
             Container(
@@ -26,151 +39,29 @@ class SearchResultsPage extends StatelessWidget {
                 ],
               ),
             ),
-            // Search Results
-            SearchResultContainer(
-                image: 'assets/images/property_image_1.jpg',
-                propertyName: 'Beautiful Villa',
-                reviews: 15,
-                status: 'Available',
-                reviewScore: 9.2,
-                price: '\$1000',
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              PropertyDetailsPage(propertyIndex: 0)));
+            Expanded(
+              child: ListView.builder(
+                itemCount: widget.accommodations.length, 
+                itemBuilder: (context, index){
+                  var accommodation = widget.accommodations[index];
+                  return SearchResultContainer(
+                    image: accommodation.images.images[0]!,
+                    propertyName: accommodation.name,
+                    pricePerNight: accommodation.pricePerNight,
+                    reviewScore: accommodation.reviewScore,
+                    totalPrice: '\$${accommodation.pricePerNight * widget.numberOfDays}',
+                    address: accommodation.location.address,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AccommodationDetailsScreen(accommodation: accommodation)));
+                    },
+                  );
                 }),
-            SearchResultContainer(
-                image: 'assets/images/property_image_2.jpg',
-                propertyName: 'Luxury Apartment',
-                reviews: 20,
-                status: 'Unavailable',
-                reviewScore: 8.8,
-                price: '\$1200',
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              PropertyDetailsPage(propertyIndex: 0)));
-                }),
-            SearchResultContainer(
-                image: 'assets/images/property_image_2.jpg',
-                propertyName: 'Luxury Apartment',
-                reviews: 20,
-                status: 'Unavailable',
-                reviewScore: 8.8,
-                price: '\$1200',
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              PropertyDetailsPage(propertyIndex: 0)));
-                }),
-            SearchResultContainer(
-                image: 'assets/images/property_image_2.jpg',
-                propertyName: 'Luxury Apartment',
-                reviews: 20,
-                status: 'Unavailable',
-                reviewScore: 8.8,
-                price: '\$1200',
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              PropertyDetailsPage(propertyIndex: 0)));
-                }),
-            SearchResultContainer(
-                image: 'assets/images/property_image_2.jpg',
-                propertyName: 'Luxury Apartment',
-                reviews: 20,
-                status: 'Unavailable',
-                reviewScore: 8.8,
-                price: '\$1200',
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              PropertyDetailsPage(propertyIndex: 0)));
-                }),
-            SearchResultContainer(
-                image: 'assets/images/property_image_2.jpg',
-                propertyName: 'Luxury Apartment',
-                reviews: 20,
-                status: 'Unavailable',
-                reviewScore: 8.8,
-                price: '\$1200',
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              PropertyDetailsPage(propertyIndex: 0)));
-                }),
-            SearchResultContainer(
-                image: 'assets/images/property_image_2.jpg',
-                propertyName: 'Luxury Apartment',
-                reviews: 20,
-                status: 'Unavailable',
-                reviewScore: 8.8,
-                price: '\$1200',
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              PropertyDetailsPage(propertyIndex: 0)));
-                }),
-            SearchResultContainer(
-                image: 'assets/images/property_image_2.jpg',
-                propertyName: 'Luxury Apartment',
-                reviews: 20,
-                status: 'Unavailable',
-                reviewScore: 8.8,
-                price: '\$1200',
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              PropertyDetailsPage(propertyIndex: 0)));
-                }),
-            SearchResultContainer(
-                image: 'assets/images/property_image_2.jpg',
-                propertyName: 'Luxury Apartment',
-                reviews: 20,
-                status: 'Unavailable',
-                reviewScore: 8.8,
-                price: '\$1200',
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              PropertyDetailsPage(propertyIndex: 0)));
-                }),
-            SearchResultContainer(
-                image: 'assets/images/property_image_2.jpg',
-                propertyName: 'Luxury Apartment',
-                reviews: 20,
-                status: 'Unavailable',
-                reviewScore: 8.8,
-                price: '\$1200',
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              PropertyDetailsPage(propertyIndex: 0)));
-                }),
-            // Add more SearchResultContainer widgets for additional results
+            ),
           ],
         ),
-      ),
       bottomNavigationBar: CustomBottomNavigationBar(),
     );
   }
@@ -205,21 +96,21 @@ class RoundedFilterButton extends StatelessWidget {
 }
 
 class SearchResultContainer extends StatelessWidget {
-  final String image;
+  final File image;
   final String propertyName;
-  final int reviews;
-  final String status;
+  final double pricePerNight;
   final double reviewScore;
-  final String price;
+  final String totalPrice;
+  final String address;
   final VoidCallback? onTap;
 
   SearchResultContainer({
     required this.image,
     required this.propertyName,
-    required this.reviews,
-    required this.status,
+    required this.pricePerNight,
     required this.reviewScore,
-    required this.price,
+    required this.totalPrice,
+    required this.address,
     this.onTap,
   });
 
@@ -243,7 +134,7 @@ class SearchResultContainer extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8.0),
                 image: DecorationImage(
-                  image: AssetImage(image),
+                  image: FileImage(image),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -261,8 +152,8 @@ class SearchResultContainer extends StatelessWidget {
                       fontSize: 16.0,
                     ),
                   ),
-                  Text('$reviews reviews'),
-                  Text('Status: $status'),
+                  Text('\$${pricePerNight} per Night'),
+                  Text('Address: $address'),
                 ],
               ),
             ),
@@ -280,7 +171,7 @@ class SearchResultContainer extends StatelessWidget {
                 ),
                 SizedBox(height: 8.0),
                 Text(
-                  price,
+                  totalPrice,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16.0,

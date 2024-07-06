@@ -1,6 +1,13 @@
+import 'dart:io';
+
+import 'package:ebooking/models/accomodation_model.dart';
+import 'package:ebooking/models/reservation_model.dart';
+import 'package:ebooking/providers/reservation_provide.dart';
+import 'package:ebooking/screens/customer_screens/accommodation_details_screen.dart';
 import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking/screens/customer_screens/feedback_screen.dart';
+import 'package:provider/provider.dart';
 
 class ReservationHistoryPage extends StatelessWidget {
   @override
@@ -9,33 +16,37 @@ class ReservationHistoryPage extends StatelessWidget {
         appBar: AppBar(
           title: Text('Reservation History'),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ListView(
-            children: [
-              _buildReservationCard(
-                  'Hotel A',
-                  '2022-10-01 to 2022-10-05',
-                  4, // Rating (out of 5)
-                  'assets/images/property_image_0.jpg',
-                  true,
-                  8.8,
-                  context
-                  ),
-              SizedBox(height: 16.0),
-              _buildReservationCard(
-                  'Resort B',
-                  '2022-08-15 to 2022-08-20',
-                  5, // Rating (out of 5)
-                  'assets/images/property_image_1.jpg',
-                  false,
-                  0,
-                  context
-                  ),
-
-              // Add more reservation cards as needed
-            ],
-          ),
+        body: FutureBuilder<List<ReservationGET>>(
+          future: Provider.of<ReservationProvider>(context, listen: false).fetchMyReservations(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              print('Stack trace: ${snapshot.stackTrace}');
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else {
+              return ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  var reservation = snapshot.data![index];
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: _buildReservationCard(
+                      reservation.accommodation!.name,
+                      '${reservation.startDate} - ${reservation.endDate}',
+                      reservation.accommodation!.reviewScore,
+                      reservation.isRated,
+                      reservation.accommodation!.reviewScore,
+                      reservation.thumbnail,
+                      reservation.accommodation!.id,
+                      reservation.accommodation!,
+                      context
+                    ),
+                  );
+                },
+              );
+            }
+          }
         ),
         bottomNavigationBar: CustomBottomNavigationBar());
   }
@@ -43,10 +54,12 @@ class ReservationHistoryPage extends StatelessWidget {
   Widget _buildReservationCard(
     String placeName, 
     String dateRange, 
-    int rating,
-    String imagePath, 
+    double rating, 
     bool rated, 
     double? reviewScore,
+    File image,
+    String accommodationId,
+    AccommodationGET accommodation,
     BuildContext context
     ) {
     return Container(
@@ -66,10 +79,11 @@ class ReservationHistoryPage extends StatelessWidget {
                 bottomLeft: Radius.circular(10.0),
               ),
               image: DecorationImage(
-                image: AssetImage(imagePath),
+                image: FileImage(image),
                 fit: BoxFit.cover,
               ),
             ),
+            
           ),
           SizedBox(width: 16.0),
           // Right side with details
@@ -99,7 +113,7 @@ class ReservationHistoryPage extends StatelessWidget {
                 if (rated)
                   Row(children: [
                     CircleAvatar(
-                      radius: 20.0,
+                      radius: 15.0,
                       backgroundColor: Colors.blue,
                       child: Text(
                         reviewScore.toString(),
@@ -112,7 +126,7 @@ class ReservationHistoryPage extends StatelessWidget {
                 else
                 GestureDetector( 
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackPage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackPage(accommodationID: accommodationId)));
                   },
                   child:
                     Row(
@@ -128,12 +142,29 @@ class ReservationHistoryPage extends StatelessWidget {
               ],
             ),
           ),
-          // Right sign
-          Icon(
-            Icons.arrow_right,
-            size: 30.0,
-            color: Colors.blue,
+          Container(
+            width: 50.0,
+            height: 120.0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(10.0),
+                bottomRight: Radius.circular(10.0),
+              ),
+            ),
           ),
+          // Pokuso pokuso
+          // Right sign
+          // IconButton(
+          //   icon: Icon(
+          //     Icons.arrow_right,
+          //     size: 30.0,
+          //     color: Colors.blue,
+          //   ),
+          //   onPressed: () {
+          //     Navigator.push(context, MaterialPageRoute(builder: (context) => AccommodationDetailsScreen(accommodation: accommodation)));
+          //   },            
+          // ),
+
         ],
       ),
     );

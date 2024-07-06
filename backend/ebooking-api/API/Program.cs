@@ -3,15 +3,18 @@ using eBooking.Services.Classes;
 using Database;
 using Repository.Interfaces;
 using Repository.Classes;
-using Services.HashService;
+using Authentication.Services.HashService;
 using TaxiHDbContext;
-using Services.TokenHandlerService;
+using Authentication.Services.TokenHandlerService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using API.Repository.Classes;
 using Services.FacebookService;
 using Services.Google;
+using Services.LocationService;
+using Services.RabbitMQService;
+using Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +48,8 @@ builder.Services.AddScoped<IHashService, HashService>();
 /*--------------------------------------------------------------------------------------*/
 builder.Services.AddScoped<ITokenHandlerService, TokenHandlerService>();
 /*--------------------------------------------------------------------------------------*/
+builder.Services.AddSingleton<ILocationService, LocationService>();
+/*--------------------------------------------------------------------------------------*/
 
 builder.Services.AddScoped<ILoginRepository, LoginRepository>();
 builder.Services.AddTransient<IGenericRepository<City>, GenericRepository<City>>();
@@ -56,10 +61,13 @@ builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
 builder.Services.AddTransient<IGenericRepository<Partner>, GenericRepository<Partner>>();
 builder.Services.AddTransient<IGenericRepository<Administrator>, GenericRepository<Administrator>>();
 builder.Services.AddTransient<IGenericRepository<Accommodation>, GenericRepository<Accommodation>>();
+builder.Services.AddTransient<IGenericRepository<Review>, GenericRepository<Review>>();
+builder.Services.AddTransient<IGenericRepository<Reservation>, GenericRepository<Reservation>>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IAdministratorRepository, AdministratorRepository>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddSingleton<IFacebookAuthService, FacebookAuthService>();
-
+builder.Services.AddScoped<IMessageProducer, MessageProducer>();
 #region AuthConfiguration
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
