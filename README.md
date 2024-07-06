@@ -1,5 +1,14 @@
 # eBooking - Seminarski Razvoj Softvera 2
 
+## Domains
+All of the microservices are assigned to a domain. Every request goes through the nginx which acts as a loadbalancer in-front of the APIs. Nginx strips SSL certificate and routes unencrypted traffic to APIs.
+
+The domains used are as follow:
+
+- ebooking.api.cuteghost.online - Main API
+- messenger.cuteghost.online - Messenger API
+- payment.cuteghost.online - Payment App
+
 ## Credentials
 
 ### Desktop App (Administrator Role)

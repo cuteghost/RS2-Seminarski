@@ -3,20 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{84FDF54D-23A5-4E58-BFEA-F9FA430AAD68}|API\\API.csproj|c:\\users\\dzeva\\desktop\\faks\\rs2\\seminarski\\backend\\ebooking-api\\api\\controllers\\usercontrollers\\administratorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{84FDF54D-23A5-4E58-BFEA-F9FA430AAD68}|API\\API.csproj|solutionrelative:api\\controllers\\usercontrollers\\administratorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5E26ABDF-7481-4B5B-87E4-CE3060744125}|Messenger\\Messenger.csproj|c:\\users\\dzeva\\desktop\\faks\\rs2\\seminarski\\backend\\ebooking-api\\messenger\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5E26ABDF-7481-4B5B-87E4-CE3060744125}|Messenger\\Messenger.csproj|solutionrelative:messenger\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{84FDF54D-23A5-4E58-BFEA-F9FA430AAD68}|API\\API.csproj|c:\\users\\dzeva\\desktop\\faks\\rs2\\seminarski\\backend\\ebooking-api\\api\\controllers\\reservationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{84FDF54D-23A5-4E58-BFEA-F9FA430AAD68}|API\\API.csproj|solutionrelative:api\\controllers\\reservationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{84FDF54D-23A5-4E58-BFEA-F9FA430AAD68}|API\\API.csproj|c:\\users\\dzeva\\desktop\\faks\\rs2\\seminarski\\backend\\ebooking-api\\api\\controllers\\usercontrollers\\customercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{84FDF54D-23A5-4E58-BFEA-F9FA430AAD68}|API\\API.csproj|solutionrelative:api\\controllers\\usercontrollers\\customercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{84FDF54D-23A5-4E58-BFEA-F9FA430AAD68}|API\\API.csproj|c:\\users\\dzeva\\desktop\\faks\\rs2\\seminarski\\backend\\ebooking-api\\api\\controllers\\usercontrollers\\partnercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{84FDF54D-23A5-4E58-BFEA-F9FA430AAD68}|API\\API.csproj|solutionrelative:api\\controllers\\usercontrollers\\partnercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{5E26ABDF-7481-4B5B-87E4-CE3060744125}|Messenger\\Messenger.csproj|c:\\users\\dzeva\\desktop\\faks\\rs2\\seminarski\\backend\\ebooking-api\\messenger\\services\\backgroudworkerservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5E26ABDF-7481-4B5B-87E4-CE3060744125}|Messenger\\Messenger.csproj|solutionrelative:messenger\\services\\backgroudworkerservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -35,53 +27,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "ReservationController.cs",
-              "DocumentMoniker": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\API\\Controllers\\ReservationController.cs",
-              "RelativeDocumentMoniker": "API\\Controllers\\ReservationController.cs",
-              "ToolTip": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\API\\Controllers\\ReservationController.cs",
-              "RelativeToolTip": "API\\Controllers\\ReservationController.cs",
-              "ViewState": "AQIAAGAAAAAAAAAAAAAAAHcAAAAeAAAA",
+              "Title": "BackgroudWorkerService.cs",
+              "DocumentMoniker": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\Messenger\\Services\\BackgroudWorkerService.cs",
+              "RelativeDocumentMoniker": "Messenger\\Services\\BackgroudWorkerService.cs",
+              "ToolTip": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\Messenger\\Services\\BackgroudWorkerService.cs",
+              "RelativeToolTip": "Messenger\\Services\\BackgroudWorkerService.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAB8AAABxAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-07-06T08:20:54.747Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "CustomerController.cs",
-              "DocumentMoniker": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\API\\Controllers\\UserControllers\\CustomerController.cs",
-              "RelativeDocumentMoniker": "API\\Controllers\\UserControllers\\CustomerController.cs",
-              "ToolTip": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\API\\Controllers\\UserControllers\\CustomerController.cs",
-              "RelativeToolTip": "API\\Controllers\\UserControllers\\CustomerController.cs",
-              "ViewState": "AQIAAEUAAAAAAAAAAAAAADkAAAAyAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-07-05T21:17:45.464Z",
+              "WhenOpened": "2024-07-06T13:38:01.714Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "AdministratorController.cs",
-              "DocumentMoniker": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\API\\Controllers\\UserControllers\\AdministratorController.cs",
-              "RelativeDocumentMoniker": "API\\Controllers\\UserControllers\\AdministratorController.cs",
-              "ToolTip": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\API\\Controllers\\UserControllers\\AdministratorController.cs",
-              "RelativeToolTip": "API\\Controllers\\UserControllers\\AdministratorController.cs",
-              "ViewState": "AQIAAH0AAAAAAAAAAAAAAIYAAADVAAAA",
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\Messenger\\Program.cs",
+              "RelativeDocumentMoniker": "Messenger\\Program.cs",
+              "ToolTip": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\Messenger\\Program.cs",
+              "RelativeToolTip": "Messenger\\Program.cs",
+              "ViewState": "AQIAADoAAAAAAAAAAAAowGgAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-07-05T01:39:25.866Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "PartnerController.cs",
-              "DocumentMoniker": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\API\\Controllers\\UserControllers\\PartnerController.cs",
-              "RelativeDocumentMoniker": "API\\Controllers\\UserControllers\\PartnerController.cs",
-              "ToolTip": "C:\\Users\\dzeva\\Desktop\\FAKS\\RS2\\seminarski\\backend\\ebooking-api\\API\\Controllers\\UserControllers\\PartnerController.cs",
-              "RelativeToolTip": "API\\Controllers\\UserControllers\\PartnerController.cs",
-              "ViewState": "AQIAACEAAAAAAAAAAAAAADEAAAAqAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-07-04T13:23:35.319Z",
+              "WhenOpened": "2024-07-06T13:37:25.574Z",
               "EditorCaption": ""
             }
           ]
