@@ -1,6 +1,14 @@
+import 'package:ebooking/models/feedback_model.dart';
+import 'package:ebooking/providers/feedback_provider.dart';
+import 'package:ebooking/screens/customer_screens/history_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class FeedbackPage extends StatefulWidget {
+  final String accommodationID;
+
+  FeedbackPage({required this.accommodationID});
+
   @override
   _FeedbackPageState createState() => _FeedbackPageState();
 }
@@ -57,18 +65,21 @@ class _FeedbackPageState extends State<FeedbackPage> {
               ),
             ),
             SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                // Submit feedback logic
-              },
-              child: Text('Attach a photo'),
-            ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                // Submit feedback logic
-              },
-              child: Text('Submit'),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Provider.of<FeedbackProvider>(context, listen: false).makeFeedback(FeedbackPOST(
+                      rating: rating.toInt(),
+                      satisfaction: enjoyedStay!,
+                      wouldRecommend: recommendUs!,
+                      comment: commentsController.text,
+                      accommodationId: widget.accommodationID
+                    )
+                  );
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ReservationHistoryPage()));
+                },
+                child: Text('Submit'),
+              ),
             ),
           ],
         ),
@@ -89,13 +100,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
         ),
         Row(
           children: [
-            Radio(
+            Radio<bool>(
               value: true,
               groupValue: value,
               onChanged: onChanged,
             ),
             Text('Yes'),
-            Radio(
+            Radio<bool>(
               value: false,
               groupValue: value,
               onChanged: onChanged,

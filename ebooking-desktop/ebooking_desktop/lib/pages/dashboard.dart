@@ -1,7 +1,9 @@
+import 'package:ebooking_desktop/providers/admin_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 // Make sure this import points to your actual drawer.dart file location
 import 'package:ebooking_desktop/widgets/drawer.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(DashboardApp());
@@ -24,38 +26,8 @@ class DashboardApp extends StatelessWidget {
 class DashboardPage extends StatelessWidget {
   // Dummy data for the bar chart
   final List<BarChartGroupData> barGroups = [
-    BarChartGroupData(x: 1, barRods: [BarChartRodData(y: 8)]),
-    BarChartGroupData(x: 2, barRods: [BarChartRodData(y: 8)]),
-    BarChartGroupData(x: 3, barRods: [BarChartRodData(y: 10)]),
-    BarChartGroupData(x: 4, barRods: [BarChartRodData(y: 14)]),
-    BarChartGroupData(x: 5, barRods: [BarChartRodData(y: 15)]),
-    BarChartGroupData(x: 6, barRods: [BarChartRodData(y: 13)]),
-    BarChartGroupData(x: 7, barRods: [BarChartRodData(y: 10)]),
-    BarChartGroupData(x: 8, barRods: [BarChartRodData(y: 8)]),
-    BarChartGroupData(x: 9, barRods: [BarChartRodData(y: 10)]),
-    BarChartGroupData(x: 10, barRods: [BarChartRodData(y: 14)]),
-    BarChartGroupData(x: 11, barRods: [BarChartRodData(y: 15)]),
-    BarChartGroupData(x: 12, barRods: [BarChartRodData(y: 13)]),
-    BarChartGroupData(x: 13, barRods: [BarChartRodData(y: 10)]),BarChartGroupData(x: 0, barRods: [BarChartRodData(y: 8)]),
-    BarChartGroupData(x: 14, barRods: [BarChartRodData(y: 10)]),
-    BarChartGroupData(x: 15, barRods: [BarChartRodData(y: 14)]),
-    BarChartGroupData(x: 16, barRods: [BarChartRodData(y: 15)]),
-    BarChartGroupData(x: 17, barRods: [BarChartRodData(y: 13)]),
-    BarChartGroupData(x: 18, barRods: [BarChartRodData(y: 10)]),BarChartGroupData(x: 0, barRods: [BarChartRodData(y: 8)]),
-    BarChartGroupData(x: 19, barRods: [BarChartRodData(y: 10)]),
-    BarChartGroupData(x: 20, barRods: [BarChartRodData(y: 14)]),
-    BarChartGroupData(x: 21, barRods: [BarChartRodData(y: 15)]),
-    BarChartGroupData(x: 22, barRods: [BarChartRodData(y: 13)]),
-    BarChartGroupData(x: 23, barRods: [BarChartRodData(y: 10)]),BarChartGroupData(x: 0, barRods: [BarChartRodData(y: 8)]),
-    BarChartGroupData(x: 24, barRods: [BarChartRodData(y: 10)]),
-    BarChartGroupData(x: 25, barRods: [BarChartRodData(y: 14)]),
-    BarChartGroupData(x: 26, barRods: [BarChartRodData(y: 15)]),
-    BarChartGroupData(x: 27, barRods: [BarChartRodData(y: 13)]),
-    BarChartGroupData(x: 28, barRods: [BarChartRodData(y: 10)]),
-    BarChartGroupData(x: 29, barRods: [BarChartRodData(y: 10)]),
-    BarChartGroupData(x: 30, barRods: [BarChartRodData(y: 155)]),
+    BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 8)]),
   ];
-
   // Function to build a stat card
   Widget buildStatCard({required IconData icon, required String label, required String value}) {
     return Card(
@@ -75,11 +47,36 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accommodationWithHighestRents = Provider.of<AdminProvider>(context, listen: false).getHighestRent();
+    final accommodationWithLowestRents = Provider.of<AdminProvider>(context, listen: false).getLowestRent();
+    final activeUsers = Provider.of<AdminProvider>(context, listen: false).profiles.length;
+    final activeProperties = Provider.of<AdminProvider>(context, listen: false).accommodations.length;
+    final reservations = Provider.of<AdminProvider>(context, listen: false).reservations;
+    calculateNumberOfRentsPerDay() {
+      final List<BarChartGroupData> barGroups = [];
+      
+      List<DateTime> last30Days = [];
+      DateTime today = DateTime.now();
+      for (int i = 0; i < 30; i++) {
+        last30Days.add(today.subtract(Duration(days: i)));
+      }
+
+      Map<DateTime, int> counts = {};
+
+      for (var day in last30Days) {
+        counts[day] = reservations.where((reservation) => reservation.startDate.isBefore(day.add(Duration(days: 1))) && reservation.endDate.isAfter(day.subtract(Duration(days: 1)))).length;
+      }
+
+      for (int i = 0; i < last30Days.length; i++) {
+        barGroups.add(BarChartGroupData(x: last30Days[i].day, barRods: [BarChartRodData(toY: counts[last30Days[i]] != null ? counts[last30Days[i]]!.toDouble() : 0)]));
+      }
+      return barGroups;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Dashboard'),
       ),
-      drawer: CustomDrawer(), // Ensure you have this CustomDrawer class in your project
+      drawer: CustomDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -93,38 +90,23 @@ class DashboardPage extends StatelessWidget {
               children: <Widget>[
                 buildStatCard(
                   icon: Icons.attach_money,
-                  label: 'Property with Highest # Rents',
-                  value: 'Property A',
+                  label: 'Property with Highest Price',
+                  value: '${accommodationWithHighestRents.name} - ${accommodationWithHighestRents.pricePerNight}',
                 ),
                 buildStatCard(
                   icon: Icons.attach_money,
-                  label: 'Property with Lowest # Rents',
-                  value: 'Property B',
-                ),
-                buildStatCard(
-                  icon: Icons.account_circle,
-                  label: 'Account with Most Rents',
-                  value: 'User XYZ',
+                  label: 'Property with Lowest Price',
+                  value: '${accommodationWithLowestRents.name} - ${accommodationWithLowestRents.pricePerNight}',
                 ),
                 buildStatCard(
                   icon: Icons.person,
                   label: 'Number of Active Users',
-                  value: '1000',
+                  value: activeUsers.toString(),
                 ),
                 buildStatCard(
                   icon: Icons.home,
                   label: 'Number of Active Properties',
-                  value: '200',
-                ),
-                buildStatCard(
-                  icon: Icons.home,
-                  label: 'Number of Active Properties',
-                  value: '200',
-                ),
-                buildStatCard(
-                  icon: Icons.home,
-                  label: 'Number of Active Properties',
-                  value: '200',
+                  value: activeProperties.toString(),
                 ),
               ],
             ),
@@ -133,6 +115,7 @@ class DashboardPage extends StatelessWidget {
               'Trends of Rents for Last Month',
               style: TextStyle(fontSize: 20),
             ),
+            SizedBox(height: 16),
             Container(
               height: 250,
               child: BarChart(
@@ -146,7 +129,7 @@ class DashboardPage extends StatelessWidget {
                     ),
                   ),
                   
-                  barGroups: barGroups,
+                  barGroups: calculateNumberOfRentsPerDay(),
                 ),
               ),
 

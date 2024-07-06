@@ -1,156 +1,45 @@
+import 'package:ebooking/models/reservation_model.dart';
+import 'package:ebooking/providers/reservation_provide.dart';
+import 'package:ebooking/screens/customer_screens/reservation_confirmation_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:ebooking/screens/customer_screens/review_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:webview_flutter/webview_flutter.dart' as webview;
 
-class CheckoutPage extends StatefulWidget {
+class CheckoutScreen extends StatefulWidget {
+  final int numberOfDays;
+  final double pricePerNight;
+  final String accommodationId;
+  final String accommodationName;
+  final ReservationPOST reservation;
+
+  CheckoutScreen ({required this.numberOfDays, required this.pricePerNight, required this.accommodationId, required this.accommodationName, required this.reservation});
   @override
-  _CheckoutPageState createState() => _CheckoutPageState();
+  _CheckoutScreenState createState() => _CheckoutScreenState();
 }
 
-class _CheckoutPageState extends State<CheckoutPage> {
-  bool creditCardSelected = true; // Initial selection
-
+class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
+    Future.delayed(Duration(seconds: 5));
     return Scaffold(
-      appBar: AppBar(title: Text('Checkout')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                CircleIndicator(label: 'Checkout', isChecked: true),
-                CircleIndicator(label: 'Review', isChecked: true),
-              ],
-            ),
-            SizedBox(height: 16.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Choose a payment method',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8.0),
-                Text(
-                  'You won\'t be charged until you review this order in the next step.',
-                  style: TextStyle(
-                    fontSize: 14.0,
-                  ),
-                ),
-                SizedBox(height: 16.0),
-                Row(
-                  children: [
-                    Radio(
-                      value: true,
-                      groupValue: creditCardSelected,
-                      onChanged: (value) {
-                        setState(() {
-                          creditCardSelected = true;
-                        });
-                      },
-                    ),
-                    Text('Credit Card'),
-                    SizedBox(width: 16.0),
-                    Radio(
-                      value: false,
-                      groupValue: creditCardSelected,
-                      onChanged: (value) {
-                        setState(() {
-                          creditCardSelected = false;
-                        });
-                      },
-                    ),
-                    Text('PayPal'),
-                  ],
-                ),
-                if (creditCardSelected) ...[
-                  // Credit Card Form
-                  TextField(
-                    decoration: InputDecoration(labelText: 'Card Number'),
-                  ),
-                  SizedBox(height: 12.0),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(labelText: 'Expiration Date'),
-                        ),
-                      ),
-                      SizedBox(width: 12.0),
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(labelText: 'Security Code'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12.0),
-                  TextField(
-                    decoration: InputDecoration(labelText: 'Name on Card'),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
+      appBar: AppBar(
+        title: Text('PaymentApp'),
       ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ReviewPage(),
-                ),
-              );
-            },
-            child: Text('Confirm and Continue'),
-          ),
-        ),
+      body: webview.WebView(
+        initialUrl: '',
+        javascriptMode: webview.JavascriptMode.unrestricted,
+        onWebViewCreated: (webview.WebViewController webViewController) {
+          webViewController.loadRequest(webview.WebViewRequest(uri: Uri.parse('https://payment.cuteghost.online/paypal?numberOfDays=${widget.numberOfDays}&pricePerNight=${widget.pricePerNight}&accommodationId=${widget.accommodationId}&accommodationName=${widget.accommodationName}'), method: webview.WebViewRequestMethod.get));
+
+        },
+        onPageFinished: (String url) {
+          print('Page finished loading: $url');
+          if (url == 'https://payment.cuteghost.online/Paypal/Success') {
+            Provider.of<ReservationProvider>(context, listen: false).makeReservation(widget.reservation);
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ReservationConfirmationPage(accommodationName: widget.accommodationName)));
+          }
+        },
       ),
-    );
-  }
-}
-
-class CircleIndicator extends StatelessWidget {
-  final String label;
-  final bool isChecked;
-
-  CircleIndicator({required this.label, required this.isChecked});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 24.0,
-          height: 24.0,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isChecked ? Colors.blue : Colors.grey,
-          ),
-          child: Icon(
-            Icons.check,
-            size: 16.0,
-            color: Colors.white,
-          ),
-        ),
-        SizedBox(height: 4.0),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -4,17 +4,20 @@ import 'package:ebooking/models/profile_model.dart';
 import 'package:ebooking/services/profile_service.dart';
 
 class ProfileProvider with ChangeNotifier {
-  Profile? profile;
   final ProfileService profileService;
-
   ProfileProvider({required this.profileService});
+  
+  late Profile _profile;
+  Profile get profile => _profile;
 
   Future<bool> updateProfile({required Profile profile}) async{
     return await profileService.updateProfile(profile);
   }
 
   Future<Profile> getProfile() async {
-    return await profileService.fetchProfile();
+    _profile = await profileService.fetchProfile();
+    notifyListeners();
+    return _profile;
   }
 
   Future<String> updateEmail(String newEmail, String password) async {

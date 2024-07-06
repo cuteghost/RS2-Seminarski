@@ -32,7 +32,7 @@ public class LocationController : Controller
     public IActionResult GetLocations()
     {
         var rawLocations = _locationRepo.GetAll(false, l => l.City, l => l.City.Country);
-        var locations = _mapper.Map<List<LocationGet>>(rawLocations);
+        var locations = _mapper.Map<List<LocationGET>>(rawLocations);
 
         return Json(locations);
     }

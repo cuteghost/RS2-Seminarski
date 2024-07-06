@@ -1,8 +1,11 @@
+import 'package:ebooking/models/accomodation_model.dart';
+import 'package:ebooking/providers/accommodation_provider.dart';
 import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -12,11 +15,32 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
   late LocationData userLocation; // Store user's current location
-
+  Future? _initMapFuture;
+  List<AccommodationGET> _nearbyAccommodations = [];
+  
   @override
   void initState() {
     super.initState();
-    initMap();
+    _initMapFuture = initMap().then((_) {
+      _getNearbyAccommodations().then((value) {
+        setState(() {
+          _nearbyAccommodations = value;
+        });
+      });
+    });
+  }
+
+  Future<List<AccommodationGET>> _getNearbyAccommodations() async {
+    if(userLocation != null){
+      var nearby = await Provider.of<AccommodationProvider>(context, listen: false)
+          .fetchNearbyAccommodations(userLocation.latitude!, userLocation.longitude!);
+     return nearby;
+    }
+    else {
+      print('Current position is null');
+      List<AccommodationGET> empty = [];
+      return empty;
+    }
   }
 
   Future<void> initMap() async {
@@ -35,8 +59,7 @@ class _MapPageState extends State<MapPage> {
       // Permission has been granted
       // Now you can proceed to get the location
     } else {
-      // Permission denied
-      // Handle this case, show a message to the user or request permission again
+      print('Location permission is not granted');
     }
   }
 
@@ -44,7 +67,9 @@ class _MapPageState extends State<MapPage> {
     Location location = Location();
 
     try {
-      return await location.getLocation();
+      LocationData? userLocation = await location.getLocation();
+      print('Got User location $userLocation');
+      return userLocation;
     } catch (e) {
       // Handle the case where location services are disabled or an error occurs
       print('Error getting location: $e');
@@ -54,26 +79,45 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Map'),
-      ),
-      body: GoogleMap(
-        onMapCreated: (controller) {
-          setState(() {
-            mapController = controller;
-          });
-        },
-        initialCameraPosition: CameraPosition(
-          target: userLocation != null
-              ? LatLng(userLocation.latitude!, userLocation.longitude!)
-              : LatLng(37.7749, -122.4194), // Default to San Francisco's coordinates
-          zoom: 12.0,
-        ),
-        // Add markers for user's current location and nearby properties
-        markers: _buildMarkers(),
-      ),
-      bottomNavigationBar: CustomBottomNavigationBar()
+    return FutureBuilder 
+    ( 
+      future: _initMapFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold (
+            appBar: AppBar (
+               title: Text('Map'),
+               ),
+            body: Center (
+              child: CircularProgressIndicator(),
+            ),
+            bottomNavigationBar: CustomBottomNavigationBar()
+          );
+        }
+        else {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Map'),
+            ),
+            body: GoogleMap(
+              onMapCreated: (controller) {
+                setState(() {
+                  mapController = controller;
+                });
+              },
+              initialCameraPosition: CameraPosition(
+                target: userLocation != null
+                    ? LatLng(userLocation.latitude!, userLocation.longitude!)
+                    : LatLng(37.7749, -122.4194), // Default to San Francisco's coordinates
+                zoom: 15.0,
+              ),
+              // Add markers for user's current location and nearby properties
+              markers: _buildMarkers(),
+            ),
+            bottomNavigationBar: CustomBottomNavigationBar()
+          );
+        }
+      },
     );
   }
 
@@ -90,27 +134,22 @@ class _MapPageState extends State<MapPage> {
           userLocation != null ? userLocation.longitude! : -122.4194,
         ),
         infoWindow: InfoWindow(title: 'Your Location'),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        flat: true,
       ),
     );
 
     // Add markers for nearby properties
     // Replace these coordinates with the actual coordinates of nearby properties
-    markers.add(
-      Marker(
-        markerId: MarkerId('property_1'),
-        position: LatLng(37.7751, -122.4196),
-        infoWindow: InfoWindow(title: 'Property 1'),
-      ),
-    );
-
-    markers.add(
-      Marker(
-        markerId: MarkerId('property_2'),
-        position: LatLng(37.7748, -122.4192),
-        infoWindow: InfoWindow(title: 'Property 2'),
-      ),
-    );
+    for(var accommodation in _nearbyAccommodations) {
+      markers.add(
+        Marker(
+          markerId: MarkerId(accommodation.name),
+          position: LatLng(accommodation.location.latitude, accommodation.location.longitude),
+          infoWindow: InfoWindow(title: accommodation.name, snippet: 'Price: \$${accommodation.pricePerNight}'),
+        ),
+      );
+    }
 
     return markers;
   }

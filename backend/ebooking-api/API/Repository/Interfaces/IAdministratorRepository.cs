@@ -6,6 +6,8 @@ namespace Repository.Interfaces;
 public interface IAdministratorRepository
 {
     public Task<IEnumerable<Customer>> GetAllCustomers();
-    Task<object?> GetAllPartners();
+    public Task<object?> GetAllPartners();
+    public Task<Administrator> GetAdminDetails(Guid id, string JWT);
+
 }
 

@@ -1,21 +1,28 @@
 import 'package:ebooking_desktop/pages/countries/manageCountry.dart';
 import 'package:ebooking_desktop/pages/dashboard.dart';
+import 'package:ebooking_desktop/pages/login.dart';
 import 'package:ebooking_desktop/pages/manageProperties.dart';
+import 'package:ebooking_desktop/pages/manageUsers.dart';
+import 'package:ebooking_desktop/pages/messenger_screen.dart';
+import 'package:ebooking_desktop/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CustomDrawer extends StatelessWidget {
+  const CustomDrawer({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          DrawerHeader(
+          const DrawerHeader(
             decoration: BoxDecoration(
               color: Colors.blue,
             ),
             child: Text(
-              'My App',
+              'eBooking Admin',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 24,
@@ -23,49 +30,40 @@ class CustomDrawer extends StatelessWidget {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.home),
-            title: Text('Home'),
+            leading: const Icon(Icons.home),
+            title: const Text('Home'),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context)=> DashboardPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>  DashboardPage()));
             },
           ),
           ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
+            leading: const Icon(Icons.location_city_outlined),
+            title: const Text('Manage Locations'),
+            onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context)=> const ManageCountryPage())); },
+          ),
+          ListTile(
+            leading: const Icon(Icons.supervised_user_circle_rounded),
+            title: const Text('Manage Users'),
+            onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context)=> const UsersManagementPage())); },
+          ),
+          ListTile(
+            leading: const Icon(Icons.house),
+            title: const Text('Manage Properties'),
+            onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context)=> const PropertyManagementPage())); },
+          ),
+          ListTile(
+            leading: const Icon(Icons.message),
+            title: const Text('Messenger'),
             onTap: () {
-              // Add your settings page navigation logic here
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ContactListScreen()));
             },
           ),
           ListTile(
-            leading: Icon(Icons.location_city_outlined),
-            title: Text('Manage Locations'),
-            onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context)=> ManageCountryPage())); },
-          ),
-          ListTile(
-            leading: Icon(Icons.supervised_user_circle_rounded),
-            title: Text('Manage Users'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: Icon(Icons.house),
-            title: Text('Manage Properties'),
-            onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context)=> PropertyManagementPage())); },
-          ),
-          ListTile(
-            leading: Icon(Icons.report),
-            title: Text('Reports'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: Icon(Icons.message),
-            title: Text('Messenger'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Logout'),
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
             onTap: () {
-              // Add your logout logic here
+              Provider.of<AuthProvider>(context, listen: false).logout();
+              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
             },
           ),
         ],

@@ -9,10 +9,56 @@ services:
       - "443:443"
     depends_on:
       - webapi
+      - messenger
+      - paymentapp
+
   webapi:
     build:
       context: ./ebooking-api
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-API
+    environment:
+      DB_SERVER: db
+      DB_NAME: 170171
+      DB_USER: sa
+      DB_PASSWORD: Lekovitobilje22!
+      JWT_KEY: aaaaaaaaaaaaaaaaasssssssssssssssssssssssswwwwwwwwwwwwwwwwwwwwwwww
+      JWT_ISSUER: localhost
+      JWT_AUDIENCE: localhost
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: user
+      RABBITMQ_PASSWORD: mypass
+      RABBITMQ_VIRTUALHOST: /
+      RABBITMQ_PORT: 5672
+    depends_on:
+      - db
+      - rabbitmq
+
+  messenger:
+    build:
+      context: ./ebooking-api
+      dockerfile: Dockerfile-Messenger
+    environment:
+      DB_SERVER: db
+      DB_NAME: 170171
+      DB_USER: sa
+      DB_PASSWORD: Lekovitobilje22!
+      JWT_KEY: aaaaaaaaaaaaaaaaasssssssssssssssssssssssswwwwwwwwwwwwwwwwwwwwwwww
+      JWT_ISSUER: localhost
+      JWT_AUDIENCE: localhost
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: user
+      RABBITMQ_PASSWORD: mypass
+      RABBITMQ_VIRTUALHOST: /
+      RABBITMQ_PORT: 5672
+    depends_on:
+      - db
+      - webapi
+      - rabbitmq
+  
+  paymentapp:
+    build:
+      context: ./ebooking-api
+      dockerfile: Dockerfile-PaymentApp
     environment:
       DB_SERVER: db
       DB_NAME: 170171
@@ -23,17 +69,21 @@ services:
       JWT_AUDIENCE: localhost
     depends_on:
       - db
+      - webapi
+      - rabbitmq
 
-
-  # rabbitmq:
-  #   image: rabbitmq:3-management
-  #   container_name: rabbitmq
-  #   restart: unless-stopped
-  #   environment:
-  #     - RABBITMQ_DEFAULT_USER=user
-  #     - RABBITMQ_DEFAULT_PASS=mypass
-  #   ports:
-  #     - "5672:5672"
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=mypass
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    expose:
+      - 5672
 
   db:
     image: mcr.microsoft.com/mssql/server:2019-latest
@@ -43,7 +93,10 @@ services:
     ports:
       - "7777:1433"
     volumes:
-      - mssql_data:/var/opt/mssql
-
+      - ./backup:/var/opt/mssql/backup
+      - ./init-scripts:/var/opt/mssql/scripts
+    entrypoint: /bin/bash -c "/var/opt/mssql/scripts/restore.sh & /opt/mssql/bin/sqlservr"
+    
 volumes:
   mssql_data:
+

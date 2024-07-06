@@ -1,5 +1,6 @@
 
 import 'dart:ffi';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:ebooking/models/accomodation_model.dart';
@@ -62,7 +63,7 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
       resultList = await AssetPicker.pickAssets(
         context,
         pickerConfig: const AssetPickerConfig(
-          maxAssets: 10,
+          maxAssets: 20,
           requestType: RequestType.image,
           selectedAssets: [],
         ),
@@ -75,8 +76,10 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
 
     setState(() {
       images = resultList;
+      
     });
 }
+
   
   
   @override
@@ -208,7 +211,7 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                   ),
                 ),
                 SizedBox(height: 10),
-                SingleChildScrollView(
+                Container(
                   child: images.isNotEmpty ?
                     Container(
                       alignment: Alignment.center,
@@ -327,22 +330,23 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                       child: Text('Submit'),
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          Provider.of<LocationProvider>(context, listen: false).craftGeoCode('${_addressController.text} ${_selectedCity?.name} ${_selectedCountry?.name}').then((value) {
+                          Provider.of<LocationProvider>(context, listen: false).craftGeoCode('${_addressController.text} ${_selectedCity?.name} ${_selectedCountry?.name}').then((value) async {
                             Location locationToPass = Location(
                               latitude: value[0],
                               longitude: value[1],
                               address: _addressController.text,
                               cityId: _selectedCity?.id ?? '',
                             );
-                            if (locationToPass != null) {
-                              Accommodation accommodation = Accommodation(
+                              AccommodationImages accommodationImages = AccommodationImages(
+                                images: await Future.wait(images.map((e) async => await e.file).toList())
+                                );
+                              AccommodationPOST accommodation = AccommodationPOST(
+                                images: accommodationImages,
                                 name: _nameController.text,
                                 pricePerNight: double.parse(_priceController.text),
                                 description: _descriptionController.text,
                                 location: locationToPass,
                                 typeOfAccommodation: 1,
-                                imageThumb: '',
-                                reviewScore: 0,
                                 accommodationDetails: AccommodationDetails(
                                   numberOfBeds: int.parse(_accommodationDetailsNumBeds.text),
                                   bathub: _accommodationDetails['Bathtub']!,
@@ -360,14 +364,12 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                                   soundProof: _accommodationDetails['Soundproof']!,
                                   breakfast: _accommodationDetails['Breakfast']!,
                                 ),
-                                image: '',
-                                reviews: '',
                                 status: true,
                               );
                               Provider.of<AccommodationProvider>(context, listen: false).addAccommodation(accommodation);
                               // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PartnerProfilePage()));
                                 
-                              }
+                              
                           });
                         }
                       },

@@ -31,17 +31,13 @@ namespace Database.Migrations
                     b.Property<Guid?>("AccommodationDetailsId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AccommodationImagesId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar");
-
-                    b.Property<byte[]>("Image")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<byte[]>("ImageThumb")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -63,10 +59,6 @@ namespace Database.Migrations
                     b.Property<decimal>("ReviewScore")
                         .HasColumnType("decimal(3,1)");
 
-                    b.Property<string>("Reviews")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
@@ -76,6 +68,8 @@ namespace Database.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AccommodationDetailsId");
+
+                    b.HasIndex("AccommodationImagesId");
 
                     b.HasIndex("LocationId");
 
@@ -143,6 +137,85 @@ namespace Database.Migrations
                     b.ToTable("AccommodationDetails");
                 });
 
+            modelBuilder.Entity("Models.Domain.AccommodationImages", b =>
+                {
+                    b.Property<Guid>("AccommodationImagesId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("Image1")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image10")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image11")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image12")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image13")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image14")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image15")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image16")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image17")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image18")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image19")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image2")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image20")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image3")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image4")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image5")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image6")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image7")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image8")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Image9")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("AccommodationImagesId");
+
+                    b.ToTable("AccommodationImages");
+                });
+
             modelBuilder.Entity("Models.Domain.Administrator", b =>
                 {
                     b.Property<Guid>("Id")
@@ -168,6 +241,27 @@ namespace Database.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Administrators");
+                });
+
+            modelBuilder.Entity("Models.Domain.Chat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("User1Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("User2Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("User1Id");
+
+                    b.HasIndex("User2Id");
+
+                    b.ToTable("Chats");
                 });
 
             modelBuilder.Entity("Models.Domain.City", b =>
@@ -260,6 +354,37 @@ namespace Database.Migrations
                     b.ToTable("Locations");
                 });
 
+            modelBuilder.Entity("Models.Domain.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("Models.Domain.Partner", b =>
                 {
                     b.Property<Guid>("Id")
@@ -293,6 +418,79 @@ namespace Database.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Partners");
+                });
+
+            modelBuilder.Entity("Models.Domain.Reservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccommodationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRated")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("NumberOfGuests")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccommodationId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("Reservations");
+                });
+
+            modelBuilder.Entity("Models.Domain.Review", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccommodationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Satisfaction")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("WouldRecommend")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccommodationId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("Models.Domain.User", b =>
@@ -360,6 +558,10 @@ namespace Database.Migrations
                         .WithMany()
                         .HasForeignKey("AccommodationDetailsId");
 
+                    b.HasOne("Models.Domain.AccommodationImages", "AccommodationImages")
+                        .WithMany()
+                        .HasForeignKey("AccommodationImagesId");
+
                     b.HasOne("Models.Domain.Location", "Location")
                         .WithMany()
                         .HasForeignKey("LocationId");
@@ -371,6 +573,8 @@ namespace Database.Migrations
                         .IsRequired();
 
                     b.Navigation("AccommodationDetails");
+
+                    b.Navigation("AccommodationImages");
 
                     b.Navigation("Location");
 
@@ -392,6 +596,25 @@ namespace Database.Migrations
                     b.Navigation("Creator");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Domain.Chat", b =>
+                {
+                    b.HasOne("Models.Domain.User", "User1")
+                        .WithMany()
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Models.Domain.User", "User2")
+                        .WithMany()
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
                 });
 
             modelBuilder.Entity("Models.Domain.City", b =>
@@ -425,6 +648,25 @@ namespace Database.Migrations
                     b.Navigation("City");
                 });
 
+            modelBuilder.Entity("Models.Domain.Message", b =>
+                {
+                    b.HasOne("Models.Domain.Chat", "Chat")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Models.Domain.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("Models.Domain.Partner", b =>
                 {
                     b.HasOne("Models.Domain.Country", "Country")
@@ -440,6 +682,49 @@ namespace Database.Migrations
                     b.Navigation("Country");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Domain.Reservation", b =>
+                {
+                    b.HasOne("Models.Domain.Accommodation", "accommodation")
+                        .WithMany()
+                        .HasForeignKey("AccommodationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Models.Domain.Customer", "customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("accommodation");
+
+                    b.Navigation("customer");
+                });
+
+            modelBuilder.Entity("Models.Domain.Review", b =>
+                {
+                    b.HasOne("Models.Domain.Accommodation", "Accommodation")
+                        .WithMany()
+                        .HasForeignKey("AccommodationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Models.Domain.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Accommodation");
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("Models.Domain.Chat", b =>
+                {
+                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

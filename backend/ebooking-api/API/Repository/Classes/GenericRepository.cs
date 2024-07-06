@@ -109,23 +109,35 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class, ISoft
         return null;
     }
 
-    public async Task<bool> Update(Expression<Func<T, bool>> predicate, T model)
+    public async Task<bool> Update(Expression<Func<T, bool>> predicate, T model, params Expression<Func<T, object>>[] includeProperties)
+{
+    try
     {
-        try
+        // Retrieve the entity you want to update with tracking
+        IQueryable<T> query = _entity;
+        foreach (var includeProperty in includeProperties)
         {
-            var entityToUpdate = await _entity.AsNoTracking().SingleOrDefaultAsync(predicate);
-            if (entityToUpdate != null)
-            {
-                _entity.Update(model);
-                _ctx.SaveChanges();
-                return true;
-            }
-            return false;
+            query = query.Include(includeProperty);
         }
-        catch (Exception)
-        {
+        var entityToUpdate = await query.SingleOrDefaultAsync(predicate);  // Remove AsNoTracking to track changes
 
-            return false;
+        if (entityToUpdate != null)
+        {
+            // Update the entity's properties with values from the model
+            _ctx.Entry(entityToUpdate).CurrentValues.SetValues(model);
+            
+            // If you use complex properties and collections, you might need further logic to update those
+            _ctx.Entry(entityToUpdate).State = EntityState.Modified;
+
+            await _ctx.SaveChangesAsync();
+            return true;
         }
+        return false;
     }
+    catch (Exception)
+    {
+        return false;
+    }
+}
+
 }

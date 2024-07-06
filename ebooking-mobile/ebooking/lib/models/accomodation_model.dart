@@ -1,41 +1,44 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:ebooking/models/location_model.dart';
 
-class Accommodation {
+class AccommodationGET {
+  String id;
   String name;
   bool status;
   int typeOfAccommodation;
   double pricePerNight;
-  String imageThumb;
   String description;
   double reviewScore;
   Location location;
   AccommodationDetails accommodationDetails;
-  String image;
   String reviews;
+  AccommodationImages images;
 
-  Accommodation({
-    required this.name,
+  AccommodationGET({
+    required this.id,
     required this.status,
+    required this.reviews,
+    required this.name,
     required this.typeOfAccommodation,
     required this.pricePerNight,
-    required this.imageThumb,
     required this.description,
     required this.reviewScore,
     required this.location,
     required this.accommodationDetails,
-    required this.image,
-    required this.reviews,
+    required this.images,
   });
 
-  factory Accommodation.fromJson(Map<String, dynamic> json) {
-    return Accommodation(
+  factory AccommodationGET.fromJson(Map<String, dynamic> json) {
+    return AccommodationGET(
+      id: json['id'] as String,
       name: json['name'] as String,
       status: json['status'] as bool,
       typeOfAccommodation: json['typeOfAccommodation'] as int,
-      pricePerNight: json['pricePerNight'] as double,
-      imageThumb: json['imageThumb'] as String,
+      pricePerNight: (json['pricePerNight'] as num).toDouble(),
       description: json['description'] as String,
-      reviewScore: json['reviewScore'] as double,
+      reviewScore: (json['reviewScore'] as num).toDouble(),
       location: Location.fromJson(json['location'] as Map<String, dynamic>),
       accommodationDetails: AccommodationDetails(
         numberOfBeds: json['accommodationDetails']['numberOfBeds'] as int,
@@ -54,24 +57,24 @@ class Accommodation {
         soundProof: json['accommodationDetails']['soundProof'] as bool,
         breakfast: json['accommodationDetails']['breakfast'] as bool,
       ),
-      image: json['image'] as String,
-      reviews: json['reviews'] as String,
+      reviews: json['reviews'] != null ? json['reviews'] as String : '',
+      images: json['accommodationImages'] != null ? AccommodationImages.fromJson(json['accommodationImages'] as Map<String, dynamic>) : AccommodationImages(images: []),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'name': name,
+      'id': id,
       'status': status,
+      'name': name,
       'typeOfAccommodation': typeOfAccommodation,
       'pricePerNight': pricePerNight,
-      'imageThumb': imageThumb,
       'description': description,
       'reviewScore': reviewScore,
       'location': location.toJson(),
       'accommodationDetails': accommodationDetails.toJson(),
-      'image': image,
       'reviews': reviews,
+      'accommodationImages': images.toJson(),
     };
   }
 }
@@ -128,6 +131,117 @@ class AccommodationDetails {
       'spaTub': spaTub,
       'soundProof': soundProof,
       'breakfast': breakfast,
+    };
+  }
+}
+
+class AccommodationImages {
+  List<File?> images;
+
+  AccommodationImages({required this.images});
+
+  factory AccommodationImages.fromJson(Map<String, dynamic> json) {
+    return AccommodationImages(
+      images: json.keys
+        .where((key) => key != 'id' && json[key] != null && json[key] as String != '')
+        .map((key) => base64ToImage(json[key] as String, key))
+        .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    List<String> imagesBase64 = [];
+    images.forEach((element) { 
+      imagesBase64.add(imageToBase64(element!));
+    });
+    Map<String, dynamic> imagesMap = {};
+    for (int i = 0; i < imagesBase64.length; i++) {
+      imagesMap['image${i + 1}'] = imagesBase64[i];
+    }
+    return imagesMap;
+  }
+
+  static String imageToBase64(File image) {
+    List<int> imageBytes = image.readAsBytesSync();
+    String base64image = base64Encode(imageBytes);
+    return base64image;
+  }
+
+  static File base64ToImage(String base64image, String key) {
+    List<int> imageBytes = base64Decode(base64image);
+    Directory tempDir = Directory.systemTemp.createTempSync('accommodationImages');
+    File imageFile = File('${tempDir.path}/accommodationImage$key.jpg');
+    imageFile.writeAsBytesSync(imageBytes);
+    return imageFile;
+  }
+}
+
+class AccommodationPATCH {
+  String id;
+  String name;
+  bool status;
+  int typeOfAccommodation;
+  double pricePerNight;
+  String description;
+  AccommodationDetails accommodationDetails;
+  AccommodationImages images;
+
+  AccommodationPATCH({
+    required this.id,
+    required this.status,
+    required this.name,
+    required this.typeOfAccommodation,
+    required this.pricePerNight,
+    required this.description,
+    required this.accommodationDetails,
+    required this.images,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'status': status,
+      'name': name,
+      'typeOfAccommodation': typeOfAccommodation,
+      'pricePerNight': pricePerNight,
+      'description': description,
+      'accommodationDetails': accommodationDetails.toJson(),
+      'accommodationImages': images.toJson(),
+    };
+  }
+}
+
+class AccommodationPOST {
+  String name;
+  bool status;
+  int typeOfAccommodation;
+  double pricePerNight;
+  String description;
+  Location location;
+  AccommodationDetails accommodationDetails;
+  AccommodationImages images;
+
+  AccommodationPOST({
+    required this.status,
+    required this.name,
+    required this.typeOfAccommodation,
+    required this.pricePerNight,
+    required this.description,
+    required this.location,
+    required this.accommodationDetails,
+    required this.images,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'status': status,
+      'name': name,
+      'typeOfAccommodation': typeOfAccommodation,
+      'pricePerNight': pricePerNight,
+      'description': description,
+      'location': location.toJson(),
+      'accommodationDetails': accommodationDetails.toJson(),
+      'accommodationImages': images.toJson(),
     };
   }
 }

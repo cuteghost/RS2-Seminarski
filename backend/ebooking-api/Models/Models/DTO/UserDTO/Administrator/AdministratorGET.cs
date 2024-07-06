@@ -5,18 +5,18 @@ namespace Models.DTO.UserDTO.Administrator;
 public class AdministratorGET
 {
     
-    public Guid Id { get; set; }
+    public Guid userId { get; set; }
     public Role Role { get; set; }
-    public string DisplayName { get; set; } = string.Empty;
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public DateTime BirthDate { get; set; }
-    public Gender Gender { get; set; }
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public byte[]? Image { get; set; }
+    public string userDisplayName { get; set; } = string.Empty;
+    public string userFirstName { get; set; } = string.Empty;
+    public string userLastName { get; set; } = string.Empty;
+    public DateTime userBirthDate { get; set; }
+    public Gender userGender { get; set; }
+    public string userEmail { get; set; } = string.Empty;
+    public string userPassword { get; set; } = string.Empty;
+    public byte[]? userImage { get; set; }
+    public string userSocialLink { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
-    public virtual Location Location { get; set; }
 }
 
 

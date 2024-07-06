@@ -7,7 +7,7 @@ using Models.DTO.UserDTO;
 using Models.DTO.UserDTO.Customer;
 using Models.Models.DTO.UserDTO;
 using Repository.Interfaces;
-using Services.TokenHandlerService;
+using Authentication.Services.TokenHandlerService;
 
 namespace API.Controllers.UserControllers;
 

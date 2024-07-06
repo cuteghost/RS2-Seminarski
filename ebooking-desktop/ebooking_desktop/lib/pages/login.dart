@@ -1,62 +1,79 @@
 import 'package:ebooking_desktop/pages/dashboard.dart';
+import 'package:ebooking_desktop/providers/admin_provider.dart';
+import 'package:ebooking_desktop/providers/auth_provider.dart';
+import 'package:ebooking_desktop/providers/message_provider.dart';
+import 'package:ebooking_desktop/providers/profile_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(LoginApp());
-}
+class LoginPage extends StatelessWidget {
+  LoginPage({super.key});
 
-class LoginApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: LoginBox(),
-        ),
-      ),
-    );
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  Future<void> _signIn(BuildContext context) async {
+    if (!context.mounted) return;
+
+    final authService = Provider.of<AuthProvider>(context, listen: false);
+    final messageProvider = Provider.of<MessageProvider>(context, listen: false);
+    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+    final adminProvider = Provider.of<AdminProvider>(context, listen: false);
+
+    bool loggedIn = await authService.login(_emailController.text, _passwordController.text);
+    if (!loggedIn) {
+      // Handle login failure (e.g., show an error message)
+      return;
+    }
+
+    await messageProvider.startSignalR();
+    await messageProvider.getChats();
+    for (var chat in messageProvider.chats) {
+      await messageProvider.getMessages(chat.Id);
+      await messageProvider.addToChat(chat.Id);
+    }
+    await profileProvider.getProfile();
+    await adminProvider.getAccommodations();
+    await adminProvider.getProfiles();
+    await adminProvider.getReservations();
+
+    // Navigate to DashboardPage on successful login
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardPage()));
   }
-}
 
-class LoginBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 300.0,
-      padding: EdgeInsets.all(20.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            decoration: InputDecoration(
-              labelText: 'Email',
+    return Scaffold(
+      body: Center(
+        child: Container(
+        width: 300.0,
+        padding: const EdgeInsets.all(20.0),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              decoration: const InputDecoration(labelText: 'Email'),
+              controller: _emailController,
             ),
-          ),
-          SizedBox(height: 10.0),
-          TextField(
-            obscureText: true,
-            decoration: InputDecoration(
-              labelText: 'Password',
+            const SizedBox(height: 10.0),
+            TextField(
+              obscureText: true,
+              decoration: const InputDecoration(labelText: 'Password'),
+              controller: _passwordController,
             ),
-          ),
-          SizedBox(height: 20.0),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DashboardPage(),
-                ),
-              );
-            },
-            child: Text('Sign In'),
-          ),
-        ],
-      ),
-    );
+            const SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: () async => await _signIn(context),
+              child: const Text('Sign In'),
+            ),
+          ],
+        ),
+      )
+    )
+  );  
   }
 }

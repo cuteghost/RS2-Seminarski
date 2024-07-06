@@ -4,7 +4,7 @@ using Models.Domain;
 using Models.DTO.GoogleDTO;
 using Models.Models.Domain;
 using Repository.Interfaces;
-using Services.TokenHandlerService;
+using Authentication.Services.TokenHandlerService;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using static Google.Apis.Auth.GoogleJsonWebSignature;

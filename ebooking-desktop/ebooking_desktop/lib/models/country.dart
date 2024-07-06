@@ -1,5 +1,5 @@
 class Country {
-  final int id;
+  final String id;
   final String name;
   Country({required this.name, required this.id});
 

@@ -1,4 +1,4 @@
-﻿using API.Models.DTO.AccommodationDetailsDTO;
+﻿using Models.DTO.AccommodationDetailsDTO;
 using Models.Domain;
 
 namespace Profiles;

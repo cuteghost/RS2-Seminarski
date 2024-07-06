@@ -1,6 +1,6 @@
 ﻿namespace Models.DTO.LocationDTO;
 
-public class LocationGet
+public class LocationGET
 {
     public double Longitude { get; set; }
     public double Latitude { get; set; }

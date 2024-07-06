@@ -207,3 +207,7 @@ C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\backend\ebooking-api\API\bin\Debug\ne
 C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\backend\ebooking-api\API\bin\Debug\net7.0\Google.Apis.Core.dll
 C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\backend\ebooking-api\API\bin\Debug\net7.0\System.Management.dll
 C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\backend\ebooking-api\API\bin\Debug\net7.0\runtimes\win\lib\net7.0\System.Management.dll
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\backend\ebooking-api\API\bin\Debug\net7.0\Authentication.dll
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\backend\ebooking-api\API\bin\Debug\net7.0\Authentication.pdb
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\backend\ebooking-api\API\bin\Debug\net7.0\EasyNetQ.dll
+C:\Users\dzeva\Desktop\FAKS\RS2\seminarski\backend\ebooking-api\API\bin\Debug\net7.0\RabbitMQ.Client.dll
