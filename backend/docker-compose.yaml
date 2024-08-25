@@ -86,17 +86,11 @@ services:
       - 5672
 
   db:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    environment:
-      ACCEPT_EULA: Y
-      SA_PASSWORD: "Lekovitobilje22!"
+    build:
+      context: ./database
+      dockerfile: Dockerfile-Database
     ports:
       - "7777:1433"
-    volumes:
-      - ./backup:/var/opt/mssql/backup
-      - ./init-scripts:/var/opt/mssql/scripts
-    entrypoint: /bin/bash -c "/var/opt/mssql/scripts/restore.sh & /opt/mssql/bin/sqlservr"
-    
 volumes:
   mssql_data:
 
