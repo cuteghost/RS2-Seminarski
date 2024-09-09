@@ -1,4 +1,3 @@
-import 'package:ebooking/models/message_model.dart';
 import 'package:ebooking/providers/message_provider.dart';
 import 'package:ebooking/providers/profile_provider.dart';
 import 'package:ebooking/screens/customer_screens/history_screen.dart';
@@ -18,13 +17,21 @@ class CustomBottomNavigationBar extends StatefulWidget {
 }
 
 class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
-  final List<Widget> _pages = [
-    ContactListScreen(),
-    ReservationHistoryPage(),
-    SuggestionsForYou(),
-    ProfilePage(),
-    MapPage(),
-  ];
+  final List<Widget> _pages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    var profile = Provider.of<ProfileProvider>(context, listen: false).profile;
+    _pages.addAll([
+      ContactListScreen(),
+      ReservationHistoryPage(),
+      SuggestionsScreen(customerId: profile.customerId),  // Pass userId here
+      ProfilePage(),
+      MapPage(),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     var profile = Provider.of<ProfileProvider>(context, listen: false).profile;
@@ -48,7 +55,6 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
             child: IconTheme(
               data: IconThemeData(color: Theme.of(context).colorScheme.onPrimary, size: 25, opticalSize: 20, ),
               child: Row(
-                
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   SizedBox(width: 20),
@@ -59,7 +65,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
                     navigateToPage(context, ReservationHistoryPage());
                   }),
                   CustomIconButton(icon: Icon(Icons.flag), label: 'Suggestions', onPressed: () {
-                    navigateToPage(context, SuggestionsForYou());
+                    navigateToPage(context, SuggestionsScreen(customerId: profile.id));  // Pass userId here
                   }),
                   CustomIconButton(icon: Icon(Icons.person), label: 'Profile', onPressed: () {
                     navigateToPage(context, ProfilePage());

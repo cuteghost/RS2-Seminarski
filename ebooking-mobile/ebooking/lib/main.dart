@@ -5,6 +5,7 @@ import 'package:ebooking/providers/message_provider.dart';
 import 'package:ebooking/providers/profile_provider.dart';
 import 'package:ebooking/providers/reservation_provide.dart';
 import 'package:ebooking/providers/search_provider.dart';
+import 'package:ebooking/providers/suggestion_provider.dart';
 import 'package:ebooking/screens/partner_screens/partner_discover_screen.dart';
 import 'package:ebooking/services/accommodation_service.dart';
 import 'package:ebooking/services/auth_service.dart';
@@ -13,6 +14,7 @@ import 'package:ebooking/services/profile_service.dart';
 import 'package:ebooking/services/reservation_service.dart';
 import 'package:ebooking/services/search_service.dart';
 import 'package:ebooking/services/signalr_service.dart';
+import 'package:ebooking/services/suggestions_service.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking/screens/login_screen.dart';
 import 'package:ebooking/screens/customer_screens/discover_screen.dart';
@@ -32,9 +34,13 @@ void main() {
       ChangeNotifierProvider(create: (context) => MessageProvider(signalRService: SignalRService(secureStorage: secureStorage))),
       ChangeNotifierProvider(create: (context) => FeedbackProvider(feedbackService: FeedbackService(secureStorage: secureStorage))),
       ChangeNotifierProvider(create:(context) => SearchProvider(searchService: SearchService(secureStorage: secureStorage)),),
+      ChangeNotifierProvider(create:(context) => SuggestionProvider(suggestionService: SuggestionsService()),),
     ],
     child: MyApp(),
   ));
+}
+
+class SuggestionService {
 }
 
 class MyApp extends StatelessWidget {

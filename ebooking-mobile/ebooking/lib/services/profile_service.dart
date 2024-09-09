@@ -16,6 +16,7 @@ class ProfileService {
       Uri.parse('${config.AppConfig.baseUrl}/api/Customer/details'), 
       headers: {'Authorization': 'Bearer $token'}   
     );
+    print('Profile Response: ${response.body}');
      if (response.statusCode == 200) {
       return Profile.fromJson(jsonDecode(response.body));
     }

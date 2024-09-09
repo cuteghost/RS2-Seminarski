@@ -104,26 +104,26 @@ class _AccommodationDetailsScreenState extends State<AccommodationDetailsScreen>
                   ),
                   SizedBox(height: 16.0),
                   // Recommended Sites
-                  Text(
-                    'Recommended Sites to Visit',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 8.0),
+                  // Text(
+                  //   'Recommended Sites to Visit',
+                  //   style: TextStyle(
+                  //     fontSize: 18.0,
+                  //     fontWeight: FontWeight.bold,
+                  //   ),
+                  // ),
+                  // SizedBox(height: 8.0),
                   // Two Recommended Sites
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      RecommendedSiteCard(
-                          title: 'Site 1',
-                          imagePath: 'assets/images/Image.jpeg'),
-                      RecommendedSiteCard(
-                          title: 'Site 2',
-                          imagePath: 'assets/images/Image.jpeg'),
-                    ],
-                  ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //   children: [
+                  //     RecommendedSiteCard(
+                  //         title: 'Site 1',
+                  //         imagePath: 'assets/images/Image.jpeg'),
+                  //     RecommendedSiteCard(
+                  //         title: 'Site 2',
+                  //         imagePath: 'assets/images/Image.jpeg'),
+                  //   ],
+                  // ),
                 ],
               ),
             ),
@@ -135,35 +135,35 @@ class _AccommodationDetailsScreenState extends State<AccommodationDetailsScreen>
   }
 }
 
-class RecommendedSiteCard extends StatelessWidget {
-  final String title;
-  final String imagePath;
+// class RecommendedSiteCard extends StatelessWidget {
+//   final String title;
+//   final String imagePath;
 
-  RecommendedSiteCard({required this.title, required this.imagePath});
+//   RecommendedSiteCard({required this.title, required this.imagePath});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 150.0,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Recommended Site Image
-          Container(
-            height: 100.0,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              image: DecorationImage(
-                image: AssetImage(imagePath),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          SizedBox(height: 8.0),
-          // Recommended Site Title
-          Text(title),
-        ],
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       width: 150.0,
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           // Recommended Site Image
+//           Container(
+//             height: 100.0,
+//             decoration: BoxDecoration(
+//               borderRadius: BorderRadius.circular(8.0),
+//               image: DecorationImage(
+//                 image: AssetImage(imagePath),
+//                 fit: BoxFit.cover,
+//               ),
+//             ),
+//           ),
+//           SizedBox(height: 8.0),
+//           // Recommended Site Title
+//           Text(title),
+//         ],
+//       ),
+//     );
+//   }
+// }

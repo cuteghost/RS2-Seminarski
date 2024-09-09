@@ -4,6 +4,7 @@ import 'package:ebooking/screens/customer_screens/reservation_confirmation_scree
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart' as webview;
+import 'package:ebooking/config/config.dart' as config;
 
 class CheckoutScreen extends StatefulWidget {
   final int numberOfDays;
@@ -29,12 +30,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         initialUrl: '',
         javascriptMode: webview.JavascriptMode.unrestricted,
         onWebViewCreated: (webview.WebViewController webViewController) {
-          webViewController.loadRequest(webview.WebViewRequest(uri: Uri.parse('https://payment.cuteghost.online/paypal?numberOfDays=${widget.numberOfDays}&pricePerNight=${widget.pricePerNight}&accommodationId=${widget.accommodationId}&accommodationName=${widget.accommodationName}'), method: webview.WebViewRequestMethod.get));
+          webViewController.loadRequest(webview.WebViewRequest(uri: Uri.parse('${config.AppConfig.paymentUrl}/paypal?numberOfDays=${widget.numberOfDays}&pricePerNight=${widget.pricePerNight}&accommodationId=${widget.accommodationId}&accommodationName=${widget.accommodationName}'), method: webview.WebViewRequestMethod.get));
 
         },
         onPageFinished: (String url) {
           print('Page finished loading: $url');
-          if (url == 'https://payment.cuteghost.online/Paypal/Success') {
+          if (url == '${config.AppConfig.paymentUrl}/Paypal/Success') {
             Provider.of<ReservationProvider>(context, listen: false).makeReservation(widget.reservation);
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ReservationConfirmationPage(accommodationName: widget.accommodationName)));
           }

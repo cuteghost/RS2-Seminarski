@@ -1,89 +1,75 @@
+import 'package:ebooking/providers/suggestion_provider.dart';
+import 'package:ebooking/screens/customer_screens/accommodation_details_screen.dart';
+import 'package:ebooking/widgets/suggestion_container.dart';
 import 'package:flutter/material.dart';
+import 'package:ebooking/services/suggestions_service.dart';
+import 'package:provider/provider.dart';
 
-class SuggestionsForYou extends StatefulWidget {
+class SuggestionsScreen extends StatefulWidget {
+  final String customerId;
+
+  SuggestionsScreen({required this.customerId});
+
   @override
-  _SuggestionsForYouState createState() => _SuggestionsForYouState();
+  _SuggestionsScreenState createState() => _SuggestionsScreenState();
 }
 
-class _SuggestionsForYouState extends State<SuggestionsForYou> {
-  List<Accommodation> suggestions = [
-    Accommodation(
-      name: 'Grand Hotel',
-      rating: 9.1,
-      type: 'Luxury',
-      reviews: 908,
-      isOpen: true,
-    ),
-    Accommodation(
-      name: 'Beach Resort',
-      rating: 8.6,
-      type: 'Tropical Getaway',
-      reviews: 420,
-      isOpen: true,
-    ),
-    Accommodation(
-      name: 'City',
-      rating: 8.2,
-      type: 'Urban Living',
-      reviews: 811,
-      isOpen: true,
-    ),
-  ];
+class _SuggestionsScreenState extends State<SuggestionsScreen> {
+  late Future<List<dynamic>> _recommendations;
+
+  @override
+  void initState() {
+    super.initState();
+    _recommendations = Provider.of<SuggestionProvider>(context, listen: false).suggest(widget.customerId);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Suggestions For You'),
+        title: Text('Your Suggestions'),
       ),
-      body: ListView.builder(
-        itemCount: suggestions.length,
-        itemBuilder: (context, index) {
-          return AccommodationCard(suggestions[index]);
+      body: FutureBuilder<List<dynamic>>(
+        future: _recommendations,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Failed to load recommendations'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No recommendations available'));
+          } else {
+            var recommendations = snapshot.data!;
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: recommendations.length,
+                    itemBuilder: (context, index) {
+                      var accommodation = recommendations[index];
+                      return SuggestionContainer(
+                        image: accommodation.images.images[0]!,
+                        propertyName: accommodation.name,
+                        pricePerNight: accommodation.pricePerNight,
+                        reviewScore: accommodation.reviewScore,
+                        address: accommodation.location.address,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AccommodationDetailsScreen(accommodation: accommodation),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
         },
       ),
     );
   }
-}
-
-class AccommodationCard extends StatelessWidget {
-  final Accommodation accommodation;
-
-  AccommodationCard(this.accommodation);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Text(accommodation.name),
-              Spacer(),
-              Text('${accommodation.rating}'),
-            ],
-          ),
-          Text(accommodation.type),
-          Text('${accommodation.reviews} reviews'),
-          if (accommodation.isOpen) Text('Open now'),
-        ],
-      ),
-    );
-  }
-}
-
-class Accommodation {
-  final String name;
-  final double rating;
-  final String type;
-  final int reviews;
-  final bool isOpen;
-
-  Accommodation({
-    required this.name,
-    required this.rating,
-    required this.type,
-    required this.reviews,
-    required this.isOpen,
-  });
 }

@@ -115,6 +115,9 @@ public class ReservationController : Controller
                 }
             }
             r.Thumbnail = r.accommodation.AccommodationImages.Image1;
+        }
+        foreach (var r in toReturn)
+        {
             r.accommodation.AccommodationImages = null;
         }
         return Json(toReturn);

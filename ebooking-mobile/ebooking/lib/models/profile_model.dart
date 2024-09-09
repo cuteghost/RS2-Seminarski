@@ -12,6 +12,7 @@ class Profile {
   File profilePicture;
   String gender;
   String socialLink;
+  String customerId;
   Profile({
     required this.id,
     required this.displayName,
@@ -22,6 +23,7 @@ class Profile {
     required this.profilePicture,
     required this.gender,
     required this.socialLink,
+    required this.customerId,
   });
 
   static Future<Profile> fromJson(jsonDecode) async {
@@ -49,6 +51,7 @@ class Profile {
         profilePicture: profilePictureFile,
         gender: genderFromJson,
         socialLink: jsonDecode['userSocialLink'],
+        customerId: jsonDecode['id'],
 
       )
     );

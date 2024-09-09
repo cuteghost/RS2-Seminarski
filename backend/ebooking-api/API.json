@@ -176,7 +176,7 @@
         }
       }
     },
-    "/api/Administrator/GetCustomers": {
+    "/api/Administrator/Customers": {
       "get": {
         "tags": [
           "Administrator"
@@ -251,18 +251,6 @@
         }
       }
     },
-    "/api/Administrator/GetUsers": {
-      "get": {
-        "tags": [
-          "Administrator"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
     "/api/Administrator/Delete/{id}": {
       "delete": {
         "tags": [
@@ -311,6 +299,121 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Administrator/Details": {
+      "get": {
+        "tags": [
+          "Administrator"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Administrator/Reservations": {
+      "get": {
+        "tags": [
+          "Administrator"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Administrator/Accommodations": {
+      "get": {
+        "tags": [
+          "Administrator"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Administrator/DeleteUser": {
+      "delete": {
+        "tags": [
+          "Administrator"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success"
@@ -760,6 +863,47 @@
         }
       }
     },
+    "/api/Feedback": {
+      "post": {
+        "tags": [
+          "Feedback"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewPOST"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewPOST"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewPOST"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "tags": [
@@ -943,6 +1087,30 @@
         }
       }
     },
+    "/api/Recommendation/recommend/{userId}": {
+      "get": {
+        "tags": [
+          "Recommendation"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Reservation/Create": {
       "post": {
         "tags": [
@@ -1019,6 +1187,64 @@
             "style": "simple",
             "schema": {
               "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Search": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "parameters": [
+          {
+            "name": "priceFrom",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "priceTo",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "checkIn",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "checkOut",
+            "in": "query",
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         ],
@@ -1806,6 +2032,30 @@
           "endDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "accommodationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReviewPOST": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "satisfaction": {
+            "type": "boolean"
+          },
+          "wouldRecommend": {
+            "type": "boolean"
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
           },
           "accommodationId": {
             "type": "string",

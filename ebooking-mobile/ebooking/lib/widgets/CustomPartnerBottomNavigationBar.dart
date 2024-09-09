@@ -20,14 +20,6 @@ class CustomPartnerBottomNavigationBar extends StatefulWidget {
 }
 
 class _CustomPartnerBottomNavigationBarState extends State<CustomPartnerBottomNavigationBar> {
-  final List<Widget> _pages = [
-    ContactListScreen(),
-    MyAccommodationsScreen(),
-    AddAccommodationScreen(),
-    PartnerProfilePage(),
-
-  ];
-
   @override
   Widget build(BuildContext context){
     var profile = Provider.of<ProfileProvider>(context, listen: false).profile;
