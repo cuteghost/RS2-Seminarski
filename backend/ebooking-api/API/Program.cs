@@ -15,6 +15,7 @@ using Services.Google;
 using Services.LocationService;
 using Services.RabbitMQService;
 using Services;
+using Services.Recommendations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +69,16 @@ builder.Services.AddTransient<IAdministratorRepository, AdministratorRepository>
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddSingleton<IFacebookAuthService, FacebookAuthService>();
 builder.Services.AddScoped<IMessageProducer, MessageProducer>();
+
+#region Recommendation
+builder.Services.AddSingleton<AccommodationRecommendationService>();
+builder.Services.AddScoped<RecommendationService>(provider =>
+{
+    return new RecommendationService("MLModels/MLmodel.zip");
+});
+
+
+#endregion
 #region AuthConfiguration
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -113,6 +124,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+var recommendationService = app.Services.GetRequiredService<AccommodationRecommendationService>();
+var model = recommendationService.TrainModel();
+var modelPath = Path.Combine(Directory.GetCurrentDirectory(), "MLModels", "MLmodel.zip");
+recommendationService.SaveModel(model, modelPath);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

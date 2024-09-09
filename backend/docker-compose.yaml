@@ -1,16 +1,5 @@
 version: '3.8'
 services:
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    ports: 
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - webapi
-      - messenger
-      - paymentapp
 
   webapi:
     build:
@@ -29,6 +18,8 @@ services:
       RABBITMQ_PASSWORD: mypass
       RABBITMQ_VIRTUALHOST: /
       RABBITMQ_PORT: 5672
+    ports:
+      - 9999:80
     depends_on:
       - db
       - rabbitmq
@@ -50,6 +41,8 @@ services:
       RABBITMQ_PASSWORD: mypass
       RABBITMQ_VIRTUALHOST: /
       RABBITMQ_PORT: 5672
+    ports:
+      - 8888:80
     depends_on:
       - db
       - webapi
@@ -67,6 +60,8 @@ services:
       JWT_KEY: aaaaaaaaaaaaaaaaasssssssssssssssssssssssswwwwwwwwwwwwwwwwwwwwwwww
       JWT_ISSUER: localhost
       JWT_AUDIENCE: localhost
+    ports:
+      - 6666:80
     depends_on:
       - db
       - webapi

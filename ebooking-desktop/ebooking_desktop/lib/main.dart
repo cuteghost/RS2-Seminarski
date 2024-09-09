@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ebooking_desktop/providers/admin_provider.dart';
 import 'package:ebooking_desktop/services/admin_service.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +15,8 @@ import 'package:ebooking_desktop/pages/login.dart';
 
 void main() {
   final SecureStorage secureStorage = SecureStorage();
-
+  HttpOverrides.global = X509Override();
+  
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => AuthProvider(authService: AuthService(secureStorage: secureStorage))),
@@ -97,5 +100,14 @@ class MyApp extends StatelessWidget {
         },
       ), 
     );
+  }
+}
+
+class X509Override extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }

@@ -154,48 +154,48 @@ class _DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
               ),
             ) : Container(child: Center(child: CircularProgressIndicator(),),),
             // Property Header
-            Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Accommodation Quick Filters',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            // Filters Horizontal Scroll
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                    FilterChip(
-                      label: Text('Pool'),
-                      onSelected: (bool selected) {},
-                    ),
-                    SizedBox(width: 8.0),
-                    FilterChip(
-                      label: Text('Bathub'),
-                      onSelected: (bool selected) {},
-                    ),
-                    SizedBox(width: 8.0),
-                    FilterChip(
-                      label: Text('Terrace'),
-                      onSelected: (bool selected) {},
-                    ),
-                    SizedBox(width: 8.0),
-                    FilterChip(
-                      label: Text('View'),
-                      onSelected: (bool selected) {},
-                    ),
-                    SizedBox(width: 8.0),
-                    FilterChip(
-                      label: Text('Sea View'),
-                      onSelected: (bool selected) {},
-                    ),
-                  ],
-                ),
-              ),
+            // Padding(
+            //   padding: EdgeInsets.all(16.0),
+            //   child: Text(
+            //     'Accommodation Quick Filters',
+            //     style: TextStyle(
+            //       fontSize: 18.0,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            // ),
+            // // Filters Horizontal Scroll
+            // SingleChildScrollView(
+            //   scrollDirection: Axis.horizontal,
+            //   child: Row(
+            //     children: [
+            //         FilterChip(
+            //           label: Text('Pool'),
+            //           onSelected: (bool selected) {},
+            //         ),
+            //         SizedBox(width: 8.0),
+            //         FilterChip(
+            //           label: Text('Bathub'),
+            //           onSelected: (bool selected) {},
+            //         ),
+            //         SizedBox(width: 8.0),
+            //         FilterChip(
+            //           label: Text('Terrace'),
+            //           onSelected: (bool selected) {},
+            //         ),
+            //         SizedBox(width: 8.0),
+            //         FilterChip(
+            //           label: Text('View'),
+            //           onSelected: (bool selected) {},
+            //         ),
+            //         SizedBox(width: 8.0),
+            //         FilterChip(
+            //           label: Text('Sea View'),
+            //           onSelected: (bool selected) {},
+            //         ),
+            //       ],
+            //     ),
+            //   ),
             // Reservation History
             Container(
               padding: EdgeInsets.all(16.0),
