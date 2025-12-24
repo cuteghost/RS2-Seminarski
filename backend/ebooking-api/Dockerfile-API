@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 as base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 as base
 WORKDIR /app
 
 RUN apt-get update && \
@@ -11,7 +11,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 as build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
 COPY API /src/API
 COPY Authentication /src/Authentication
 COPY Models /src/Models

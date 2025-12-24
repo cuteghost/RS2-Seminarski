@@ -1,9 +1,9 @@
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 as base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 as base
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y netcat
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 as build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
 COPY Messenger /src/Messenger
 COPY Authentication /src/Authentication
 COPY Models /src/Models
