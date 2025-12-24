@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 as base
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y curl apt-transport-https gnupg2 && \
+    apt-get install -y curl apt-transport-https gnupg2 netcat-openbsd && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list -o /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update && \
