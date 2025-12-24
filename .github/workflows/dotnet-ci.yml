@@ -1,0 +1,37 @@
+name: .NET CI
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/dotnet-ci.yml'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'backend/**'
+
+jobs:
+  build-and-format:
+    name: Build and Format Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend/ebooking-api
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      
+      - name: Restore dependencies
+        run: dotnet restore API.sln
+      
+      - name: Build solution
+        run: dotnet build API.sln --no-restore --configuration Release
+      
+      - name: Check formatting
+        run: dotnet format API.sln --verify-no-changes --no-restore
