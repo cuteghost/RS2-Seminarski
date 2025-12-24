@@ -1,0 +1,63 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'android/**'
+      - 'desktop/**'
+      - '.github/workflows/flutter-ci.yml'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'android/**'
+      - 'desktop/**'
+
+jobs:
+  analyze-mobile:
+    name: Flutter Analyze (Mobile)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+      
+      - name: Get dependencies
+        working-directory: ./android
+        run: flutter pub get
+      
+      - name: Run Flutter analyze
+        working-directory: ./android
+        run: flutter analyze --no-fatal-infos
+      
+      - name: Check formatting
+        working-directory: ./android
+        run: dart format --set-exit-if-changed lib/
+
+  analyze-desktop:
+    name: Flutter Analyze (Desktop)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+      
+      - name: Get dependencies
+        working-directory: ./desktop
+        run: flutter pub get
+      
+      - name: Run Flutter analyze
+        working-directory: ./desktop
+        run: flutter analyze --no-fatal-infos
+      
+      - name: Check formatting
+        working-directory: ./desktop
+        run: dart format --set-exit-if-changed lib/
