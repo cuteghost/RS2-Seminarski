@@ -368,3 +368,17 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# Environment files - contain secrets
+.env
+*.env
+!.env.example
+
+# Sensitive configuration files
+appsettings.Development.json
+**/local.properties
+!**/local.properties.example
+
+# Android keystore files
+*.jks
+*.keystore
