@@ -61,7 +61,7 @@ flutter run -d windows
 #### Prerequisites
 ```bash
 # Navigate to android directory
-cd android
+cd client/mobile
 
 # Create local.properties file from template (if not exists)
 cp android/local.properties.example android/local.properties
@@ -191,7 +191,7 @@ You can monitor RabbitMQ messages at http://localhost:15672 (credentials from .e
 
 ```
 e-Booking/
-├── backend/
+├── server/
 │   ├── docker-compose.yaml          # Docker orchestration
 │   ├── .env                          # Backend secrets (not in git)
 │   └── ebooking-api/
@@ -201,17 +201,18 @@ e-Booking/
 │       ├── Database/                 # EF Core context & migrations
 │       ├── Models/                   # Domain models & DTOs
 │       └── Authentication/           # JWT & auth services
-├── android/
-│   ├── lib/                          # Flutter mobile app source
-│   ├── android/
-│   │   ├── local.properties          # Android secrets (not in git)
-│   │   └── app/
-│   │       ├── proguard-rules.pro    # Code obfuscation rules
-│   │       └── build.gradle          # BuildConfig fields
-│   └── pubspec.yaml
-├── desktop/
-│   ├── lib/                          # Flutter desktop app source
-│   └── pubspec.yaml
+├── client
+│    ├── mobile/
+│    │   ├── lib/                          # Flutter mobile app source
+│    │   ├── android/
+│    │   │   ├── local.properties          # Android secrets (not in git)
+│    │   │   └── app/
+│    │   │       ├── proguard-rules.pro    # Code obfuscation rules
+│    │   │       └── build.gradle          # BuildConfig fields
+│    │   └── pubspec.yaml
+│    ├── desktop/
+│    │   ├── lib/                          # Flutter desktop app source
+│    │   └── pubspec.yaml
 └── .github/
     └── workflows/                    # CI/CD pipelines
         ├── dotnet-ci.yml             # .NET build & format checks

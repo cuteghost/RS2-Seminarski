@@ -4,14 +4,14 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'android/**'
-      - 'desktop/**'
+      - 'client/mobile/**'
+      - 'client/desktop/**'
       - '.github/workflows/flutter-ci.yml'
   pull_request:
     branches: [ master ]
     paths:
-      - 'android/**'
-      - 'desktop/**'
+      - 'client/mobile/**'
+      - 'client/desktop/**'
 
 jobs:
   analyze-mobile:
@@ -27,15 +27,15 @@ jobs:
           channel: 'stable'
       
       - name: Get dependencies
-        working-directory: ./android
+        working-directory: ./client/mobile
         run: flutter pub get
       
       - name: Run Flutter analyze
-        working-directory: ./android
+        working-directory: ./client/mobile
         run: flutter analyze --no-fatal-infos
       
       - name: Check formatting
-        working-directory: ./android
+        working-directory: ./client/mobile
         run: dart format --set-exit-if-changed lib/
 
   analyze-desktop:
@@ -51,13 +51,13 @@ jobs:
           channel: 'stable'
       
       - name: Get dependencies
-        working-directory: ./desktop
+        working-directory: ./client/desktop
         run: flutter pub get
       
       - name: Run Flutter analyze
-        working-directory: ./desktop
+        working-directory: ./client/desktop
         run: flutter analyze --no-fatal-infos
       
       - name: Check formatting
-        working-directory: ./desktop
+        working-directory: ./client/desktop
         run: dart format --set-exit-if-changed lib/
