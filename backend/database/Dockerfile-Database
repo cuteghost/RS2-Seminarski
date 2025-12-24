@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/mssql/server:2019-latest
+
+ENV ACCEPT_EULA=Y
+ENV SA_PASSWORD=Lekovitobilje22!
+
+USER root
+
+RUN apt-get update && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
+
+EXPOSE 1433
+
+RUN mkdir -p /var/opt/mssql/backup /var/opt/mssql/scripts
+
+COPY ./backup /var/opt/mssql/backup
+COPY ./init-scripts /var/opt/mssql/scripts
+
+ENTRYPOINT ["/bin/bash", "-c", "/var/opt/mssql/scripts/restore.sh & /opt/mssql/bin/sqlservr"]
