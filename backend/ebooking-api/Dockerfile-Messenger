@@ -1,0 +1,38 @@
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 as base
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y netcat
+
+FROM mcr.microsoft.com/dotnet/sdk:7.0 as build
+COPY Messenger /src/Messenger
+COPY Authentication /src/Authentication
+COPY Models /src/Models
+COPY Database /src/Database
+
+WORKDIR /src
+ARG DB_SERVER_ARG
+ARG DB_NAME_ARG
+ARG DB_USER_ARG
+ARG DB_PASSWORD_ARG
+ARG JWT_KEY_ARG
+ARG JWT_ISSUER_ARG
+ARG JWT_AUDIENCE_ARG
+RUN dotnet build "Messenger/Messenger.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Messenger/Messenger.csproj" -c Release -o /app/publish
+
+FROM base as final
+WORKDIR /app
+COPY --from=publish /app/publish .
+COPY wait-for-rabbitmq.sh /app
+RUN chmod +x /app/wait-for-rabbitmq.sh
+ENV DB_SERVER=$DB_SERVER_ARG
+ENV DB_NAME=$DB_NAME_ARG
+ENV DB_USER=$DB_USER_ARG
+ENV DB_PASSWORD=$DB_PASSWORD_ARG
+ENV JWT_KEY=$JWT_KEY_ARG
+ENV JWT_ISSUER=$JWT_ISSUER_ARG
+ENV JWT_AUDIENCE=$JWT_AUDIENCE_ARG
+
+ENTRYPOINT ["/app/wait-for-rabbitmq.sh"]
