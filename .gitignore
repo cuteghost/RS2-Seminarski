@@ -1,3 +1,6 @@
+# Helpers folder and all contents
+helpers/
+
 # Ignore folders within ebooking-api directory
 ebooking-api/.vs/
 ebooking-api/.vs/API/v17/.suo
