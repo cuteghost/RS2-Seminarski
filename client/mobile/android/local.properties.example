@@ -1,0 +1,8 @@
+sdk.dir=C:\\Android
+flutter.sdk=C:\\flutter
+
+# API Keys - Copy this file to local.properties and fill in actual values
+# IMPORTANT: Never commit local.properties with real credentials
+facebook.app.id=
+facebook.client.token=
+google.api.key=
