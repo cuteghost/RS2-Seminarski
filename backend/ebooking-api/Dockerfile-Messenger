@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 as base
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y netcat
+RUN apt-get update && apt-get install -y netcat-openbsd
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
 COPY Messenger /src/Messenger
