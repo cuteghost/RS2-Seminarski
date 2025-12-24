@@ -22,6 +22,11 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+// Load secrets from local.properties
+def facebookAppId = localProperties.getProperty('facebook.app.id') ?: ''
+def facebookClientToken = localProperties.getProperty('facebook.client.token') ?: ''
+def googleApiKey = localProperties.getProperty('google.api.key') ?: ''
+
 android {
     namespace "com.example.ebooking"
     compileSdkVersion 34
@@ -49,6 +54,18 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        
+        // Securely inject API keys into BuildConfig
+        buildConfigField "String", "FACEBOOK_APP_ID", "\"${facebookAppId}\""
+        buildConfigField "String", "FACEBOOK_CLIENT_TOKEN", "\"${facebookClientToken}\""
+        buildConfigField "String", "GOOGLE_API_KEY", "\"${googleApiKey}\""
+        
+        // Make available to AndroidManifest.xml
+        manifestPlaceholders = [
+            facebookAppId: facebookAppId,
+            facebookClientToken: facebookClientToken,
+            googleApiKey: googleApiKey
+        ]
     }
 
     buildTypes {
@@ -56,6 +73,11 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
+            
+            // Enable code obfuscation and optimization
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 

@@ -5,19 +5,8 @@ services:
     build:
       context: ./ebooking-api
       dockerfile: Dockerfile-API
-    environment:
-      DB_SERVER: db
-      DB_NAME: 170171
-      DB_USER: sa
-      DB_PASSWORD: Lekovitobilje22!
-      JWT_KEY: aaaaaaaaaaaaaaaaasssssssssssssssssssssssswwwwwwwwwwwwwwwwwwwwwwww
-      JWT_ISSUER: localhost
-      JWT_AUDIENCE: localhost
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USERNAME: user
-      RABBITMQ_PASSWORD: mypass
-      RABBITMQ_VIRTUALHOST: /
-      RABBITMQ_PORT: 5672
+    env_file:
+      - .env
     ports:
       - 9999:80
     depends_on:
@@ -28,19 +17,8 @@ services:
     build:
       context: ./ebooking-api
       dockerfile: Dockerfile-Messenger
-    environment:
-      DB_SERVER: db
-      DB_NAME: 170171
-      DB_USER: sa
-      DB_PASSWORD: Lekovitobilje22!
-      JWT_KEY: aaaaaaaaaaaaaaaaasssssssssssssssssssssssswwwwwwwwwwwwwwwwwwwwwwww
-      JWT_ISSUER: localhost
-      JWT_AUDIENCE: localhost
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USERNAME: user
-      RABBITMQ_PASSWORD: mypass
-      RABBITMQ_VIRTUALHOST: /
-      RABBITMQ_PORT: 5672
+    env_file:
+      - .env
     ports:
       - 8888:80
     depends_on:
@@ -52,14 +30,8 @@ services:
     build:
       context: ./ebooking-api
       dockerfile: Dockerfile-PaymentApp
-    environment:
-      DB_SERVER: db
-      DB_NAME: 170171
-      DB_USER: sa
-      DB_PASSWORD: Lekovitobilje22!
-      JWT_KEY: aaaaaaaaaaaaaaaaasssssssssssssssssssssssswwwwwwwwwwwwwwwwwwwwwwww
-      JWT_ISSUER: localhost
-      JWT_AUDIENCE: localhost
+    env_file:
+      - .env
     ports:
       - 6666:80
     depends_on:
@@ -71,9 +43,11 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      - RABBITMQ_DEFAULT_USER=user
-      - RABBITMQ_DEFAULT_PASS=mypass
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
     ports:
       - "5672:5672"
       - "15672:15672"
