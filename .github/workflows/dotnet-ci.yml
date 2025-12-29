@@ -4,12 +4,12 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'backend/**'
+      - 'server/**'
       - '.github/workflows/dotnet-ci.yml'
   pull_request:
     branches: [ master ]
     paths:
-      - 'backend/**'
+      - 'server/**'
 
 jobs:
   build-and-format:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./backend/ebooking-api
+        working-directory: ./server/ebooking-api
     
     steps:
       - uses: actions/checkout@v4
