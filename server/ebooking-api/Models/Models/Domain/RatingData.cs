@@ -1,10 +1,8 @@
-﻿public class AccommodationRating
+public class AccommodationRating
 {
-    public float CustomerId { get; set; }
-    public float AccommodationId { get; set; }
+    public string CustomerId { get; set; } = string.Empty;
+    public string AccommodationId { get; set; } = string.Empty;
     public float Rating { get; set; }
-    public float PricePerNight { get; set; }
-    public float ReviewScore { get; set; }
 }
 
 public class AccommodationRatingPrediction

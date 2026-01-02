@@ -1,8 +1,6 @@
-﻿using Models.Domain;
-
 namespace Models.DTO.UserDTO.Partner;
 
-public class PartnerPATCH
+public class PartnerPATCH : UserPATCH
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }

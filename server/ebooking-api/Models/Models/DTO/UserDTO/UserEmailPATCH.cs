@@ -1,4 +1,4 @@
-﻿namespace Models.Models.DTO.UserDTO;
+﻿namespace Models.DTO.UserDTO;
 
 public class UserEmailPATCH
 {

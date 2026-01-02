@@ -1,13 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-
 namespace Models.DTO.LocationDTO;
 
-public class LocationPatch
+public class LocationPATCH
 {
     public Guid Id { get; set; }
-    [MaxLength(50)]
-    [MinLength(5)]
+    public double Longitude { get; set; }
+    public double Latitude { get; set; }
     public string Address { get; set; } = string.Empty;
     public Guid CityId { get; set; }
-
 }
