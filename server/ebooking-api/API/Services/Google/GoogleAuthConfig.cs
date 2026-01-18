@@ -1,7 +1,8 @@
-﻿namespace Services.Google;
+namespace Services.Google;
 
 public class GoogleAuthConfig
 {
-    public string ClientId { get; set; }
-    public string ClientSecret { get; set; }
+    public string ClientId { get; set; } = string.Empty;
+
+    public string ClientSecret { get; set; } = string.Empty;
 }

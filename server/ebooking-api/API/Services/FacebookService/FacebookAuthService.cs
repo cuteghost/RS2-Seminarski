@@ -20,9 +20,16 @@ namespace Services.FacebookService
         }
 
 
+        public string AppId => _facebookAuthConfig.AppId;
+
+        public bool IsConfigured =>
+            !string.IsNullOrWhiteSpace(_facebookAuthConfig.AppId) &&
+            !string.IsNullOrWhiteSpace(_facebookAuthConfig.AppSecret) &&
+            !string.IsNullOrWhiteSpace(_facebookAuthConfig.TokenValidationUrl) &&
+            !string.IsNullOrWhiteSpace(_facebookAuthConfig.UserInfoUrl);
+
         public async Task<BaseResponse<FacebookTokenValidationResponse>> ValidateFacebookToken(string accessToken)
         {
-            try
             {
                 string TokenValidationUrl = _facebookAuthConfig.TokenValidationUrl;
                 var url = string.Format(TokenValidationUrl, accessToken, _facebookAuthConfig.AppId, _facebookAuthConfig.AppSecret);
@@ -33,21 +40,15 @@ namespace Services.FacebookService
                     var responseAsString = await response.Content.ReadAsStringAsync();
 
                     var tokenValidationResponse = JsonConvert.DeserializeObject<FacebookTokenValidationResponse>(responseAsString);
-                    return new BaseResponse<FacebookTokenValidationResponse>("Success", true, tokenValidationResponse);
+                    return new BaseResponse<FacebookTokenValidationResponse>("Success", tokenValidationResponse);
                 }
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
-
-            return new BaseResponse<FacebookTokenValidationResponse>("Failed to get response", false, null);
+            return new BaseResponse<FacebookTokenValidationResponse>("Facebook did not accept the token validation request.", null);
 
         }
 
         public async Task<BaseResponse<FacebookUserInfoResponse>> GetFacebookUserInformation(string accessToken)
         {
-            try
             {
                 string userInfoUrl = _facebookAuthConfig.UserInfoUrl;
                 string url = string.Format(userInfoUrl, accessToken);
@@ -58,15 +59,10 @@ namespace Services.FacebookService
                 {
                     var responseAsString = await response.Content.ReadAsStringAsync();
                     var userInfoResponse = JsonConvert.DeserializeObject<FacebookUserInfoResponse>(responseAsString);
-                    return new BaseResponse<FacebookUserInfoResponse>("Success", true, userInfoResponse);
+                    return new BaseResponse<FacebookUserInfoResponse>("Success", userInfoResponse);
                 }
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
-
-            return new BaseResponse<FacebookUserInfoResponse>("Failed to get response", false, null);
+            return new BaseResponse<FacebookUserInfoResponse>("Facebook did not return user information.", null);
 
         }
 
