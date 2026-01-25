@@ -11,6 +11,7 @@ public class ReservationProfile : AutoMapper.Profile
         CreateMap<Reservation, ReservationGET>().ReverseMap();
         CreateMap<Reservation, ReservationPOST>().ReverseMap();
         CreateMap<Reservation, ReservationPATCH>().ReverseMap();
+        CreateMap<ReservationStatusHistory, ReservationStatusHistoryGET>().ReverseMap();
     }
 
 
