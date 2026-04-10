@@ -10,7 +10,7 @@ public class ConsumeRabbitMQHostedService : BackgroundService
     private readonly IServiceProvider _serviceProvider;
     private readonly string _host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
     private readonly string _username = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME") ?? "user";
-    private readonly string _password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? "${RABBITMQ_PASSWORD}";
+    private readonly string _password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? "mypass";
     private readonly string _virtualhost = Environment.GetEnvironmentVariable("RABBITMQ_VIRTUALHOST") ?? "/";
     private readonly string _port = Environment.GetEnvironmentVariable("RABBITMQ_PORT") ?? "5672";
 
