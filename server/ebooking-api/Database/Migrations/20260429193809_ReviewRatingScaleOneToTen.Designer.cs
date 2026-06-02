@@ -4,6 +4,7 @@ using Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260429193809_ReviewRatingScaleOneToTen")]
+    partial class ReviewRatingScaleOneToTen
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1986,9 +1989,6 @@ namespace Database.Migrations
                     b.Property<int>("NumberOfGuests")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("PricePerNight")
-                        .HasColumnType("decimal(10,2)");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
@@ -2001,9 +2001,6 @@ namespace Database.Migrations
                     b.Property<string>("StatusReason")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(10,2)");
 
                     b.HasKey("Id");
 
@@ -2023,11 +2020,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 1,
-                            PricePerNight = 180m,
                             StartDate = new DateTime(2026, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2025, 12, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 360m
+                            StatusChangedAt = new DateTime(2025, 12, 26, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2038,11 +2033,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 2,
-                            PricePerNight = 180m,
                             StartDate = new DateTime(2026, 3, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 540m
+                            StatusChangedAt = new DateTime(2026, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2053,11 +2046,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 180m,
                             StartDate = new DateTime(2026, 5, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 4, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 720m
+                            StatusChangedAt = new DateTime(2026, 4, 29, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2068,11 +2059,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 180m,
                             StartDate = new DateTime(2026, 7, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 6, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 900m
+                            StatusChangedAt = new DateTime(2026, 6, 30, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2083,11 +2072,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 180m,
                             StartDate = new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 1,
-                            StatusChangedAt = new DateTime(2026, 8, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1080m
+                            StatusChangedAt = new DateTime(2026, 8, 31, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2098,11 +2085,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 2,
-                            PricePerNight = 65m,
                             StartDate = new DateTime(2026, 1, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2025, 12, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 195m
+                            StatusChangedAt = new DateTime(2025, 12, 29, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2113,11 +2098,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 3,
-                            PricePerNight = 65m,
                             StartDate = new DateTime(2026, 3, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 260m
+                            StatusChangedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2128,11 +2111,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 65m,
                             StartDate = new DateTime(2026, 5, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 325m
+                            StatusChangedAt = new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2143,11 +2124,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 65m,
                             StartDate = new DateTime(2026, 7, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 390m
+                            StatusChangedAt = new DateTime(2026, 7, 3, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2158,11 +2137,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 65m,
                             StartDate = new DateTime(2026, 9, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 2,
-                            StatusChangedAt = new DateTime(2026, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 130m
+                            StatusChangedAt = new DateTime(2026, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2173,11 +2150,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 3,
-                            PricePerNight = 120m,
                             StartDate = new DateTime(2026, 1, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 480m
+                            StatusChangedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2188,11 +2163,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 4,
-                            PricePerNight = 120m,
                             StartDate = new DateTime(2026, 3, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 600m
+                            StatusChangedAt = new DateTime(2026, 3, 4, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2203,11 +2176,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 120m,
                             StartDate = new DateTime(2026, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 720m
+                            StatusChangedAt = new DateTime(2026, 5, 5, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2218,11 +2189,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 120m,
                             StartDate = new DateTime(2026, 7, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 240m
+                            StatusChangedAt = new DateTime(2026, 7, 6, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2233,11 +2202,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 120m,
                             StartDate = new DateTime(2026, 9, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 2,
-                            StatusChangedAt = new DateTime(2026, 9, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 360m
+                            StatusChangedAt = new DateTime(2026, 9, 6, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2248,11 +2215,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 4,
-                            PricePerNight = 25m,
                             StartDate = new DateTime(2026, 1, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 125m
+                            StatusChangedAt = new DateTime(2026, 1, 4, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2263,11 +2228,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 1,
-                            PricePerNight = 25m,
                             StartDate = new DateTime(2026, 3, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 150m
+                            StatusChangedAt = new DateTime(2026, 3, 7, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2278,11 +2241,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 25m,
                             StartDate = new DateTime(2026, 5, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 50m
+                            StatusChangedAt = new DateTime(2026, 5, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2293,11 +2254,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 25m,
                             StartDate = new DateTime(2026, 7, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 75m
+                            StatusChangedAt = new DateTime(2026, 7, 9, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2308,12 +2267,10 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 25m,
                             StartDate = new DateTime(2026, 9, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 3,
                             StatusChangedAt = new DateTime(2026, 9, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            StatusReason = "Gost je otkazao putovanje.",
-                            TotalPrice = 100m
+                            StatusReason = "Gost je otkazao putovanje."
                         },
                         new
                         {
@@ -2324,11 +2281,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 1,
-                            PricePerNight = 210m,
                             StartDate = new DateTime(2026, 1, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1260m
+                            StatusChangedAt = new DateTime(2026, 1, 7, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2339,11 +2294,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 2,
-                            PricePerNight = 210m,
                             StartDate = new DateTime(2026, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 420m
+                            StatusChangedAt = new DateTime(2026, 3, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2354,11 +2307,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 210m,
                             StartDate = new DateTime(2026, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 630m
+                            StatusChangedAt = new DateTime(2026, 5, 11, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2369,11 +2320,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 210m,
                             StartDate = new DateTime(2026, 7, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 840m
+                            StatusChangedAt = new DateTime(2026, 7, 12, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2384,11 +2333,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 210m,
                             StartDate = new DateTime(2026, 9, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 1,
-                            StatusChangedAt = new DateTime(2026, 9, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1050m
+                            StatusChangedAt = new DateTime(2026, 9, 12, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2399,11 +2346,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 2,
-                            PricePerNight = 95m,
                             StartDate = new DateTime(2026, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 190m
+                            StatusChangedAt = new DateTime(2026, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2414,11 +2359,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 3,
-                            PricePerNight = 95m,
                             StartDate = new DateTime(2026, 3, 23, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 285m
+                            StatusChangedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2429,11 +2372,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 95m,
                             StartDate = new DateTime(2026, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 380m
+                            StatusChangedAt = new DateTime(2026, 5, 14, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2444,11 +2385,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 95m,
                             StartDate = new DateTime(2026, 7, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 475m
+                            StatusChangedAt = new DateTime(2026, 7, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2459,11 +2398,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 95m,
                             StartDate = new DateTime(2026, 9, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 2,
-                            StatusChangedAt = new DateTime(2026, 9, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 570m
+                            StatusChangedAt = new DateTime(2026, 9, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2474,11 +2411,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 3,
-                            PricePerNight = 70m,
                             StartDate = new DateTime(2026, 1, 23, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 210m
+                            StatusChangedAt = new DateTime(2026, 1, 13, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2489,11 +2424,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 4,
-                            PricePerNight = 70m,
                             StartDate = new DateTime(2026, 3, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 280m
+                            StatusChangedAt = new DateTime(2026, 3, 16, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2504,11 +2437,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 70m,
                             StartDate = new DateTime(2026, 5, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 350m
+                            StatusChangedAt = new DateTime(2026, 5, 17, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2519,11 +2450,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 70m,
                             StartDate = new DateTime(2026, 7, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 420m
+                            StatusChangedAt = new DateTime(2026, 7, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2534,11 +2463,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 70m,
                             StartDate = new DateTime(2026, 9, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 2,
-                            StatusChangedAt = new DateTime(2026, 9, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 140m
+                            StatusChangedAt = new DateTime(2026, 9, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2549,11 +2476,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 4,
-                            PricePerNight = 240m,
                             StartDate = new DateTime(2026, 1, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 960m
+                            StatusChangedAt = new DateTime(2026, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2564,11 +2489,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 1,
-                            PricePerNight = 240m,
                             StartDate = new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1200m
+                            StatusChangedAt = new DateTime(2026, 3, 19, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2579,11 +2502,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 240m,
                             StartDate = new DateTime(2026, 5, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1440m
+                            StatusChangedAt = new DateTime(2026, 5, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2594,11 +2515,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 240m,
                             StartDate = new DateTime(2026, 7, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 480m
+                            StatusChangedAt = new DateTime(2026, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2609,12 +2528,10 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 240m,
                             StartDate = new DateTime(2026, 10, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 3,
                             StatusChangedAt = new DateTime(2026, 9, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            StatusReason = "Gost je otkazao putovanje.",
-                            TotalPrice = 720m
+                            StatusReason = "Gost je otkazao putovanje."
                         },
                         new
                         {
@@ -2625,11 +2542,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 1,
-                            PricePerNight = 110m,
                             StartDate = new DateTime(2026, 1, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 550m
+                            StatusChangedAt = new DateTime(2026, 1, 19, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2640,11 +2555,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 2,
-                            PricePerNight = 110m,
                             StartDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 660m
+                            StatusChangedAt = new DateTime(2026, 3, 22, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2655,11 +2568,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 110m,
                             StartDate = new DateTime(2026, 6, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 23, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 220m
+                            StatusChangedAt = new DateTime(2026, 5, 23, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2670,11 +2581,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 110m,
                             StartDate = new DateTime(2026, 8, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 330m
+                            StatusChangedAt = new DateTime(2026, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2685,11 +2594,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 110m,
                             StartDate = new DateTime(2026, 10, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 1,
-                            StatusChangedAt = new DateTime(2026, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 440m
+                            StatusChangedAt = new DateTime(2026, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2700,11 +2607,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 2,
-                            PricePerNight = 320m,
                             StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1920m
+                            StatusChangedAt = new DateTime(2026, 1, 22, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2715,11 +2620,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 3,
-                            PricePerNight = 320m,
                             StartDate = new DateTime(2026, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 640m
+                            StatusChangedAt = new DateTime(2026, 3, 25, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2730,11 +2633,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 320m,
                             StartDate = new DateTime(2026, 6, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 960m
+                            StatusChangedAt = new DateTime(2026, 5, 26, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2745,11 +2646,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 320m,
                             StartDate = new DateTime(2026, 8, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1280m
+                            StatusChangedAt = new DateTime(2026, 7, 27, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2760,11 +2659,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 320m,
                             StartDate = new DateTime(2026, 10, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 2,
-                            StatusChangedAt = new DateTime(2026, 9, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1600m
+                            StatusChangedAt = new DateTime(2026, 9, 27, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2775,11 +2672,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 3,
-                            PricePerNight = 140m,
                             StartDate = new DateTime(2026, 2, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 280m
+                            StatusChangedAt = new DateTime(2026, 1, 25, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2790,11 +2685,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 4,
-                            PricePerNight = 140m,
                             StartDate = new DateTime(2026, 4, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 420m
+                            StatusChangedAt = new DateTime(2026, 3, 28, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2805,11 +2698,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 140m,
                             StartDate = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 560m
+                            StatusChangedAt = new DateTime(2026, 5, 29, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2820,11 +2711,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 140m,
                             StartDate = new DateTime(2026, 8, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 700m
+                            StatusChangedAt = new DateTime(2026, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2835,11 +2724,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 140m,
                             StartDate = new DateTime(2026, 10, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 2,
-                            StatusChangedAt = new DateTime(2026, 9, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 840m
+                            StatusChangedAt = new DateTime(2026, 9, 30, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2850,11 +2737,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 4,
-                            PricePerNight = 260m,
                             StartDate = new DateTime(2026, 2, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 780m
+                            StatusChangedAt = new DateTime(2026, 1, 28, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2865,11 +2750,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 1,
-                            PricePerNight = 260m,
                             StartDate = new DateTime(2026, 4, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1040m
+                            StatusChangedAt = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2880,11 +2763,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 260m,
                             StartDate = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1300m
+                            StatusChangedAt = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2895,11 +2776,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 260m,
                             StartDate = new DateTime(2026, 8, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 5,
-                            StatusChangedAt = new DateTime(2026, 8, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1560m
+                            StatusChangedAt = new DateTime(2026, 8, 2, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2910,12 +2789,10 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 260m,
                             StartDate = new DateTime(2026, 10, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = 3,
                             StatusChangedAt = new DateTime(2026, 10, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            StatusReason = "Gost je otkazao putovanje.",
-                            TotalPrice = 520m
+                            StatusReason = "Gost je otkazao putovanje."
                         });
                 });
 
@@ -2970,8 +2847,7 @@ namespace Database.Migrations
 
                     b.Property<string>("Comment")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
@@ -3316,10 +3192,6 @@ namespace Database.Migrations
                     b.Property<string>("SocialLink")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SocialProvider")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int>("TokenVersion")
                         .HasColumnType("int");

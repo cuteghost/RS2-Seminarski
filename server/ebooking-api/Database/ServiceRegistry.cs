@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using Database;
 
-namespace TaxiHDbContext;
+namespace Seminarski.Database;
 
 public static class ServiceRegistry
 {
@@ -23,9 +23,7 @@ public static class ServiceRegistry
 
             using (StreamReader reader = new StreamReader(stream))
             {
-                var res = reader.ReadToEnd();
-                Console.WriteLine(res);
-                return res;
+                return reader.ReadToEnd();
             }
         }
     }
@@ -56,24 +54,11 @@ public static class ServiceRegistry
     }
     public static void ConfigureDbContext(DbContextOptionsBuilder optionsBuilder, string dbConnectionString)
     {
-        try
-        {
-            if (dbConnectionString != null)
-            {
-                optionsBuilder.UseSqlServer(dbConnectionString);
-                Console.WriteLine("INFO: Connection with the database established successfully!");
-            }
-            else
-            {
-                Console.WriteLine("ERROR: Unable to connect to the SQL server.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"ERROR: Configuration of DBContext failed!\n{ex}");
-            throw;
-        }
+        if (string.IsNullOrWhiteSpace(dbConnectionString))
+            throw new InvalidOperationException(
+                "Connection string is empty. Set DB_SERVER, DB_NAME, DB_USER and DB_PASSWORD.");
 
+        optionsBuilder.UseSqlServer(dbConnectionString);
     }
 
     public static string ReadFromEnv()

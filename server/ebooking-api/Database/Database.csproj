@@ -4,7 +4,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +14,11 @@
     <EmbeddedResource Include="appsettings_database.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <!-- Seed fotografije putuju sa Database.dll; upisuje ih SeedImageInitializer nakon migracije. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Data\Seed\Images\*.jpg" LogicalName="Database.Data.Seed.Images.%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

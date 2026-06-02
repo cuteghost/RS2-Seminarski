@@ -4,6 +4,7 @@ using Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260428131738_SeedInitialData")]
+    partial class SeedInitialData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,9 +35,6 @@ namespace Database.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("AccommodationImagesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AccommodationTypeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -65,13 +65,14 @@ namespace Database.Migrations
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
+                    b.Property<int>("TypeOfAccommodation")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AccommodationDetailsId");
 
                     b.HasIndex("AccommodationImagesId");
-
-                    b.HasIndex("AccommodationTypeId");
 
                     b.HasIndex("LocationId");
 
@@ -85,180 +86,180 @@ namespace Database.Migrations
                             Id = new Guid("00000008-0000-0000-0000-000000000001"),
                             AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000001"),
                             AccommodationImagesId = new Guid("0000000a-0000-0000-0000-000000000001"),
-                            AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000005"),
                             Description = "Vila sa pet spavaćih soba i pogledom na sarajevsku kotlinu, deset minuta vožnje od centra grada.",
                             IsDeleted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000001"),
                             Name = "Villa Poljine",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
                             PricePerNight = 180.0,
-                            ReviewScore = 1.5m,
-                            Status = true
+                            ReviewScore = 3.5m,
+                            Status = true,
+                            TypeOfAccommodation = 5
                         },
                         new
                         {
                             Id = new Guid("00000008-0000-0000-0000-000000000002"),
                             AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000002"),
                             AccommodationImagesId = new Guid("0000000a-0000-0000-0000-000000000002"),
-                            AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000004"),
                             Description = "Apartman u srcu Baščaršije, uz Sebilj i glavnu pješačku zonu, sa potpuno opremljenom kuhinjom.",
                             IsDeleted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000002"),
                             Name = "Apartman Baščaršija",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
                             PricePerNight = 65.0,
-                            ReviewScore = 2.5m,
-                            Status = true
+                            ReviewScore = 4.5m,
+                            Status = true,
+                            TypeOfAccommodation = 4
                         },
                         new
                         {
                             Id = new Guid("00000008-0000-0000-0000-000000000003"),
                             AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000003"),
                             AccommodationImagesId = new Guid("0000000a-0000-0000-0000-000000000003"),
-                            AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000002"),
                             Description = "Hotel na obali Miljacke, preko puta Vijećnice, sa doručkom i besplatnim parkingom za goste.",
                             IsDeleted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000003"),
                             Name = "Hotel Vijećnica",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
                             PricePerNight = 120.0,
-                            ReviewScore = 3.5m,
-                            Status = true
+                            ReviewScore = 4m,
+                            Status = true,
+                            TypeOfAccommodation = 2
                         },
                         new
                         {
                             Id = new Guid("00000008-0000-0000-0000-000000000004"),
                             AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000004"),
                             AccommodationImagesId = new Guid("0000000a-0000-0000-0000-000000000004"),
-                            AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000006"),
                             Description = "Hostel uz Latinsku ćupriju sa zajedničkom kuhinjom i sobama za dva do šest gostiju.",
                             IsDeleted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000004"),
                             Name = "Hostel Latinska Ćuprija",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
                             PricePerNight = 25.0,
-                            ReviewScore = 4.5m,
-                            Status = true
+                            ReviewScore = 3.5m,
+                            Status = true,
+                            TypeOfAccommodation = 6
                         },
                         new
                         {
                             Id = new Guid("00000008-0000-0000-0000-000000000005"),
                             AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000005"),
                             AccommodationImagesId = new Guid("0000000a-0000-0000-0000-000000000005"),
-                            AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000008"),
                             Description = "Potkrovni stan na Marijin Dvoru sa velikom terasom, pogledom na Trebević i dva parking mjesta.",
                             IsDeleted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000005"),
                             Name = "Penthouse Marijin Dvor",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
                             PricePerNight = 210.0,
-                            ReviewScore = 5.5m,
-                            Status = true
+                            ReviewScore = 4.5m,
+                            Status = true,
+                            TypeOfAccommodation = 8
                         },
                         new
                         {
                             Id = new Guid("00000008-0000-0000-0000-000000000006"),
                             AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000006"),
                             AccommodationImagesId = new Guid("0000000a-0000-0000-0000-000000000006"),
-                            AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000001"),
                             Description = "Kuća na padinama Trebevića sa baštom i roštiljem, idealna za porodični boravak van gradske vreve.",
                             IsDeleted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000006"),
                             Name = "Kuća na Trebeviću",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
                             PricePerNight = 95.0,
-                            ReviewScore = 6.5m,
-                            Status = true
+                            ReviewScore = 4m,
+                            Status = true,
+                            TypeOfAccommodation = 1
                         },
                         new
                         {
                             Id = new Guid("00000008-0000-0000-0000-000000000007"),
                             AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000007"),
                             AccommodationImagesId = new Guid("0000000a-0000-0000-0000-000000000007"),
-                            AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000004"),
                             Description = "Apartman u starom dijelu Mostara, nekoliko koraka od Starog mosta i mostarske čaršije.",
                             IsDeleted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000007"),
                             Name = "Apartman Stari Most",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
                             PricePerNight = 70.0,
-                            ReviewScore = 7.5m,
-                            Status = true
+                            ReviewScore = 3.5m,
+                            Status = true,
+                            TypeOfAccommodation = 4
                         },
                         new
                         {
                             Id = new Guid("00000008-0000-0000-0000-000000000008"),
                             AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
                             AccommodationImagesId = new Guid("0000000a-0000-0000-0000-000000000008"),
-                            AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000005"),
                             Description = "Vila sa privatnim bazenom na Bačvicama, sa direktnim izlazom na šetnicu i gradsku plažu.",
                             IsDeleted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000008"),
                             Name = "Villa Riva",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000002"),
                             PricePerNight = 240.0,
-                            ReviewScore = 8.5m,
-                            Status = true
+                            ReviewScore = 4.5m,
+                            Status = true,
+                            TypeOfAccommodation = 5
                         },
                         new
                         {
                             Id = new Guid("00000008-0000-0000-0000-000000000009"),
                             AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000009"),
                             AccommodationImagesId = new Guid("0000000a-0000-0000-0000-000000000009"),
-                            AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000004"),
                             Description = "Apartman unutar zidina Dioklecijanove palače, sa klimom i pogledom na staru gradsku jezgru.",
                             IsDeleted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000009"),
                             Name = "Apartman Dioklecijan",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000002"),
                             PricePerNight = 110.0,
-                            ReviewScore = 9.5m,
-                            Status = true
+                            ReviewScore = 4m,
+                            Status = true,
+                            TypeOfAccommodation = 4
                         },
                         new
                         {
                             Id = new Guid("00000008-0000-0000-0000-000000000010"),
                             AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000010"),
                             AccommodationImagesId = new Guid("0000000a-0000-0000-0000-000000000010"),
-                            AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000002"),
                             Description = "Hotel iznad dubrovačkih gradskih zidina, sa spa centrom, restoranom i pogledom na otvoreno more.",
                             IsDeleted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000010"),
                             Name = "Hotel Adriatic",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000002"),
                             PricePerNight = 320.0,
-                            ReviewScore = 5.5m,
-                            Status = true
+                            ReviewScore = 3.5m,
+                            Status = true,
+                            TypeOfAccommodation = 2
                         },
                         new
                         {
                             Id = new Guid("00000008-0000-0000-0000-000000000011"),
                             AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000011"),
                             AccommodationImagesId = new Guid("0000000a-0000-0000-0000-000000000011"),
-                            AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000007"),
                             Description = "Vikendica u zelenilu Rožnika, dvadeset minuta hoda od centra Ljubljane, sa kaminom i terasom.",
                             IsDeleted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000011"),
                             Name = "Vikendica Rožnik",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000003"),
                             PricePerNight = 140.0,
-                            ReviewScore = 1.5m,
-                            Status = true
+                            ReviewScore = 4.5m,
+                            Status = true,
+                            TypeOfAccommodation = 7
                         },
                         new
                         {
                             Id = new Guid("00000008-0000-0000-0000-000000000012"),
                             AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000012"),
                             AccommodationImagesId = new Guid("0000000a-0000-0000-0000-000000000012"),
-                            AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000003"),
                             Description = "Resort nadomak Salzburga sa unutrašnjim bazenom, wellness centrom i pogledom na Alpe.",
                             IsDeleted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000012"),
                             Name = "Resort Alpenblick",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000003"),
                             PricePerNight = 260.0,
-                            ReviewScore = 2.5m,
-                            Status = true
+                            ReviewScore = 4m,
+                            Status = true,
+                            TypeOfAccommodation = 3
                         });
                 });
 
@@ -268,11 +269,53 @@ namespace Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("AC")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Balcony")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Bathub")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Breakfast")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CoffeeMachine")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Kitchen")
                         .HasColumnType("bit");
 
                     b.Property<int>("NumberOfBeds")
                         .HasColumnType("int");
+
+                    b.Property<bool>("PrivateBathroom")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("PrivatePool")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("SeaView")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("SoundProof")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("SpaTub")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Terrace")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("View")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("WashingMachine")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -282,606 +325,242 @@ namespace Database.Migrations
                         new
                         {
                             Id = new Guid("00000009-0000-0000-0000-000000000001"),
+                            AC = true,
+                            Balcony = true,
+                            Bathub = true,
+                            Breakfast = false,
+                            CoffeeMachine = true,
                             IsDeleted = false,
-                            NumberOfBeds = 8
+                            Kitchen = true,
+                            NumberOfBeds = 8,
+                            PrivateBathroom = true,
+                            PrivatePool = true,
+                            SeaView = false,
+                            SoundProof = false,
+                            SpaTub = true,
+                            Terrace = true,
+                            View = true,
+                            WashingMachine = true
                         },
                         new
                         {
                             Id = new Guid("00000009-0000-0000-0000-000000000002"),
+                            AC = true,
+                            Balcony = true,
+                            Bathub = false,
+                            Breakfast = false,
+                            CoffeeMachine = true,
                             IsDeleted = false,
-                            NumberOfBeds = 4
+                            Kitchen = true,
+                            NumberOfBeds = 4,
+                            PrivateBathroom = true,
+                            PrivatePool = false,
+                            SeaView = false,
+                            SoundProof = true,
+                            SpaTub = false,
+                            Terrace = false,
+                            View = true,
+                            WashingMachine = true
                         },
                         new
                         {
                             Id = new Guid("00000009-0000-0000-0000-000000000003"),
+                            AC = true,
+                            Balcony = true,
+                            Bathub = true,
+                            Breakfast = true,
+                            CoffeeMachine = true,
                             IsDeleted = false,
-                            NumberOfBeds = 2
+                            Kitchen = false,
+                            NumberOfBeds = 2,
+                            PrivateBathroom = true,
+                            PrivatePool = false,
+                            SeaView = false,
+                            SoundProof = true,
+                            SpaTub = false,
+                            Terrace = false,
+                            View = true,
+                            WashingMachine = false
                         },
                         new
                         {
                             Id = new Guid("00000009-0000-0000-0000-000000000004"),
+                            AC = true,
+                            Balcony = false,
+                            Bathub = false,
+                            Breakfast = false,
+                            CoffeeMachine = false,
                             IsDeleted = false,
-                            NumberOfBeds = 6
+                            Kitchen = true,
+                            NumberOfBeds = 6,
+                            PrivateBathroom = false,
+                            PrivatePool = false,
+                            SeaView = false,
+                            SoundProof = false,
+                            SpaTub = false,
+                            Terrace = false,
+                            View = false,
+                            WashingMachine = true
                         },
                         new
                         {
                             Id = new Guid("00000009-0000-0000-0000-000000000005"),
+                            AC = true,
+                            Balcony = true,
+                            Bathub = true,
+                            Breakfast = false,
+                            CoffeeMachine = true,
                             IsDeleted = false,
-                            NumberOfBeds = 5
+                            Kitchen = true,
+                            NumberOfBeds = 5,
+                            PrivateBathroom = true,
+                            PrivatePool = false,
+                            SeaView = false,
+                            SoundProof = true,
+                            SpaTub = true,
+                            Terrace = true,
+                            View = true,
+                            WashingMachine = true
                         },
                         new
                         {
                             Id = new Guid("00000009-0000-0000-0000-000000000006"),
+                            AC = false,
+                            Balcony = true,
+                            Bathub = false,
+                            Breakfast = false,
+                            CoffeeMachine = false,
                             IsDeleted = false,
-                            NumberOfBeds = 7
+                            Kitchen = true,
+                            NumberOfBeds = 7,
+                            PrivateBathroom = true,
+                            PrivatePool = false,
+                            SeaView = false,
+                            SoundProof = false,
+                            SpaTub = false,
+                            Terrace = true,
+                            View = true,
+                            WashingMachine = true
                         },
                         new
                         {
                             Id = new Guid("00000009-0000-0000-0000-000000000007"),
+                            AC = true,
+                            Balcony = true,
+                            Bathub = false,
+                            Breakfast = false,
+                            CoffeeMachine = true,
                             IsDeleted = false,
-                            NumberOfBeds = 4
+                            Kitchen = true,
+                            NumberOfBeds = 4,
+                            PrivateBathroom = true,
+                            PrivatePool = false,
+                            SeaView = false,
+                            SoundProof = false,
+                            SpaTub = false,
+                            Terrace = false,
+                            View = true,
+                            WashingMachine = false
                         },
                         new
                         {
                             Id = new Guid("00000009-0000-0000-0000-000000000008"),
+                            AC = true,
+                            Balcony = true,
+                            Bathub = true,
+                            Breakfast = false,
+                            CoffeeMachine = true,
                             IsDeleted = false,
-                            NumberOfBeds = 9
+                            Kitchen = true,
+                            NumberOfBeds = 9,
+                            PrivateBathroom = true,
+                            PrivatePool = true,
+                            SeaView = true,
+                            SoundProof = false,
+                            SpaTub = true,
+                            Terrace = true,
+                            View = true,
+                            WashingMachine = true
                         },
                         new
                         {
                             Id = new Guid("00000009-0000-0000-0000-000000000009"),
+                            AC = true,
+                            Balcony = true,
+                            Bathub = false,
+                            Breakfast = false,
+                            CoffeeMachine = true,
                             IsDeleted = false,
-                            NumberOfBeds = 4
+                            Kitchen = true,
+                            NumberOfBeds = 4,
+                            PrivateBathroom = true,
+                            PrivatePool = false,
+                            SeaView = true,
+                            SoundProof = true,
+                            SpaTub = false,
+                            Terrace = false,
+                            View = true,
+                            WashingMachine = true
                         },
                         new
                         {
                             Id = new Guid("00000009-0000-0000-0000-000000000010"),
+                            AC = true,
+                            Balcony = true,
+                            Bathub = true,
+                            Breakfast = true,
+                            CoffeeMachine = true,
                             IsDeleted = false,
-                            NumberOfBeds = 2
+                            Kitchen = false,
+                            NumberOfBeds = 2,
+                            PrivateBathroom = true,
+                            PrivatePool = false,
+                            SeaView = true,
+                            SoundProof = true,
+                            SpaTub = true,
+                            Terrace = true,
+                            View = true,
+                            WashingMachine = false
                         },
                         new
                         {
                             Id = new Guid("00000009-0000-0000-0000-000000000011"),
+                            AC = false,
+                            Balcony = false,
+                            Bathub = true,
+                            Breakfast = false,
+                            CoffeeMachine = true,
                             IsDeleted = false,
-                            NumberOfBeds = 6
+                            Kitchen = true,
+                            NumberOfBeds = 6,
+                            PrivateBathroom = true,
+                            PrivatePool = false,
+                            SeaView = false,
+                            SoundProof = false,
+                            SpaTub = false,
+                            Terrace = true,
+                            View = true,
+                            WashingMachine = true
                         },
                         new
                         {
                             Id = new Guid("00000009-0000-0000-0000-000000000012"),
+                            AC = true,
+                            Balcony = true,
+                            Bathub = true,
+                            Breakfast = true,
+                            CoffeeMachine = true,
                             IsDeleted = false,
-                            NumberOfBeds = 3
-                        });
-                });
-
-            modelBuilder.Entity("Models.Domain.AccommodationDetailsAmenity", b =>
-                {
-                    b.Property<Guid>("AccommodationDetailsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AmenityId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("AccommodationDetailsId", "AmenityId");
-
-                    b.HasIndex("AmenityId");
-
-                    b.ToTable("AccommodationDetailsAmenities");
-
-                    b.HasData(
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000001"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000001"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000001"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000001"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000004")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000001"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000005")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000001"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000006")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000001"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000007")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000001"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000008")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000001"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000009")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000001"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000011")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000001"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000012")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000002"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000002"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000002"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000004")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000002"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000006")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000002"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000008")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000002"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000009")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000002"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000011")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000002"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000013")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000003"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000003"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000003"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000003"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000004")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000003"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000008")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000003"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000009")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000003"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000013")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000003"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000014")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000004"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000004")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000004"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000006")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000004"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000011")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000005"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000005"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000005"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000005"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000004")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000005"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000005")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000005"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000006")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000005"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000008")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000005"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000009")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000005"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000011")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000005"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000012")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000005"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000013")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000006"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000006"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000006"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000005")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000006"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000006")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000006"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000009")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000006"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000011")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000007"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000007"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000007"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000004")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000007"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000006")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000007"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000008")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000007"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000009")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000004")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000005")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000006")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000007")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000008")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000009")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000010")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000011")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000008"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000012")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000009"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000009"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000009"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000004")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000009"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000006")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000009"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000008")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000009"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000009")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000009"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000010")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000009"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000011")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000009"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000013")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000010"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000010"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000010"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000010"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000004")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000010"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000005")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000010"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000008")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000010"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000009")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000010"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000010")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000010"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000012")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000010"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000013")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000010"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000014")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000011"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000011"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000011"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000005")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000011"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000006")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000011"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000008")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000011"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000009")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000011"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000011")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000012"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000012"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000012"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000012"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000004")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000012"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000005")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000012"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000007")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000012"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000008")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000012"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000009")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000012"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000012")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000012"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000013")
-                        },
-                        new
-                        {
-                            AccommodationDetailsId = new Guid("00000009-0000-0000-0000-000000000012"),
-                            AmenityId = new Guid("00000010-0000-0000-0000-000000000014")
+                            Kitchen = false,
+                            NumberOfBeds = 3,
+                            PrivateBathroom = true,
+                            PrivatePool = true,
+                            SeaView = false,
+                            SoundProof = true,
+                            SpaTub = true,
+                            Terrace = true,
+                            View = true,
+                            WashingMachine = false
                         });
                 });
 
@@ -1086,90 +765,6 @@ namespace Database.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Models.Domain.AccommodationType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
-
-                    b.ToTable("AccommodationTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("0000000f-0000-0000-0000-000000000001"),
-                            IsDeleted = false,
-                            Name = "Kuća",
-                            SortOrder = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("0000000f-0000-0000-0000-000000000002"),
-                            IsDeleted = false,
-                            Name = "Hotel",
-                            SortOrder = 2
-                        },
-                        new
-                        {
-                            Id = new Guid("0000000f-0000-0000-0000-000000000003"),
-                            IsDeleted = false,
-                            Name = "Resort",
-                            SortOrder = 3
-                        },
-                        new
-                        {
-                            Id = new Guid("0000000f-0000-0000-0000-000000000004"),
-                            IsDeleted = false,
-                            Name = "Apartman",
-                            SortOrder = 4
-                        },
-                        new
-                        {
-                            Id = new Guid("0000000f-0000-0000-0000-000000000005"),
-                            IsDeleted = false,
-                            Name = "Vila",
-                            SortOrder = 5
-                        },
-                        new
-                        {
-                            Id = new Guid("0000000f-0000-0000-0000-000000000006"),
-                            IsDeleted = false,
-                            Name = "Hostel",
-                            SortOrder = 6
-                        },
-                        new
-                        {
-                            Id = new Guid("0000000f-0000-0000-0000-000000000007"),
-                            IsDeleted = false,
-                            Name = "Vikendica",
-                            SortOrder = 7
-                        },
-                        new
-                        {
-                            Id = new Guid("0000000f-0000-0000-0000-000000000008"),
-                            IsDeleted = false,
-                            Name = "Penthouse",
-                            SortOrder = 8
-                        });
-                });
-
             modelBuilder.Entity("Models.Domain.Administrator", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1203,151 +798,6 @@ namespace Database.Migrations
                             IsDeleted = false,
                             Joined = new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             UserId = new Guid("00000004-0000-0000-0000-000000000001")
-                        });
-                });
-
-            modelBuilder.Entity("Models.Domain.Amenity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
-
-                    b.ToTable("Amenities");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000001"),
-                            Code = "Bathub",
-                            IsDeleted = false,
-                            Name = "Kada",
-                            SortOrder = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000002"),
-                            Code = "Balcony",
-                            IsDeleted = false,
-                            Name = "Balkon",
-                            SortOrder = 2
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000003"),
-                            Code = "PrivateBathroom",
-                            IsDeleted = false,
-                            Name = "Privatno kupatilo",
-                            SortOrder = 3
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000004"),
-                            Code = "AC",
-                            IsDeleted = false,
-                            Name = "Klima uređaj",
-                            SortOrder = 4
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000005"),
-                            Code = "Terrace",
-                            IsDeleted = false,
-                            Name = "Terasa",
-                            SortOrder = 5
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000006"),
-                            Code = "Kitchen",
-                            IsDeleted = false,
-                            Name = "Kuhinja",
-                            SortOrder = 6
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000007"),
-                            Code = "PrivatePool",
-                            IsDeleted = false,
-                            Name = "Privatni bazen",
-                            SortOrder = 7
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000008"),
-                            Code = "CoffeeMachine",
-                            IsDeleted = false,
-                            Name = "Aparat za kafu",
-                            SortOrder = 8
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000009"),
-                            Code = "View",
-                            IsDeleted = false,
-                            Name = "Pogled",
-                            SortOrder = 9
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000010"),
-                            Code = "SeaView",
-                            IsDeleted = false,
-                            Name = "Pogled na more",
-                            SortOrder = 10
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000011"),
-                            Code = "WashingMachine",
-                            IsDeleted = false,
-                            Name = "Mašina za veš",
-                            SortOrder = 11
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000012"),
-                            Code = "SpaTub",
-                            IsDeleted = false,
-                            Name = "Hidromasažna kada",
-                            SortOrder = 12
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000013"),
-                            Code = "SoundProof",
-                            IsDeleted = false,
-                            Name = "Zvučna izolacija",
-                            SortOrder = 13
-                        },
-                        new
-                        {
-                            Id = new Guid("00000010-0000-0000-0000-000000000014"),
-                            Code = "Breakfast",
-                            IsDeleted = false,
-                            Name = "Doručak",
-                            SortOrder = 14
                         });
                 });
 
@@ -1499,8 +949,7 @@ namespace Database.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .IsUnique();
 
                     b.ToTable("Countries");
 
@@ -1905,63 +1354,6 @@ namespace Database.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Models.Domain.Payment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasMaxLength(3)
-                        .HasColumnType("nvarchar(3)");
-
-                    b.Property<string>("FailureReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Provider")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("ProviderCaptureId")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<string>("ProviderOrderId")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<Guid>("ReservationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProviderOrderId")
-                        .IsUnique()
-                        .HasFilter("[ProviderOrderId] IS NOT NULL");
-
-                    b.HasIndex("ReservationId");
-
-                    b.ToTable("Payments");
-                });
-
             modelBuilder.Entity("Models.Domain.Reservation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1986,24 +1378,8 @@ namespace Database.Migrations
                     b.Property<int>("NumberOfGuests")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("PricePerNight")
-                        .HasColumnType("decimal(10,2)");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("StatusChangedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("StatusReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(10,2)");
 
                     b.HasKey("Id");
 
@@ -2023,11 +1399,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 1,
-                            PricePerNight = 180m,
-                            StartDate = new DateTime(2026, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2025, 12, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 360m
+                            StartDate = new DateTime(2026, 1, 5, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2038,11 +1410,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 2,
-                            PricePerNight = 180m,
-                            StartDate = new DateTime(2026, 3, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 2, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 540m
+                            StartDate = new DateTime(2026, 3, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2053,11 +1421,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 180m,
-                            StartDate = new DateTime(2026, 5, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 4, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 720m
+                            StartDate = new DateTime(2026, 5, 9, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2068,11 +1432,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 180m,
-                            StartDate = new DateTime(2026, 7, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 6, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 900m
+                            StartDate = new DateTime(2026, 7, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2083,11 +1443,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 180m,
-                            StartDate = new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 1,
-                            StatusChangedAt = new DateTime(2026, 8, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1080m
+                            StartDate = new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2098,11 +1454,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 2,
-                            PricePerNight = 65m,
-                            StartDate = new DateTime(2026, 1, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2025, 12, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 195m
+                            StartDate = new DateTime(2026, 1, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2113,11 +1465,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 3,
-                            PricePerNight = 65m,
-                            StartDate = new DateTime(2026, 3, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 260m
+                            StartDate = new DateTime(2026, 3, 11, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2128,11 +1476,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 65m,
-                            StartDate = new DateTime(2026, 5, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 325m
+                            StartDate = new DateTime(2026, 5, 12, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2143,11 +1487,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 65m,
-                            StartDate = new DateTime(2026, 7, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 390m
+                            StartDate = new DateTime(2026, 7, 13, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2158,11 +1498,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 65m,
-                            StartDate = new DateTime(2026, 9, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 2,
-                            StatusChangedAt = new DateTime(2026, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 130m
+                            StartDate = new DateTime(2026, 9, 13, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2173,11 +1509,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 3,
-                            PricePerNight = 120m,
-                            StartDate = new DateTime(2026, 1, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 480m
+                            StartDate = new DateTime(2026, 1, 11, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2188,11 +1520,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 4,
-                            PricePerNight = 120m,
-                            StartDate = new DateTime(2026, 3, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 600m
+                            StartDate = new DateTime(2026, 3, 14, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2203,11 +1531,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 120m,
-                            StartDate = new DateTime(2026, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 720m
+                            StartDate = new DateTime(2026, 5, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2218,11 +1542,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 120m,
-                            StartDate = new DateTime(2026, 7, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 240m
+                            StartDate = new DateTime(2026, 7, 16, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2233,11 +1553,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 120m,
-                            StartDate = new DateTime(2026, 9, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 2,
-                            StatusChangedAt = new DateTime(2026, 9, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 360m
+                            StartDate = new DateTime(2026, 9, 16, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2248,11 +1564,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 4,
-                            PricePerNight = 25m,
-                            StartDate = new DateTime(2026, 1, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 125m
+                            StartDate = new DateTime(2026, 1, 14, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2263,11 +1575,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 1,
-                            PricePerNight = 25m,
-                            StartDate = new DateTime(2026, 3, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 150m
+                            StartDate = new DateTime(2026, 3, 17, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2278,11 +1586,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 25m,
-                            StartDate = new DateTime(2026, 5, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 50m
+                            StartDate = new DateTime(2026, 5, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2293,11 +1597,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 25m,
-                            StartDate = new DateTime(2026, 7, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 75m
+                            StartDate = new DateTime(2026, 7, 19, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2308,12 +1608,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 25m,
-                            StartDate = new DateTime(2026, 9, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 3,
-                            StatusChangedAt = new DateTime(2026, 9, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            StatusReason = "Gost je otkazao putovanje.",
-                            TotalPrice = 100m
+                            StartDate = new DateTime(2026, 9, 19, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2324,11 +1619,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 1,
-                            PricePerNight = 210m,
-                            StartDate = new DateTime(2026, 1, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1260m
+                            StartDate = new DateTime(2026, 1, 17, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2339,11 +1630,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 2,
-                            PricePerNight = 210m,
-                            StartDate = new DateTime(2026, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 420m
+                            StartDate = new DateTime(2026, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2354,11 +1641,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 210m,
-                            StartDate = new DateTime(2026, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 630m
+                            StartDate = new DateTime(2026, 5, 21, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2369,11 +1652,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 210m,
-                            StartDate = new DateTime(2026, 7, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 840m
+                            StartDate = new DateTime(2026, 7, 22, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2384,11 +1663,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 210m,
-                            StartDate = new DateTime(2026, 9, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 1,
-                            StatusChangedAt = new DateTime(2026, 9, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1050m
+                            StartDate = new DateTime(2026, 9, 22, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2399,11 +1674,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 2,
-                            PricePerNight = 95m,
-                            StartDate = new DateTime(2026, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 190m
+                            StartDate = new DateTime(2026, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2414,11 +1685,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 3,
-                            PricePerNight = 95m,
-                            StartDate = new DateTime(2026, 3, 23, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 285m
+                            StartDate = new DateTime(2026, 3, 23, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2429,11 +1696,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 95m,
-                            StartDate = new DateTime(2026, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 380m
+                            StartDate = new DateTime(2026, 5, 24, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2444,11 +1707,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 95m,
-                            StartDate = new DateTime(2026, 7, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 475m
+                            StartDate = new DateTime(2026, 7, 25, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2459,11 +1718,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 95m,
-                            StartDate = new DateTime(2026, 9, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 2,
-                            StatusChangedAt = new DateTime(2026, 9, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 570m
+                            StartDate = new DateTime(2026, 9, 25, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2474,11 +1729,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 3,
-                            PricePerNight = 70m,
-                            StartDate = new DateTime(2026, 1, 23, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 210m
+                            StartDate = new DateTime(2026, 1, 23, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2489,11 +1740,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 4,
-                            PricePerNight = 70m,
-                            StartDate = new DateTime(2026, 3, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 280m
+                            StartDate = new DateTime(2026, 3, 26, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2504,11 +1751,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 70m,
-                            StartDate = new DateTime(2026, 5, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 350m
+                            StartDate = new DateTime(2026, 5, 27, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2519,11 +1762,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 70m,
-                            StartDate = new DateTime(2026, 7, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 420m
+                            StartDate = new DateTime(2026, 7, 28, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2534,11 +1773,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 70m,
-                            StartDate = new DateTime(2026, 9, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 2,
-                            StatusChangedAt = new DateTime(2026, 9, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 140m
+                            StartDate = new DateTime(2026, 9, 28, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2549,11 +1784,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 4,
-                            PricePerNight = 240m,
-                            StartDate = new DateTime(2026, 1, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 960m
+                            StartDate = new DateTime(2026, 1, 26, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2564,11 +1795,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 1,
-                            PricePerNight = 240m,
-                            StartDate = new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1200m
+                            StartDate = new DateTime(2026, 3, 29, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2579,11 +1806,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 240m,
-                            StartDate = new DateTime(2026, 5, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1440m
+                            StartDate = new DateTime(2026, 5, 30, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2594,11 +1817,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 240m,
-                            StartDate = new DateTime(2026, 7, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 480m
+                            StartDate = new DateTime(2026, 7, 31, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2609,12 +1828,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 240m,
-                            StartDate = new DateTime(2026, 10, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 3,
-                            StatusChangedAt = new DateTime(2026, 9, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            StatusReason = "Gost je otkazao putovanje.",
-                            TotalPrice = 720m
+                            StartDate = new DateTime(2026, 10, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2625,11 +1839,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 1,
-                            PricePerNight = 110m,
-                            StartDate = new DateTime(2026, 1, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 550m
+                            StartDate = new DateTime(2026, 1, 29, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2640,11 +1850,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 2,
-                            PricePerNight = 110m,
-                            StartDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 660m
+                            StartDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2655,11 +1861,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 110m,
-                            StartDate = new DateTime(2026, 6, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 23, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 220m
+                            StartDate = new DateTime(2026, 6, 2, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2670,11 +1872,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 110m,
-                            StartDate = new DateTime(2026, 8, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 330m
+                            StartDate = new DateTime(2026, 8, 3, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2685,11 +1883,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 110m,
-                            StartDate = new DateTime(2026, 10, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 1,
-                            StatusChangedAt = new DateTime(2026, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 440m
+                            StartDate = new DateTime(2026, 10, 4, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2700,11 +1894,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 2,
-                            PricePerNight = 320m,
-                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1920m
+                            StartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2715,11 +1905,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 3,
-                            PricePerNight = 320m,
-                            StartDate = new DateTime(2026, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 640m
+                            StartDate = new DateTime(2026, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2730,11 +1916,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 320m,
-                            StartDate = new DateTime(2026, 6, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 960m
+                            StartDate = new DateTime(2026, 6, 5, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2745,11 +1927,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 320m,
-                            StartDate = new DateTime(2026, 8, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1280m
+                            StartDate = new DateTime(2026, 8, 6, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2760,11 +1938,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 320m,
-                            StartDate = new DateTime(2026, 10, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 2,
-                            StatusChangedAt = new DateTime(2026, 9, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1600m
+                            StartDate = new DateTime(2026, 10, 7, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2775,11 +1949,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 3,
-                            PricePerNight = 140m,
-                            StartDate = new DateTime(2026, 2, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 280m
+                            StartDate = new DateTime(2026, 2, 4, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2790,11 +1960,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 4,
-                            PricePerNight = 140m,
-                            StartDate = new DateTime(2026, 4, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 420m
+                            StartDate = new DateTime(2026, 4, 7, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2805,11 +1971,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 1,
-                            PricePerNight = 140m,
-                            StartDate = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 5, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 560m
+                            StartDate = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2820,11 +1982,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 140m,
-                            StartDate = new DateTime(2026, 8, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 700m
+                            StartDate = new DateTime(2026, 8, 9, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2835,11 +1993,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 140m,
-                            StartDate = new DateTime(2026, 10, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 2,
-                            StatusChangedAt = new DateTime(2026, 9, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 840m
+                            StartDate = new DateTime(2026, 10, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2850,11 +2004,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 4,
-                            PricePerNight = 260m,
-                            StartDate = new DateTime(2026, 2, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 1, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 780m
+                            StartDate = new DateTime(2026, 2, 7, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2865,11 +2015,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = true,
                             NumberOfGuests = 1,
-                            PricePerNight = 260m,
-                            StartDate = new DateTime(2026, 4, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 3, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1040m
+                            StartDate = new DateTime(2026, 4, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2880,11 +2026,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 2,
-                            PricePerNight = 260m,
-                            StartDate = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1300m
+                            StartDate = new DateTime(2026, 6, 11, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2895,11 +2037,7 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 3,
-                            PricePerNight = 260m,
-                            StartDate = new DateTime(2026, 8, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 5,
-                            StatusChangedAt = new DateTime(2026, 8, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TotalPrice = 1560m
+                            StartDate = new DateTime(2026, 8, 12, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
@@ -2910,53 +2048,8 @@ namespace Database.Migrations
                             IsDeleted = false,
                             IsRated = false,
                             NumberOfGuests = 4,
-                            PricePerNight = 260m,
-                            StartDate = new DateTime(2026, 10, 13, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 3,
-                            StatusChangedAt = new DateTime(2026, 10, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            StatusReason = "Gost je otkazao putovanje.",
-                            TotalPrice = 520m
+                            StartDate = new DateTime(2026, 10, 13, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
-                });
-
-            modelBuilder.Entity("Models.Domain.ReservationStatusHistory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ChangedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ChangedByRole")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<Guid>("ChangedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("FromStatus")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Reason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid>("ReservationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("ToStatus")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReservationId");
-
-                    b.ToTable("ReservationStatusHistory");
                 });
 
             modelBuilder.Entity("Models.Domain.Review", b =>
@@ -2970,8 +2063,7 @@ namespace Database.Migrations
 
                     b.Property<string>("Comment")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
@@ -3004,7 +2096,7 @@ namespace Database.Migrations
                             Comment = "Smještaj je tačno kako je opisan, domaćin se javio odmah i predaja ključeva je prošla bez čekanja.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000001"),
                             IsDeleted = false,
-                            Rating = 1,
+                            Rating = 3,
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3015,9 +2107,9 @@ namespace Database.Migrations
                             Comment = "Čisto, tiho i blizu centra. Jedina zamjerka je parking koji se popuni rano popodne.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000002"),
                             IsDeleted = false,
-                            Rating = 2,
-                            Satisfaction = false,
-                            WouldRecommend = false
+                            Rating = 4,
+                            Satisfaction = true,
+                            WouldRecommend = true
                         },
                         new
                         {
@@ -3026,9 +2118,9 @@ namespace Database.Migrations
                             Comment = "Čisto, tiho i blizu centra. Jedina zamjerka je parking koji se popuni rano popodne.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000002"),
                             IsDeleted = false,
-                            Rating = 2,
-                            Satisfaction = false,
-                            WouldRecommend = false
+                            Rating = 4,
+                            Satisfaction = true,
+                            WouldRecommend = true
                         },
                         new
                         {
@@ -3037,9 +2129,9 @@ namespace Database.Migrations
                             Comment = "Odličan odnos cijene i kvaliteta, doručak bogat, osoblje ljubazno. Vraćamo se sigurno.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000003"),
                             IsDeleted = false,
-                            Rating = 3,
-                            Satisfaction = false,
-                            WouldRecommend = false
+                            Rating = 5,
+                            Satisfaction = true,
+                            WouldRecommend = true
                         },
                         new
                         {
@@ -3048,18 +2140,18 @@ namespace Database.Migrations
                             Comment = "Odličan odnos cijene i kvaliteta, doručak bogat, osoblje ljubazno. Vraćamo se sigurno.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000003"),
                             IsDeleted = false,
-                            Rating = 3,
-                            Satisfaction = false,
-                            WouldRecommend = false
+                            Rating = 5,
+                            Satisfaction = true,
+                            WouldRecommend = true
                         },
                         new
                         {
                             Id = new Guid("0000000c-0000-0000-0000-000000000006"),
                             AccommodationId = new Guid("00000008-0000-0000-0000-000000000003"),
-                            Comment = "",
+                            Comment = "Sve je bilo uredno, ali grijanje je slabo radilo prve večeri dok domaćin nije došao i podesio ga.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000004"),
                             IsDeleted = false,
-                            Rating = 4,
+                            Rating = 3,
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3067,10 +2159,10 @@ namespace Database.Migrations
                         {
                             Id = new Guid("0000000c-0000-0000-0000-000000000007"),
                             AccommodationId = new Guid("00000008-0000-0000-0000-000000000004"),
-                            Comment = "",
+                            Comment = "Sve je bilo uredno, ali grijanje je slabo radilo prve večeri dok domaćin nije došao i podesio ga.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000004"),
                             IsDeleted = false,
-                            Rating = 4,
+                            Rating = 3,
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3081,9 +2173,9 @@ namespace Database.Migrations
                             Comment = "Pogled iz dnevnog boravka je stvarno kakav se vidi na fotografijama, preporučujem za par dana odmora.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000005"),
                             IsDeleted = false,
-                            Rating = 5,
-                            Satisfaction = false,
-                            WouldRecommend = false
+                            Rating = 4,
+                            Satisfaction = true,
+                            WouldRecommend = true
                         },
                         new
                         {
@@ -3092,9 +2184,9 @@ namespace Database.Migrations
                             Comment = "Pogled iz dnevnog boravka je stvarno kakav se vidi na fotografijama, preporučujem za par dana odmora.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000005"),
                             IsDeleted = false,
-                            Rating = 5,
-                            Satisfaction = false,
-                            WouldRecommend = false
+                            Rating = 4,
+                            Satisfaction = true,
+                            WouldRecommend = true
                         },
                         new
                         {
@@ -3103,9 +2195,9 @@ namespace Database.Migrations
                             Comment = "Kupatilo bi trebalo osvježiti, sve ostalo je bilo besprijekorno i dobili smo kasniji odjavni termin.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000001"),
                             IsDeleted = false,
-                            Rating = 6,
-                            Satisfaction = false,
-                            WouldRecommend = false
+                            Rating = 5,
+                            Satisfaction = true,
+                            WouldRecommend = true
                         },
                         new
                         {
@@ -3114,9 +2206,9 @@ namespace Database.Migrations
                             Comment = "Kupatilo bi trebalo osvježiti, sve ostalo je bilo besprijekorno i dobili smo kasniji odjavni termin.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000001"),
                             IsDeleted = false,
-                            Rating = 6,
-                            Satisfaction = false,
-                            WouldRecommend = false
+                            Rating = 5,
+                            Satisfaction = true,
+                            WouldRecommend = true
                         },
                         new
                         {
@@ -3125,9 +2217,9 @@ namespace Database.Migrations
                             Comment = "Smještaj je tačno kako je opisan, domaćin se javio odmah i predaja ključeva je prošla bez čekanja.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000002"),
                             IsDeleted = false,
-                            Rating = 7,
-                            Satisfaction = true,
-                            WouldRecommend = true
+                            Rating = 3,
+                            Satisfaction = false,
+                            WouldRecommend = false
                         },
                         new
                         {
@@ -3136,18 +2228,18 @@ namespace Database.Migrations
                             Comment = "Smještaj je tačno kako je opisan, domaćin se javio odmah i predaja ključeva je prošla bez čekanja.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000002"),
                             IsDeleted = false,
-                            Rating = 7,
-                            Satisfaction = true,
-                            WouldRecommend = true
+                            Rating = 3,
+                            Satisfaction = false,
+                            WouldRecommend = false
                         },
                         new
                         {
                             Id = new Guid("0000000c-0000-0000-0000-000000000014"),
                             AccommodationId = new Guid("00000008-0000-0000-0000-000000000007"),
-                            Comment = "",
+                            Comment = "Čisto, tiho i blizu centra. Jedina zamjerka je parking koji se popuni rano popodne.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000003"),
                             IsDeleted = false,
-                            Rating = 8,
+                            Rating = 4,
                             Satisfaction = true,
                             WouldRecommend = true
                         },
@@ -3155,10 +2247,10 @@ namespace Database.Migrations
                         {
                             Id = new Guid("0000000c-0000-0000-0000-000000000015"),
                             AccommodationId = new Guid("00000008-0000-0000-0000-000000000008"),
-                            Comment = "",
+                            Comment = "Čisto, tiho i blizu centra. Jedina zamjerka je parking koji se popuni rano popodne.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000003"),
                             IsDeleted = false,
-                            Rating = 8,
+                            Rating = 4,
                             Satisfaction = true,
                             WouldRecommend = true
                         },
@@ -3169,7 +2261,7 @@ namespace Database.Migrations
                             Comment = "Odličan odnos cijene i kvaliteta, doručak bogat, osoblje ljubazno. Vraćamo se sigurno.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000004"),
                             IsDeleted = false,
-                            Rating = 9,
+                            Rating = 5,
                             Satisfaction = true,
                             WouldRecommend = true
                         },
@@ -3180,7 +2272,7 @@ namespace Database.Migrations
                             Comment = "Odličan odnos cijene i kvaliteta, doručak bogat, osoblje ljubazno. Vraćamo se sigurno.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000004"),
                             IsDeleted = false,
-                            Rating = 9,
+                            Rating = 5,
                             Satisfaction = true,
                             WouldRecommend = true
                         },
@@ -3191,9 +2283,9 @@ namespace Database.Migrations
                             Comment = "Sve je bilo uredno, ali grijanje je slabo radilo prve večeri dok domaćin nije došao i podesio ga.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000005"),
                             IsDeleted = false,
-                            Rating = 10,
-                            Satisfaction = true,
-                            WouldRecommend = true
+                            Rating = 3,
+                            Satisfaction = false,
+                            WouldRecommend = false
                         },
                         new
                         {
@@ -3202,9 +2294,9 @@ namespace Database.Migrations
                             Comment = "Sve je bilo uredno, ali grijanje je slabo radilo prve večeri dok domaćin nije došao i podesio ga.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000005"),
                             IsDeleted = false,
-                            Rating = 10,
-                            Satisfaction = true,
-                            WouldRecommend = true
+                            Rating = 3,
+                            Satisfaction = false,
+                            WouldRecommend = false
                         },
                         new
                         {
@@ -3213,9 +2305,9 @@ namespace Database.Migrations
                             Comment = "Pogled iz dnevnog boravka je stvarno kakav se vidi na fotografijama, preporučujem za par dana odmora.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000001"),
                             IsDeleted = false,
-                            Rating = 1,
-                            Satisfaction = false,
-                            WouldRecommend = false
+                            Rating = 4,
+                            Satisfaction = true,
+                            WouldRecommend = true
                         },
                         new
                         {
@@ -3224,31 +2316,31 @@ namespace Database.Migrations
                             Comment = "Pogled iz dnevnog boravka je stvarno kakav se vidi na fotografijama, preporučujem za par dana odmora.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000001"),
                             IsDeleted = false,
-                            Rating = 1,
-                            Satisfaction = false,
-                            WouldRecommend = false
+                            Rating = 4,
+                            Satisfaction = true,
+                            WouldRecommend = true
                         },
                         new
                         {
                             Id = new Guid("0000000c-0000-0000-0000-000000000022"),
                             AccommodationId = new Guid("00000008-0000-0000-0000-000000000011"),
-                            Comment = "",
+                            Comment = "Kupatilo bi trebalo osvježiti, sve ostalo je bilo besprijekorno i dobili smo kasniji odjavni termin.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000002"),
                             IsDeleted = false,
-                            Rating = 2,
-                            Satisfaction = false,
-                            WouldRecommend = false
+                            Rating = 5,
+                            Satisfaction = true,
+                            WouldRecommend = true
                         },
                         new
                         {
                             Id = new Guid("0000000c-0000-0000-0000-000000000023"),
                             AccommodationId = new Guid("00000008-0000-0000-0000-000000000012"),
-                            Comment = "",
+                            Comment = "Kupatilo bi trebalo osvježiti, sve ostalo je bilo besprijekorno i dobili smo kasniji odjavni termin.",
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000002"),
                             IsDeleted = false,
-                            Rating = 2,
-                            Satisfaction = false,
-                            WouldRecommend = false
+                            Rating = 5,
+                            Satisfaction = true,
+                            WouldRecommend = true
                         },
                         new
                         {
@@ -3317,13 +2409,6 @@ namespace Database.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SocialProvider")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int>("TokenVersion")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.ToTable("Users");
@@ -3341,10 +2426,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             Joined = new DateTime(2024, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Hodžić",
-                            Password = "pbkdf2-sha256$210000$F4sKc/vBcNAHlTczfUeA3g==$LUTXGVXtMq8Uur6S3ASNUONf7T+432LDByBNv1dMKsE=",
+                            Password = "e3bcb85cc3094a428058a741949eed1b13f3070201b8b0cbb0d81f28006307a7",
                             Role = 1337,
-                            SocialLink = "",
-                            TokenVersion = 0
+                            SocialLink = ""
                         },
                         new
                         {
@@ -3358,10 +2442,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             Joined = new DateTime(2024, 2, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Kovačević",
-                            Password = "pbkdf2-sha256$210000$UhC9GXZqavEsAGJn9zbRwQ==$Rz2+XiH0Ui9683w0xuUefPSLOzrk5gGbm+4vOwdHykk=",
+                            Password = "e3bcb85cc3094a428058a741949eed1b13f3070201b8b0cbb0d81f28006307a7",
                             Role = 1,
-                            SocialLink = "",
-                            TokenVersion = 0
+                            SocialLink = ""
                         },
                         new
                         {
@@ -3375,10 +2458,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             Joined = new DateTime(2024, 2, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Marić",
-                            Password = "pbkdf2-sha256$210000$XdfzQkcLsN4YQlSCpg/gcg==$WPuYCvaok41trGvT2ncbpeakLOUnHdW9JJfuJbEUnug=",
+                            Password = "e3bcb85cc3094a428058a741949eed1b13f3070201b8b0cbb0d81f28006307a7",
                             Role = 1,
-                            SocialLink = "",
-                            TokenVersion = 0
+                            SocialLink = ""
                         },
                         new
                         {
@@ -3392,10 +2474,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             Joined = new DateTime(2024, 3, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Novak",
-                            Password = "pbkdf2-sha256$210000$5IljL8kifIRsrp9674xXzA==$XMI04NeoIRRkOurPvdwsX3097utpIs65NgCcP0UKGmo=",
+                            Password = "e3bcb85cc3094a428058a741949eed1b13f3070201b8b0cbb0d81f28006307a7",
                             Role = 1,
-                            SocialLink = "",
-                            TokenVersion = 0
+                            SocialLink = ""
                         },
                         new
                         {
@@ -3409,10 +2490,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             Joined = new DateTime(2024, 3, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Selimović",
-                            Password = "pbkdf2-sha256$210000$sUfGRW2b3aYL9DiDBgsznw==$G5PH9AH2Tr6j4UeZKvbdK7t19AniWgjnpOT0qikPb8Q=",
+                            Password = "e3bcb85cc3094a428058a741949eed1b13f3070201b8b0cbb0d81f28006307a7",
                             Role = 0,
-                            SocialLink = "",
-                            TokenVersion = 0
+                            SocialLink = ""
                         },
                         new
                         {
@@ -3426,10 +2506,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             Joined = new DateTime(2024, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Softić",
-                            Password = "pbkdf2-sha256$210000$q+yfAiHLdAve+zlMAQ+9iQ==$iL61ES5hCKjQ3+qktR15LXekmOtHQGi/ioQf9PmnwmM=",
+                            Password = "e3bcb85cc3094a428058a741949eed1b13f3070201b8b0cbb0d81f28006307a7",
                             Role = 0,
-                            SocialLink = "",
-                            TokenVersion = 0
+                            SocialLink = ""
                         },
                         new
                         {
@@ -3443,10 +2522,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             Joined = new DateTime(2024, 4, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Bešić",
-                            Password = "pbkdf2-sha256$210000$lFIW5xtQMv5VWfNw1rVLLw==$2tU7BEZVNV0mynJBhoy7fCd4TtcyOmAHzeHJbqW7N54=",
+                            Password = "e3bcb85cc3094a428058a741949eed1b13f3070201b8b0cbb0d81f28006307a7",
                             Role = 0,
-                            SocialLink = "",
-                            TokenVersion = 0
+                            SocialLink = ""
                         },
                         new
                         {
@@ -3460,10 +2538,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             Joined = new DateTime(2024, 5, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Delić",
-                            Password = "pbkdf2-sha256$210000$BCJh96cpPJYZL96P4l4dmQ==$P8f57xgxkL9QiVulZ6Ve//gVw2elhzijjrsyV4+qpKk=",
+                            Password = "e3bcb85cc3094a428058a741949eed1b13f3070201b8b0cbb0d81f28006307a7",
                             Role = 0,
-                            SocialLink = "",
-                            TokenVersion = 0
+                            SocialLink = ""
                         },
                         new
                         {
@@ -3477,10 +2554,9 @@ namespace Database.Migrations
                             IsDeleted = false,
                             Joined = new DateTime(2024, 5, 23, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             LastName = "Zulfikarpašić",
-                            Password = "pbkdf2-sha256$210000$71wU3gNAAjy7UFRJpDT/hQ==$6VdEE7A/qJpvX3NpYeIkzvHmRbfVB69QOKUiwsy/luU=",
+                            Password = "e3bcb85cc3094a428058a741949eed1b13f3070201b8b0cbb0d81f28006307a7",
                             Role = 0,
-                            SocialLink = "",
-                            TokenVersion = 0
+                            SocialLink = ""
                         });
                 });
 
@@ -3493,12 +2569,6 @@ namespace Database.Migrations
                     b.HasOne("Models.Domain.AccommodationImages", "AccommodationImages")
                         .WithMany()
                         .HasForeignKey("AccommodationImagesId");
-
-                    b.HasOne("Models.Domain.AccommodationType", "AccommodationType")
-                        .WithMany()
-                        .HasForeignKey("AccommodationTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.HasOne("Models.Domain.Location", "Location")
                         .WithMany()
@@ -3514,30 +2584,9 @@ namespace Database.Migrations
 
                     b.Navigation("AccommodationImages");
 
-                    b.Navigation("AccommodationType");
-
                     b.Navigation("Location");
 
                     b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("Models.Domain.AccommodationDetailsAmenity", b =>
-                {
-                    b.HasOne("Models.Domain.AccommodationDetails", "AccommodationDetails")
-                        .WithMany("AccommodationDetailsAmenities")
-                        .HasForeignKey("AccommodationDetailsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Models.Domain.Amenity", "Amenity")
-                        .WithMany("AccommodationDetailsAmenities")
-                        .HasForeignKey("AmenityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AccommodationDetails");
-
-                    b.Navigation("Amenity");
                 });
 
             modelBuilder.Entity("Models.Domain.Administrator", b =>
@@ -3643,21 +2692,10 @@ namespace Database.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Models.Domain.Payment", b =>
-                {
-                    b.HasOne("Models.Domain.Reservation", "Reservation")
-                        .WithMany()
-                        .HasForeignKey("ReservationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Reservation");
-                });
-
             modelBuilder.Entity("Models.Domain.Reservation", b =>
                 {
                     b.HasOne("Models.Domain.Accommodation", "accommodation")
-                        .WithMany("Reservations")
+                        .WithMany()
                         .HasForeignKey("AccommodationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -3671,17 +2709,6 @@ namespace Database.Migrations
                     b.Navigation("accommodation");
 
                     b.Navigation("customer");
-                });
-
-            modelBuilder.Entity("Models.Domain.ReservationStatusHistory", b =>
-                {
-                    b.HasOne("Models.Domain.Reservation", "Reservation")
-                        .WithMany()
-                        .HasForeignKey("ReservationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Reservation");
                 });
 
             modelBuilder.Entity("Models.Domain.Review", b =>
@@ -3701,21 +2728,6 @@ namespace Database.Migrations
                     b.Navigation("Accommodation");
 
                     b.Navigation("Customer");
-                });
-
-            modelBuilder.Entity("Models.Domain.Accommodation", b =>
-                {
-                    b.Navigation("Reservations");
-                });
-
-            modelBuilder.Entity("Models.Domain.AccommodationDetails", b =>
-                {
-                    b.Navigation("AccommodationDetailsAmenities");
-                });
-
-            modelBuilder.Entity("Models.Domain.Amenity", b =>
-                {
-                    b.Navigation("AccommodationDetailsAmenities");
                 });
 
             modelBuilder.Entity("Models.Domain.Chat", b =>
