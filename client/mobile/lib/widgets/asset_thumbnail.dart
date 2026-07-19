@@ -6,7 +6,7 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 class AssetThumbnail extends StatelessWidget {
   final AssetEntity asset;
 
-  const AssetThumbnail({Key? key, required this.asset}) : super(key: key);
+  const AssetThumbnail({super.key, required this.asset});
 
   @override
   Widget build(BuildContext context) {

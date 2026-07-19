@@ -1,119 +1,91 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:ebooking/config/config.dart' as config;
-import 'package:ebooking/services/auth_service.dart';
-import 'package:ebooking/models/accomodation_model.dart';
+import 'dart:typed_data';
+
+import 'package:ebooking/config/app_constants.dart';
+import 'package:ebooking/models/accommodation_model.dart';
+import 'package:ebooking/services/api_client.dart';
 
 class AccommodationService {
-  final SecureStorage _secureStorage;
+  AccommodationService({required this._apiClient});
 
-  AccommodationService({required SecureStorage secureStorage})
-      : _secureStorage = secureStorage;
+  final ApiClient _apiClient;
 
-  Future<bool> add(AccommodationPOST accommodation) async {
-    final response = await http.post(
-        Uri.parse('${config.AppConfig.baseUrl}/api/Accommodation/Add'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ${await _secureStorage.getToken()}'
-        },
-        body: json.encode(accommodation.toJson()));
-    if (response.statusCode == 200) {
-      print('Accommodation added successfully');
-      return true;
-    } else {
-      print('Failed to add accommodation');
-      print(response.body);
-      print(response.statusCode);
-      return false;
-    }
+  /// Returns the stored listing, which the caller needs for its new id.
+  Future<AccommodationGET> add(AccommodationPOST accommodation) {
+    return _apiClient.post<AccommodationGET>(
+      '/api/Accommodation/Add',
+      body: accommodation.toJson(),
+      parse: (data) => AccommodationGET.fromJson(data as Map<String, dynamic>),
+    );
   }
 
-  getMyAccommodations() async {
-    final response = await http.get(
-        Uri.parse(
-            '${config.AppConfig.baseUrl}/api/Accommodation/GetMyAccommodation'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ${await _secureStorage.getToken()}'
-        });
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      print(response.body);
-      return data.map((json) => AccommodationGET.fromJson(json)).toList();
-    } else {
-      print('Failed to fetch accommodations');
-      print(response.body);
-      print(response.statusCode);
-      return [];
-    }
+  /// A partner's own listings. Every page is walked: the screen shows total,
+  /// active and inactive counts from the complete set, so a partial page
+  /// would understate them.
+  Future<List<AccommodationGET>> getMyAccommodations() {
+    return _apiClient.getAllPages<AccommodationGET>(
+      '/api/Accommodation/GetMyAccommodation',
+      parseItem: AccommodationGET.fromJson,
+    );
   }
 
-  fetchAccommodation(String accommodationId) async {
-    final response = await http.get(
-        Uri.parse(
-            '${config.AppConfig.baseUrl}/api/Accommodation/GetAccommodationById?id=$accommodationId'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ${await _secureStorage.getToken()}'
-        });
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return AccommodationGET.fromJson(data);
-    } else {
-      print('Failed to fetch accommodation');
-      print(response.body);
-      print(response.statusCode);
-      return null;
-    }
+  Future<AccommodationGET> fetchAccommodation(String accommodationId) {
+    return _apiClient.get<AccommodationGET>(
+      '/api/Accommodation/GetAccommodationById',
+      query: <String, String>{'id': accommodationId},
+      parse: (data) => AccommodationGET.fromJson(data as Map<String, dynamic>),
+    );
   }
 
-  Future<bool> update(AccommodationPATCH accommodation) async {
-    final response = await http.patch(
-        Uri.parse('${config.AppConfig.baseUrl}/api/Accommodation/Update'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ${await _secureStorage.getToken()}'
-        },
-        body: json.encode(accommodation.toJson()));
-    if (response.statusCode == 200) {
-      print('Accommodation updated successfully');
-      return true;
-    } else {
-      print('Failed to update accommodation');
-      print(response.body);
-      print(response.statusCode);
-      return false;
-    }
+  Future<AccommodationGET> update(AccommodationPATCH accommodation) {
+    return _apiClient.patch<AccommodationGET>(
+      '/api/Accommodation/Update',
+      body: accommodation.toJson(),
+      parse: (data) => AccommodationGET.fromJson(data as Map<String, dynamic>),
+    );
   }
 
+  Future<Uint8List> fetchImage(String imageUrl) {
+    return _apiClient.getBytes(imageUrl);
+  }
+
+  /// [radiusKm] is the server's own filter radius; it defaults to 10 km there
+  /// and is sent explicitly so the value the screen shows is the value asked
+  /// for.
+  ///
+  /// One page, for the previews on the Explore/map screens -- the full list
+  /// behind "See all" pages through [fetchNearbyAccommodationsPage] instead.
   Future<List<AccommodationGET>> fetchNearbyAccommodations(
-      double lat, double long) async {
-    // Fetch nearby accommodations based on the latitude and longitude
-    print('Latitude: $lat Longitude: $long');
-    final response = await http.get(
-        Uri.parse(
-            '${config.AppConfig.baseUrl}/api/Accommodation/GetNearby?latitude=$lat&longitude=$long'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ${_secureStorage.getToken()}'
-        });
-    if (response.statusCode == 200) {
-      final List<dynamic> accommodationsJson = json.decode(response.body);
-      return accommodationsJson
-          .map((json) => AccommodationGET.fromJson(json))
-          .toList();
-    } else {
-      print('Failed to fetch nearby accommodations');
-      print(response.body);
-      print(response.statusCode);
-      List<AccommodationGET> empty = [];
-      return empty;
-    }
+    double latitude,
+    double longitude, {
+    double radiusKm = 10,
+    int pageSize = ApiPagination.maxPageSize,
+  }) async {
+    final page = await fetchNearbyAccommodationsPage(
+      latitude,
+      longitude,
+      radiusKm: radiusKm,
+      pageSize: pageSize,
+    );
+    return page.items;
+  }
+
+  Future<Paged<AccommodationGET>> fetchNearbyAccommodationsPage(
+    double latitude,
+    double longitude, {
+    double radiusKm = 10,
+    int page = ApiPagination.firstPage,
+    int pageSize = ApiPagination.defaultPageSize,
+  }) {
+    return _apiClient.getPaged<AccommodationGET>(
+      '/api/Accommodation/GetNearby',
+      query: <String, String>{
+        'latitude': '$latitude',
+        'longitude': '$longitude',
+        'radius': '$radiusKm',
+      },
+      parseItem: AccommodationGET.fromJson,
+      page: page,
+      pageSize: pageSize,
+    );
   }
 }

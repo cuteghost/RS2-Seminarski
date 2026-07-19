@@ -1,73 +1,63 @@
-import 'dart:convert';
-
 import 'package:ebooking/models/reservation_model.dart';
-import 'package:ebooking/services/auth_service.dart';
-import 'package:http/http.dart' as http;
-import 'package:ebooking/config/config.dart';
+import 'package:ebooking/services/api_client.dart';
 
 class ReservationService {
-  final SecureStorage _secureStorage;
+  ReservationService({required this._apiClient});
 
-  ReservationService({required SecureStorage secureStorage})
-      : _secureStorage = secureStorage;
+  final ApiClient _apiClient;
 
-  Future<void> makeReservation(ReservationPOST reservation) async {
-    final token = await _secureStorage.getToken();
-    final response = await http.post(
-        Uri.parse('${AppConfig.baseUrl}/api/Reservation/Create'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json'
-        },
-        body: json.encode(reservation.toJson()));
-    if (response.statusCode != 200) {
-      throw Exception('Failed to make reservation');
-    } else {
-      return;
-    }
+  /// Returns the stored reservation. A refusal — an overlapping stay, a date
+  /// in the past — arrives as an [ApiException] carrying the server's message.
+  Future<ReservationGET> makeReservation(ReservationPOST reservation) {
+    return _apiClient.post<ReservationGET>(
+      '/api/Reservation/Create',
+      body: reservation.toJson(),
+      parse: (data) => ReservationGET.fromJson(data as Map<String, dynamic>),
+    );
   }
 
+  /// The taken dates for one listing. This endpoint is deliberately not paged
+  /// on the server: a partial page would show a booked date as free in the
+  /// calendar.
   Future<List<Map<String, DateTime>>> fetchReservedDates(
-      String accommodationId) async {
-    final token = await _secureStorage.getToken();
-    final response = await http.get(
-        Uri.parse(
-            '${AppConfig.baseUrl}/api/Reservation/CheckAvailability?accommodationId=$accommodationId'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json'
-        });
-    if (response.statusCode == 200) {
-      final List<dynamic> reservedDatesJsonList = json.decode(response.body);
-      return reservedDatesJsonList
-          .map((item) => {
-                'Start': DateTime.parse(item['startDate']),
-                'End': DateTime.parse(item['endDate'])
-              })
-          .toList();
-    } else {
-      throw Exception('Failed to load reserved dates');
-    }
+    String accommodationId,
+  ) {
+    return _apiClient.get<List<Map<String, DateTime>>>(
+      '/api/Reservation/CheckAvailability',
+      query: <String, String>{'accommodationId': accommodationId},
+      parse: (data) => (data as List)
+          .whereType<Map<String, dynamic>>()
+          .map(
+            (item) => <String, DateTime>{
+              'Start': DateTime.parse(item['startDate'] as String),
+              'End': DateTime.parse(item['endDate'] as String),
+            },
+          )
+          .toList(),
+    );
   }
 
-  Future<List<ReservationGET>> fetchMyReservations() async {
-    final token = await _secureStorage.getToken();
-    final response = await http.get(
-        Uri.parse(
-            '${AppConfig.baseUrl}/api/Reservation/Customer/GetReservations'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json'
-        });
-    print(response.body);
-    if (response.statusCode == 200) {
-      final List<dynamic> reservationsJsonList = json.decode(response.body);
-      print(reservationsJsonList);
-      return reservationsJsonList
-          .map((item) => ReservationGET.fromJson(item))
-          .toList();
-    } else {
-      throw Exception('Failed to load my reservations');
-    }
+  /// Every page is walked: the trips screen splits the result into upcoming
+  /// and past, so a truncated list would silently drop a stay.
+  Future<List<ReservationGET>> fetchMyReservations() {
+    return _apiClient.getAllPages<ReservationGET>(
+      '/api/Reservation/Customer/GetReservations',
+      parseItem: ReservationGET.fromJson,
+    );
+  }
+
+  Future<List<ReservationGET>> fetchPartnerReservations() {
+    return _apiClient.getAllPages<ReservationGET>(
+      '/api/Reservation/Partner/GetReservations',
+      parseItem: ReservationGET.fromJson,
+    );
+  }
+
+  Future<ReservationGET> changeStatus(ReservationStatusPATCH change) {
+    return _apiClient.patch<ReservationGET>(
+      '/api/Reservation/Status',
+      body: change.toJson(),
+      parse: (data) => ReservationGET.fromJson(data as Map<String, dynamic>),
+    );
   }
 }
