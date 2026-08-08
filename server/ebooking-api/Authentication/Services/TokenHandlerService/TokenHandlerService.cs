@@ -22,7 +22,11 @@ public class TokenHandlerService : ITokenHandlerService
     }
     public async Task<string> CreateTokenAsync(User user)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:key"]));
+        // JWT_KEY is loaded from the JWT_KEY environment variable at startup (see API/Program.cs).
+        // If this throws, the env var was not set — see rotation instructions in API/Program.cs.
+        var rawKey = _configuration["JWT:key"]
+            ?? throw new InvalidOperationException("JWT:key is not configured. Set the JWT_KEY environment variable.");
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(rawKey));
         var role = await CheckRole(user.Email);
         if (role == "") return null;
         var claims = new List<Claim>
@@ -44,7 +48,9 @@ public class TokenHandlerService : ITokenHandlerService
     public async Task<string> RefreshTokenAsync(string jwt)
     {
         var email = GetEmailFromJWT(jwt);
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:key"]));
+        var rawKey = _configuration["JWT:key"]
+            ?? throw new InvalidOperationException("JWT:key is not configured. Set the JWT_KEY environment variable.");
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(rawKey));
         var role = await CheckRole(email);
         var claims = new List<Claim>
         {

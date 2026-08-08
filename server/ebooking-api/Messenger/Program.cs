@@ -22,9 +22,23 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var configuration = builder.Configuration;
 
+// ---------------------------------------------------------------------------
+// JWT SIGNING KEY — SECURITY NOTICE
+// ---------------------------------------------------------------------------
+// The signing key MUST come from the JWT_KEY environment variable.
+// A committed RSA key file (tempkey.jwk) was previously checked into git and
+// has been neutralized. Rotate the key following the instructions in
+// API/Program.cs (same key is shared by the API and Messenger services).
+// Fail fast: the Messenger cannot validate tokens without a signing key.
+// ---------------------------------------------------------------------------
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? configuration["JWT:key"];
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? configuration["JWT:issuer"];
 var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? configuration["JWT:audience"];
+
+if (string.IsNullOrWhiteSpace(jwtKey))
+    throw new InvalidOperationException(
+        "JWT signing key is not configured. Set the JWT_KEY environment variable.");
+
 configuration["JWT:key"] = jwtKey;
 configuration["JWT:issuer"] = jwtIssuer;
 configuration["JWT:audience"] = jwtAudience;

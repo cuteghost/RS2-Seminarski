@@ -1,3 +1,18 @@
+# ---------------------------------------------------------------------------
+# JWT SIGNING KEYS — NEVER COMMIT THESE
+# ---------------------------------------------------------------------------
+# The file tempkey.jwk contained a real RSA private key and was previously
+# committed by mistake. Its key material is COMPROMISED and must be rotated.
+# See server/ebooking-api/API/Program.cs for rotation instructions.
+#
+# The keys/ folder contains ASP.NET Core Data Protection key-ring files that
+# are machine-specific and must never be committed to version control.
+# ---------------------------------------------------------------------------
+ebooking-api/API/tempkey.jwk
+ebooking-api/API/*.jwk
+*.jwk
+ebooking-api/API/keys/
+
 # Helpers folder and all contents
 helpers/
 

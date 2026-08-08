@@ -3,7 +3,7 @@
 # Wait for the SQL Server to come up
 sleep 30s
 
-/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P ${DB_PASSWORD} -Q "
+/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -Q "
 RESTORE DATABASE [170171] 
 FROM DISK = '/var/opt/mssql/backup/Database.bak' 
 WITH MOVE '170171' TO '/var/opt/mssql/data/170171.mdf', 

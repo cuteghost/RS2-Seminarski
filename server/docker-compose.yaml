@@ -1,43 +1,91 @@
-version: '3.8'
 services:
-
   webapi:
     build:
       context: ./ebooking-api
       dockerfile: Dockerfile-API
     env_file:
       - .env
+    environment:
+      - DB_SERVER=$DB_SERVER
+      - DB_NAME=$DB_NAME
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - JWT_KEY=$JWT_KEY
+      - JWT_ISSUER=$JWT_ISSUER
+      - JWT_AUDIENCE=$JWT_AUDIENCE
     ports:
       - 9999:8080
     depends_on:
-      - db
-      - rabbitmq
-
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    
   messenger:
     build:
       context: ./ebooking-api
       dockerfile: Dockerfile-Messenger
     env_file:
       - .env
+    environment:
+      - DB_SERVER=$DB_SERVER
+      - DB_NAME=$DB_NAME
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - JWT_KEY=$JWT_KEY
+      - JWT_ISSUER=$JWT_ISSUER
+      - JWT_AUDIENCE=$JWT_AUDIENCE
     ports:
       - 8888:8080
     depends_on:
-      - db
-      - webapi
-      - rabbitmq
-  
+      db:
+        condition: service_healthy
+      webapi:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
   paymentapp:
     build:
       context: ./ebooking-api
       dockerfile: Dockerfile-PaymentApp
     env_file:
       - .env
+    environment:
+      - DB_SERVER=$DB_SERVER
+      - DB_NAME=$DB_NAME
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - JWT_KEY=$JWT_KEY
+      - JWT_ISSUER=$JWT_ISSUER
+      - JWT_AUDIENCE=$JWT_AUDIENCE
     ports:
       - 6666:8080
     depends_on:
-      - db
-      - webapi
-      - rabbitmq
+      db:
+        condition: service_healthy
+      webapi:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -53,6 +101,12 @@ services:
       - "15672:15672"
     expose:
       - 5672
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
 
   db:
     build:
@@ -60,6 +114,19 @@ services:
       dockerfile: Dockerfile-Database
     ports:
       - "7777:1433"
+    env_file:
+      - .env
+    environment:
+      - SA_PASSWORD=${DB_PASSWORD}
+      - ACCEPT_EULA=Y
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -h -1 -Q \"SET NOCOUNT ON; SELECT 1 FROM sys.databases WHERE name = N'170171'\" | grep -q 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    restart:
+      unless-stopped
 volumes:
   mssql_data:
 

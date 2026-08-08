@@ -21,12 +21,37 @@ var builder = WebApplication.CreateBuilder(args);
 
 var configuration = builder.Configuration;
 
-// Load JWT settings from environment variables or appsettings.json
+// ---------------------------------------------------------------------------
+// JWT SIGNING KEY — SECURITY NOTICE
+// ---------------------------------------------------------------------------
+// The signing key MUST come from the JWT_KEY environment variable.
+// A committed RSA key file (tempkey.jwk) was previously checked into git and
+// has been neutralized. The key material in that file is COMPROMISED — rotate
+// it immediately using the steps below.
+//
+// HOW TO ROTATE / SET UP FOR THE FIRST TIME:
+//   1. Generate a new symmetric key (minimum 32 bytes / 256 bits):
+//          openssl rand -base64 64
+//   2. Copy the output and set it as an environment variable:
+//          - Local dev:  add   JWT_KEY=<value>  to server/.env   (already git-ignored)
+//          - Docker:     the docker-compose.yaml already reads JWT_KEY from .env
+//          - Production: store the value in your secrets manager / CI secrets
+//   3. Also set JWT_ISSUER and JWT_AUDIENCE (e.g. "localhost" for local dev).
+//   4. Revoke the old key: treat all JWTs signed before this rotation as
+//      untrusted. Force all users to log in again if needed.
+//   5. NEVER hardcode a key value here or in appsettings.json.
+// ---------------------------------------------------------------------------
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? configuration["JWT:key"];
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? configuration["JWT:issuer"];
 var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? configuration["JWT:audience"];
 var facebookAppId = Environment.GetEnvironmentVariable("FacebookAppId") ?? configuration["FacebookAppId"];
 var facebookAppSecret = Environment.GetEnvironmentVariable("FacebookAppSecret") ?? configuration["FacebookAppSecret"];
+
+// Fail fast: the app cannot start securely without a signing key.
+if (string.IsNullOrWhiteSpace(jwtKey))
+    throw new InvalidOperationException(
+        "JWT signing key is not configured. Set the JWT_KEY environment variable. " +
+        "See the rotation instructions in API/Program.cs for details.");
 
 configuration["JWT:key"] = jwtKey;
 configuration["JWT:issuer"] = jwtIssuer;
