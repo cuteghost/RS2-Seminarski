@@ -1,0 +1,16 @@
+$kind: http-request
+name: /api/User/UpdateEmail
+url: "{{baseUrl}}/api/User/UpdateEmail"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "password": "string",
+      "email": "string"
+    }
+settings: {}
+examples: ./.resources/-api-User-UpdateEmail.resources/examples
+order: 1000

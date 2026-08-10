@@ -1,0 +1,7 @@
+$kind: http-request
+name: /api/Customer/Delete
+url: "{{baseUrl}}/api/Customer/Delete"
+method: DELETE
+settings: {}
+examples: ./.resources/-api-Customer-Delete.resources/examples
+order: 1000

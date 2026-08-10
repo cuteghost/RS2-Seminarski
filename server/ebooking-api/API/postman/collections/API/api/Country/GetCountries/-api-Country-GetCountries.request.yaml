@@ -1,0 +1,7 @@
+$kind: http-request
+name: /api/Country/GetCountries
+url: "{{baseUrl}}/api/Country/GetCountries"
+method: GET
+settings: {}
+examples: ./.resources/-api-Country-GetCountries.resources/examples
+order: 1000

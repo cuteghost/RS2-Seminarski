@@ -3,7 +3,7 @@ using Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.DTO.AccommodationDTO;
-using Services.Recommendations;
+using Services.RecommendationService;
 using System.Collections.Generic;
 using System.Linq;
 

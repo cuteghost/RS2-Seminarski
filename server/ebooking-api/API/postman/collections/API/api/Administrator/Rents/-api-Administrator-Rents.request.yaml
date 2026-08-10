@@ -1,0 +1,10 @@
+$kind: http-request
+name: /api/Administrator/Rents
+url: "{{baseUrl}}/api/Administrator/Rents?start=1974-09-17T06:52:50.041Z&end=1974-09-17T06:52:50.041Z"
+method: GET
+queryParams:
+  start: 1974-09-17T06:52:50.041Z
+  end: 1974-09-17T06:52:50.041Z
+settings: {}
+examples: ./.resources/-api-Administrator-Rents.resources/examples
+order: 1000

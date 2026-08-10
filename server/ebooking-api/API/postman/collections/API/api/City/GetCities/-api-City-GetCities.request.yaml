@@ -1,0 +1,7 @@
+$kind: http-request
+name: /api/City/GetCities
+url: "{{baseUrl}}/api/City/GetCities"
+method: GET
+settings: {}
+examples: ./.resources/-api-City-GetCities.resources/examples
+order: 1000

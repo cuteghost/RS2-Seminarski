@@ -1,0 +1,22 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/Reservation/Create"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "accommodationId": "0ce47a3e-9ba6-bdee-0e71-ff757c9a0141",
+        "endDate": "1953-03-14T01:24:14.912Z",
+        "numberOfGuests": 9874,
+        "startDate": "2008-10-14T06:37:41.284Z"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: text
+    content: ""
+order: 1000

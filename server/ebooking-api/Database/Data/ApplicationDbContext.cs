@@ -42,6 +42,9 @@ public class ApplicationDbContext : DbContext
             .WithMany(c => c.Messages)
             .HasForeignKey(m => m.ChatId)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Country>()
+            .HasIndex(c => c.Name)
+            .IsUnique();
 
         base.OnModelCreating(modelBuilder);
     }

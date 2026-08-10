@@ -1,0 +1,15 @@
+$kind: http-request
+name: /api/Auth/facebook-login
+url: "{{baseUrl}}/api/Auth/facebook-login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "accessToken": "string"
+    }
+settings: {}
+examples: ./.resources/-api-Auth-facebook-login.resources/examples
+order: 1000

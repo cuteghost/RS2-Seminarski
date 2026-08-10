@@ -1,0 +1,23 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/Partner/Add"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "userId": "1dc8244b-8ce8-9a01-5674-069fd0735a30",
+        "countryId": "d736fd7e-b2d8-3e02-e744-2f1ea4dc88d9",
+        "taxId": 3706,
+        "taxName": "string",
+        "phoneNumber": 7903
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: text
+    content: ""
+order: 1000

@@ -1,0 +1,19 @@
+$kind: http-request
+name: /api/Customer/UpdateDetails
+url: "{{baseUrl}}/api/Customer/UpdateDetails"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "displayName": "string",
+      "firstName": "string",
+      "lastName": "string",
+      "birthDate": "1982-08-22T03:57:13.249Z",
+      "image": "string"
+    }
+settings: {}
+examples: ./.resources/-api-Customer-UpdateDetails.resources/examples
+order: 1000

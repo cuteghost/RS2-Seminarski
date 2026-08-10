@@ -1,0 +1,7 @@
+$kind: http-request
+name: /api/Reservation/Customer/GetReservations
+url: "{{baseUrl}}/api/Reservation/Customer/GetReservations"
+method: GET
+settings: {}
+examples: ./.resources/-api-Reservation-Customer-GetReservations.resources/examples
+order: 1000

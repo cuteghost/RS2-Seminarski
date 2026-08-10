@@ -1,0 +1,64 @@
+$kind: http-request
+name: /api/Accommodation/Add
+url: "{{baseUrl}}/api/Accommodation/Add"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "string",
+      "typeOfAccommodation": 6,
+      "pricePerNight": 8734.09268058212,
+      "imageThumb": "string",
+      "description": "string",
+      "accommodationImages": {
+        "image1": "string",
+        "image2": "string",
+        "image3": "string",
+        "image4": "string",
+        "image5": "string",
+        "image6": "string",
+        "image7": "string",
+        "image8": "string",
+        "image9": "string",
+        "image10": "string",
+        "image11": "string",
+        "image12": "string",
+        "image13": "string",
+        "image14": "string",
+        "image15": "string",
+        "image16": "string",
+        "image17": "string",
+        "image18": "string",
+        "image19": "string",
+        "image20": "string"
+      },
+      "location": {
+        "longitude": 8555.670508648136,
+        "latitude": 4610.156231223711,
+        "address": "string",
+        "cityId": "ec19c11d-fd72-9702-a5a7-31310a4849f1"
+      },
+      "accommodationDetails": {
+        "numberOfBeds": 4798,
+        "bathub": true,
+        "balcony": true,
+        "privateBathroom": false,
+        "ac": true,
+        "terrace": true,
+        "kitchen": false,
+        "privatePool": false,
+        "coffeeMachine": true,
+        "view": true,
+        "seaView": false,
+        "washingMachine": true,
+        "spaTub": false,
+        "soundProof": false,
+        "breakfast": false
+      }
+    }
+settings: {}
+examples: ./.resources/-api-Accommodation-Add.resources/examples
+order: 1000

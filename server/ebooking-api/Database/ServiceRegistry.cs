@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using Database;
 
-namespace TaxiHDbContext;
+namespace Seminarski.Database;
 
 public static class ServiceRegistry
 {

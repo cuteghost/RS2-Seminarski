@@ -1,0 +1,7 @@
+$kind: http-request
+name: /api/Accommodation/GetMyAccommodation
+url: "{{baseUrl}}/api/Accommodation/GetMyAccommodation"
+method: GET
+settings: {}
+examples: ./.resources/-api-Accommodation-GetMyAccommodation.resources/examples
+order: 1000

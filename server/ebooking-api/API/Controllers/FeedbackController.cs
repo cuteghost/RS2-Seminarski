@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models.Domain;
 using Models.DTO.ReviewDTO;
 using Repository.Interfaces;
-using Services;
+using Services.ReviewService;
 
 namespace Controllers;
 

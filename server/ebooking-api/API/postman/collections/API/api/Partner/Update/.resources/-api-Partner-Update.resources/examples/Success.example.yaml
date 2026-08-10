@@ -1,0 +1,24 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/Partner/Update"
+  method: PATCH
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "id": "83218419-99d5-69e5-aaf3-97813be3f495",
+        "userId": "5c3bbcbf-f66a-4a43-4f95-5d81da2d510b",
+        "taxId": 8293,
+        "taxName": "string",
+        "phoneNumber": 5746,
+        "countryId": "e063a697-cbd9-d4b2-91da-9e5498a87026"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: text
+    content: ""
+order: 1000

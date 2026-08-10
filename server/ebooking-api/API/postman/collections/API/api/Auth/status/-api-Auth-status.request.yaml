@@ -1,0 +1,7 @@
+$kind: http-request
+name: /api/Auth/status
+url: "{{baseUrl}}/api/Auth/status"
+method: GET
+settings: {}
+examples: ./.resources/-api-Auth-status.resources/examples
+order: 1000

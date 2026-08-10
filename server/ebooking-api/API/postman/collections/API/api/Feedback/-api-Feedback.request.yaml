@@ -1,0 +1,19 @@
+$kind: http-request
+name: /api/Feedback
+url: "{{baseUrl}}/api/Feedback"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "rating": 5876,
+      "satisfaction": true,
+      "wouldRecommend": true,
+      "comment": "string",
+      "accommodationId": "c076ed12-2638-182f-42de-075d3ebff41e"
+    }
+settings: {}
+examples: ./.resources/-api-Feedback.resources/examples
+order: 1000

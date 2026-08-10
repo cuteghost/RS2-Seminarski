@@ -1,0 +1,16 @@
+$kind: http-request
+name: /api/Country/Update
+url: "{{baseUrl}}/api/Country/Update"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "id": "f453ed63-a721-59af-a63d-03054c6d300c",
+      "name": "string"
+    }
+settings: {}
+examples: ./.resources/-api-Country-Update.resources/examples
+order: 1000

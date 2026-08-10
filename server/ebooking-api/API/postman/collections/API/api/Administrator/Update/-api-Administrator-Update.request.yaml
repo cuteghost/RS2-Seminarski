@@ -1,0 +1,12 @@
+$kind: http-request
+name: /api/Administrator/Update
+url: "{{baseUrl}}/api/Administrator/Update"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{}"
+settings: {}
+examples: ./.resources/-api-Administrator-Update.resources/examples
+order: 1000

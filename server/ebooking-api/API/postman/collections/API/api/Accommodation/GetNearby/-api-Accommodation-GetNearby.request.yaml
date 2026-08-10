@@ -1,0 +1,10 @@
+$kind: http-request
+name: /api/Accommodation/GetNearby
+url: "{{baseUrl}}/api/Accommodation/GetNearby?latitude=5426.975754190485&longitude=5426.975754190485"
+method: GET
+queryParams:
+  latitude: "5426.975754190485"
+  longitude: "5426.975754190485"
+settings: {}
+examples: ./.resources/-api-Accommodation-GetNearby.resources/examples
+order: 1000

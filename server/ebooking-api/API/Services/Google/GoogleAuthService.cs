@@ -43,11 +43,11 @@ public class GoogleAuthService : IGoogleAuthService
         }
         catch (Exception ex)
         {
-            return new BaseResponse<Payload>("Failed to get a response.", false, null);
+            return new BaseResponse<Payload>("Failed to get a response.", null);
         }
 
 
-        return new BaseResponse<Payload>("Success", true, payload);
+        return new BaseResponse<Payload>("Success", payload);
     }
 
     public async Task<GoogleUserInfoResponse> GetUserData(GoogleSignInVM model)

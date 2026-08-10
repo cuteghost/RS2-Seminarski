@@ -1,0 +1,18 @@
+$kind: http-request
+name: /api/Location/Add
+url: "{{baseUrl}}/api/Location/Add"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "longitude": 1085.734719471988,
+      "latitude": 6158.701282930413,
+      "address": "string",
+      "cityId": "5c8b3fe4-3bef-9b7e-7b4a-989e44e4a65e"
+    }
+settings: {}
+examples: ./.resources/-api-Location-Add.resources/examples
+order: 1000

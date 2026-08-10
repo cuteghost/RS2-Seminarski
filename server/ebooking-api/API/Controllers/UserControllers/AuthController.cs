@@ -53,27 +53,27 @@ public class AuthController : Controller
     {
         return Content(await _tokenHandlerService.RefreshTokenAsync(Authorization));
     }
+    // JUST FYI THIS NEEDS TO BE REWRITEN DUE TO THE CHANGE IN BASERESPONSE CLASS
+    // [HttpPost]
+    // [Route("facebook-login")]
+    // public async Task<IActionResult> FacebookLogin([FromBody] FacebookSignInDTO model)
+    // {
+    //     //Implement facebook login here
+    //     var facebookResponse = await _facebook.ValidateFacebookToken(model.AccessToken);
 
-    [HttpPost]
-    [Route("facebook-login")]
-    public async Task<IActionResult> FacebookLogin([FromBody] FacebookSignInDTO model)
-    {
-        //Implement facebook login here
-        var facebookResponse = await _facebook.ValidateFacebookToken(model.AccessToken);
+    //     if (!facebookResponse.IsSuccess)
+    //     {
+    //         return Unauthorized("401");
+    //     }
+    //     else
+    //     {
+    //         var facebookUser = await _facebook.GetFacebookUserInformation(model.AccessToken);
+    //         var validUser = await _loginRepository.FacebookLogin(facebookUser.Data);
+    //         var loginResponse = await _tokenHandlerService.CreateTokenAsync(validUser);
 
-        if (!facebookResponse.IsSuccess)
-        {
-            return Unauthorized("401");
-        }
-        else
-        {
-            var facebookUser = await _facebook.GetFacebookUserInformation(model.AccessToken);
-            var validUser = await _loginRepository.FacebookLogin(facebookUser.Data);
-            var loginResponse = await _tokenHandlerService.CreateTokenAsync(validUser);
-
-            return Content(loginResponse);
-        }
-    }
+    //         return Content(loginResponse);
+    //     }
+    // }
 
     [HttpPost]
     [Route("google-login")]

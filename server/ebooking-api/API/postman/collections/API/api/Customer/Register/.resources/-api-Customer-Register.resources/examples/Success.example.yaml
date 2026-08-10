@@ -1,0 +1,25 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/Customer/Register"
+  method: POST
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "displayName": "string",
+        "firstName": "string",
+        "lastName": "string",
+        "birthDate": "2020-10-31T21:55:32.265Z",
+        "email": "string",
+        "password": "string",
+        "image": "string"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: text
+    content: ""
+order: 1000

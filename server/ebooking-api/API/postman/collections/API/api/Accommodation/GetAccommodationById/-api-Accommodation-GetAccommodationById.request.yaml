@@ -1,0 +1,9 @@
+$kind: http-request
+name: /api/Accommodation/GetAccommodationById
+url: "{{baseUrl}}/api/Accommodation/GetAccommodationById?id=089d22e4-22a7-bce6-fdd5-a756cfc7ce20"
+method: GET
+queryParams:
+  id: 089d22e4-22a7-bce6-fdd5-a756cfc7ce20
+settings: {}
+examples: ./.resources/-api-Accommodation-GetAccommodationById.resources/examples
+order: 1000

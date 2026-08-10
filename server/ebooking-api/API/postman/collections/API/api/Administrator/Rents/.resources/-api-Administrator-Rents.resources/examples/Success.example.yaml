@@ -1,0 +1,14 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/Administrator/Rents?start=1974-09-17T06:52:50.041Z&end=1974-09-17T06:52:50.041Z"
+  method: GET
+  queryParams:
+    start: 1974-09-17T06:52:50.041Z
+    end: 1974-09-17T06:52:50.041Z
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: text
+    content: ""
+order: 1000

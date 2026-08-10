@@ -4,7 +4,7 @@ using Database;
 using Repository.Interfaces;
 using Repository.Classes;
 using Authentication.Services.HashService;
-using TaxiHDbContext;
+using Seminarski.Database;
 using Authentication.Services.TokenHandlerService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -14,8 +14,10 @@ using Services.FacebookService;
 using Services.Google;
 using Services.LocationService;
 using Services.RabbitMQService;
-using Services;
-using Services.Recommendations;
+using API.Exceptions;
+using Services.ReviewService;
+using Services.RecommendationService;
+using Services.CountryService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,41 +71,50 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 #endregion
 
-/*--------------------------------------------------------------------------------------*/
-builder.Services.AddScoped<IHashService, HashService>();
-/*--------------------------------------------------------------------------------------*/
-builder.Services.AddScoped<ITokenHandlerService, TokenHandlerService>();
-/*--------------------------------------------------------------------------------------*/
-builder.Services.AddSingleton<ILocationService, LocationService>();
-/*--------------------------------------------------------------------------------------*/
+// Generic repository registration
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
+// Specific service registrations
+#region SpecificServices
+builder.Services.AddScoped<IHashService, HashService>();
+builder.Services.AddScoped<ITokenHandlerService, TokenHandlerService>();
+builder.Services.AddSingleton<ILocationService, LocationService>();
+builder.Services.AddScoped<ICountryService, CountryService>();
+#endregion
+
+// Specific repository registrations
+#region SpecificRepositories
 builder.Services.AddScoped<ILoginRepository, LoginRepository>();
-builder.Services.AddTransient<IGenericRepository<City>, GenericRepository<City>>();
-builder.Services.AddTransient<IGenericRepository<Country>, GenericRepository<Country>>();
-builder.Services.AddTransient<IGenericRepository<Location>, GenericRepository<Location>>();
-builder.Services.AddTransient<IGenericRepository<User>, GenericRepository<User>>();
-builder.Services.AddTransient<IGenericRepository<Customer>, GenericRepository<Customer>>();
 builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
-builder.Services.AddTransient<IGenericRepository<Partner>, GenericRepository<Partner>>();
-builder.Services.AddTransient<IGenericRepository<Administrator>, GenericRepository<Administrator>>();
-builder.Services.AddTransient<IGenericRepository<Accommodation>, GenericRepository<Accommodation>>();
-builder.Services.AddTransient<IGenericRepository<Review>, GenericRepository<Review>>();
-builder.Services.AddTransient<IGenericRepository<Reservation>, GenericRepository<Reservation>>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IAdministratorRepository, AdministratorRepository>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
-builder.Services.AddSingleton<IFacebookAuthService, FacebookAuthService>();
-builder.Services.AddScoped<IMessageProducer, MessageProducer>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+#endregion
 
+// OAuth service registrations
+#region OAuthParties
+builder.Services.AddSingleton<IFacebookAuthService, FacebookAuthService>();
+builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+builder.Services.Configure<GoogleAuthConfig>(builder.Configuration.GetSection("Google"));
+
+builder.Services.Configure<FacebookAuthConfig>(configuration.GetSection("Facebook"));
+builder.Services.AddHttpClient("Facebook", c =>
+{
+    c.BaseAddress = new Uri("https://graph.facebook.com/v11.0/");
+    c.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+#endregion
+
+// Recommendation service registrations
 #region Recommendation
 builder.Services.AddSingleton<AccommodationRecommendationService>();
 builder.Services.AddScoped<RecommendationService>(provider =>
 {
     return new RecommendationService("MLModels/MLmodel.zip");
 });
-
-
 #endregion
+
 #region AuthConfiguration
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -121,15 +132,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 #endregion
 
-builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
-builder.Services.Configure<GoogleAuthConfig>(builder.Configuration.GetSection("Google"));
-
-builder.Services.Configure<FacebookAuthConfig>(configuration.GetSection("Facebook"));
-builder.Services.AddHttpClient("Facebook", c =>
-{
-    c.BaseAddress = new Uri("https://graph.facebook.com/v11.0/");
-    c.DefaultRequestHeaders.Add("Accept", "application/json");
-});
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
@@ -149,6 +151,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+
+app.UseExceptionHandler();
 
 var recommendationService = app.Services.GetRequiredService<AccommodationRecommendationService>();
 var model = recommendationService.TrainModel();

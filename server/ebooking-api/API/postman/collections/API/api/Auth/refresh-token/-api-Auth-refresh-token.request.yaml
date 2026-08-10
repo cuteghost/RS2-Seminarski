@@ -1,0 +1,7 @@
+$kind: http-request
+name: /api/Auth/refresh-token
+url: "{{baseUrl}}/api/Auth/refresh-token"
+method: GET
+settings: {}
+examples: ./.resources/-api-Auth-refresh-token.resources/examples
+order: 1000

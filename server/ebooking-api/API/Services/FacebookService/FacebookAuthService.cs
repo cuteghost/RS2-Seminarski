@@ -33,7 +33,7 @@ namespace Services.FacebookService
                     var responseAsString = await response.Content.ReadAsStringAsync();
 
                     var tokenValidationResponse = JsonConvert.DeserializeObject<FacebookTokenValidationResponse>(responseAsString);
-                    return new BaseResponse<FacebookTokenValidationResponse>("Success", true, tokenValidationResponse);
+                    return new BaseResponse<FacebookTokenValidationResponse>("Success", tokenValidationResponse);
                 }
             }
             catch (Exception ex)
@@ -41,7 +41,7 @@ namespace Services.FacebookService
                 throw;
             }
 
-            return new BaseResponse<FacebookTokenValidationResponse>("Failed to get response", false, null);
+            return new BaseResponse<FacebookTokenValidationResponse>("Failed to get response", null);
 
         }
 
@@ -58,7 +58,7 @@ namespace Services.FacebookService
                 {
                     var responseAsString = await response.Content.ReadAsStringAsync();
                     var userInfoResponse = JsonConvert.DeserializeObject<FacebookUserInfoResponse>(responseAsString);
-                    return new BaseResponse<FacebookUserInfoResponse>("Success", true, userInfoResponse);
+                    return new BaseResponse<FacebookUserInfoResponse>("Success", userInfoResponse);
                 }
             }
             catch (Exception ex)
@@ -66,7 +66,7 @@ namespace Services.FacebookService
                 throw;
             }
 
-            return new BaseResponse<FacebookUserInfoResponse>("Failed to get response", false, null);
+            return new BaseResponse<FacebookUserInfoResponse>("Failed to get response", null);
 
         }
 

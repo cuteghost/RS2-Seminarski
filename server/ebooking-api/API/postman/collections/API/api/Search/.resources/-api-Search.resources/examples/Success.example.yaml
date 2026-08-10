@@ -1,0 +1,17 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/Search?priceFrom=5426.975754190485&priceTo=5426.975754190485&city=string&checkIn=1974-09-17T06:52:50.041Z&checkOut=1974-09-17T06:52:50.041Z"
+  method: GET
+  queryParams:
+    priceFrom: "5426.975754190485"
+    priceTo: "5426.975754190485"
+    city: string
+    checkIn: 1974-09-17T06:52:50.041Z
+    checkOut: 1974-09-17T06:52:50.041Z
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: text
+    content: ""
+order: 1000

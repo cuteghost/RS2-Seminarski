@@ -1,0 +1,16 @@
+$kind: http-request
+name: /api/Auth/google-login
+url: "{{baseUrl}}/api/Auth/google-login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "accessToken": "string",
+      "idToken": "string"
+    }
+settings: {}
+examples: ./.resources/-api-Auth-google-login.resources/examples
+order: 1000

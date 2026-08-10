@@ -1,0 +1,7 @@
+$kind: http-request
+name: /api/Partner/PartnerDetails
+url: "{{baseUrl}}/api/Partner/PartnerDetails"
+method: GET
+settings: {}
+examples: ./.resources/-api-Partner-PartnerDetails.resources/examples
+order: 1000

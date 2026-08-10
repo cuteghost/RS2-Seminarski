@@ -1,0 +1,22 @@
+$kind: http-request
+name: /api/Administrator/Add
+url: "{{baseUrl}}/api/Administrator/Add"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "displayName": "string",
+      "firstName": "string",
+      "lastName": "string",
+      "birthDate": "1965-09-02T11:09:37.262Z",
+      "email": "string",
+      "password": "string",
+      "image": "string",
+      "isActive": false
+    }
+settings: {}
+examples: ./.resources/-api-Administrator-Add.resources/examples
+order: 1000

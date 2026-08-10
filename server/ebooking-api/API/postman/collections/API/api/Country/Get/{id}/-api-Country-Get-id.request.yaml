@@ -1,0 +1,9 @@
+$kind: http-request
+name: /api/Country/Get/:id
+url: "{{baseUrl}}/api/Country/Get/:id"
+method: GET
+pathVariables:
+  id: 089d22e4-22a7-bce6-fdd5-a756cfc7ce20
+settings: {}
+examples: ./.resources/-api-Country-Get-id.resources/examples
+order: 1000

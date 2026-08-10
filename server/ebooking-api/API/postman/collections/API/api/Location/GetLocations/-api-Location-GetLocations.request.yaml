@@ -1,0 +1,7 @@
+$kind: http-request
+name: /api/Location/GetLocations
+url: "{{baseUrl}}/api/Location/GetLocations"
+method: GET
+settings: {}
+examples: ./.resources/-api-Location-GetLocations.resources/examples
+order: 1000

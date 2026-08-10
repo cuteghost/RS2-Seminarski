@@ -1,0 +1,64 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/Accommodation/Update"
+  method: PATCH
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "id": "075cdbfb-fa1b-79b4-932b-170ade08bc2b",
+        "name": "string",
+        "status": false,
+        "typeOfAccommodation": 6,
+        "pricePerNight": 2274.78357926162,
+        "description": "string",
+        "accommodationDetails": {
+          "id": "60b9a53a-9075-31cb-059a-edbf45e16ee3",
+          "numberOfBeds": 442,
+          "bathub": true,
+          "balcony": true,
+          "privateBathroom": false,
+          "ac": false,
+          "terrace": true,
+          "kitchen": false,
+          "privatePool": true,
+          "coffeeMachine": true,
+          "view": true,
+          "seaView": true,
+          "washingMachine": true,
+          "spaTub": false,
+          "soundProof": true,
+          "breakfast": false
+        },
+        "accommodationImages": {
+          "image1": "string",
+          "image2": "string",
+          "image3": "string",
+          "image4": "string",
+          "image5": "string",
+          "image6": "string",
+          "image7": "string",
+          "image8": "string",
+          "image9": "string",
+          "image10": "string",
+          "image11": "string",
+          "image12": "string",
+          "image13": "string",
+          "image14": "string",
+          "image15": "string",
+          "image16": "string",
+          "image17": "string",
+          "image18": "string",
+          "image19": "string",
+          "image20": "string"
+        }
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  body:
+    type: text
+    content: ""
+order: 1000

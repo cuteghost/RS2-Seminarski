@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.SignalR;
 using System.Text;
-using TaxiHDbContext;
+using Seminarski.Database;
 using Messenger;
 using Messenger.Middleware;
 using EasyNetQ;

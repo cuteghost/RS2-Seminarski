@@ -1,0 +1,7 @@
+$kind: http-request
+name: /
+url: "{{baseUrl}}/"
+method: GET
+settings: {}
+examples: ./.resources/-.resources/examples
+order: 1000

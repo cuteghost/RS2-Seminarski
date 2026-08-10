@@ -1,0 +1,7 @@
+$kind: http-request
+name: /api/Administrator/Details
+url: "{{baseUrl}}/api/Administrator/Details"
+method: GET
+settings: {}
+examples: ./.resources/-api-Administrator-Details.resources/examples
+order: 1000

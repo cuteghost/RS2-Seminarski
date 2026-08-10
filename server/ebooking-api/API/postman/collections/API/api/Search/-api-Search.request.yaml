@@ -1,0 +1,13 @@
+$kind: http-request
+name: /api/Search
+url: "{{baseUrl}}/api/Search?priceFrom=5426.975754190485&priceTo=5426.975754190485&city=string&checkIn=1974-09-17T06:52:50.041Z&checkOut=1974-09-17T06:52:50.041Z"
+method: GET
+queryParams:
+  priceFrom: "5426.975754190485"
+  priceTo: "5426.975754190485"
+  city: string
+  checkIn: 1974-09-17T06:52:50.041Z
+  checkOut: 1974-09-17T06:52:50.041Z
+settings: {}
+examples: ./.resources/-api-Search.resources/examples
+order: 1000
