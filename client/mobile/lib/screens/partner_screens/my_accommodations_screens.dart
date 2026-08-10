@@ -1,12 +1,14 @@
 import 'package:ebooking/models/accomodation_model.dart';
 import 'package:ebooking/providers/accommodation_provider.dart';
 import 'package:ebooking/screens/partner_screens/accommodation_screen.dart';
-import 'package:ebooking/widgets/CustomPartnerBottomNavigationBar.dart';
+import 'package:ebooking/widgets/custom_partner_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking/widgets/accommodation_container.dart';
 import 'package:provider/provider.dart';
 
 class MyAccommodationsScreen extends StatelessWidget {
+  const MyAccommodationsScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +22,6 @@ class MyAccommodationsScreen extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CircularProgressIndicator();
           } else if (snapshot.hasError) {
-            print('Stack trace: ${snapshot.stackTrace}');
             return Text('Error: ${snapshot.error}');
           } else {
             return CustomScrollView(

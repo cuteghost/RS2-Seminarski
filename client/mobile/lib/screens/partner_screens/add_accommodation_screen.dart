@@ -13,11 +13,13 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:ebooking/widgets/asset_thumbnail.dart';
 
 class AddAccommodationScreen extends StatefulWidget {
+  const AddAccommodationScreen({super.key});
+
   @override
-  _AddAccommodationScreenState createState() => _AddAccommodationScreenState();
+  AddAccommodationScreenState createState() => AddAccommodationScreenState();
 }
 
-class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
+class AddAccommodationScreenState extends State<AddAccommodationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _addressController = TextEditingController();
   final _nameController = TextEditingController();
@@ -56,6 +58,7 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
     }
 
     List<AssetEntity> resultList = <AssetEntity>[];
+    if (!mounted) return;
     try {
       resultList = await AssetPicker.pickAssets(
             context,
@@ -66,8 +69,8 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
             ),
           ) ??
           [];
-    } on Exception catch (e) {
-      print(e);
+    } on Exception catch (_) {
+      // Ignore picker errors — user may have cancelled
     }
 
     if (!mounted) return;
@@ -87,6 +90,11 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
 
   @override
   void dispose() {
+    _addressController.dispose();
+    _nameController.dispose();
+    _priceController.dispose();
+    _descriptionController.dispose();
+    _accommodationDetailsNumBeds.dispose();
     super.dispose();
   }
 
@@ -94,7 +102,7 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Accommodation'),
+        title: const Text('Add Accommodation'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -109,10 +117,10 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.black)),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: _nameController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Name',
                     border: OutlineInputBorder(),
                   ),
@@ -123,10 +131,10 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: _priceController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Price Per Night',
                     border: OutlineInputBorder(),
                   ),
@@ -138,10 +146,10 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Description',
                     border: OutlineInputBorder(),
                   ),
@@ -152,8 +160,8 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                     return null;
                   },
                 ),
-                DropdownButtonFormField(
-                  value: _selectedCountry,
+                DropdownButtonFormField<Country>(
+                  initialValue: _selectedCountry,
                   hint: const Text('Select Country'),
                   onChanged: (Country? newValue) async {
                     setState(() {
@@ -164,12 +172,13 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                     });
 
                     if (_selectedCountry != null) {
-                      await Provider.of<LocationProvider>(context,
-                              listen: false)
+                      final locationProvider = Provider.of<LocationProvider>(
+                          context,
+                          listen: false);
+                      await locationProvider
                           .fetchCities(_selectedCountry?.id);
                     }
                   },
-                  //fill items with countries from provider
                   items: (Provider.of<LocationProvider>(context, listen: true)
                           .countries)
                       .map<DropdownMenuItem<Country>>((Country country) {
@@ -177,8 +186,8 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                         value: country, child: Text(country.name));
                   }).toList(),
                 ),
-                DropdownButtonFormField(
-                  value: _selectedCity,
+                DropdownButtonFormField<City>(
+                  initialValue: _selectedCity,
                   hint: const Text('Select City'),
                   onChanged: (City? newValue) {
                     setState(() {
@@ -192,10 +201,10 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                         value: city, child: Text(city.name));
                   }).toList(),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: _addressController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Address',
                     border: OutlineInputBorder(),
                   ),
@@ -206,111 +215,107 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 const Text('Accommodation Details',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.black)),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Center(
                   child: ElevatedButton(
-                    child: Text("Load Images"),
                     onPressed: loadImages,
+                    child: const Text('Load Images'),
                   ),
                 ),
-                SizedBox(height: 10),
-                Container(
-                    child: images.isNotEmpty
-                        ? Container(
-                            alignment: Alignment.center,
-                            height: min(
-                                images.length > 3
-                                    ? (images.length / 3).ceil() * 120.0
-                                    : 100.0,
-                                MediaQuery.of(context).size.height),
-                            child: Column(children: <Widget>[
-                              Expanded(
-                                child: CustomScrollView(
-                                  slivers: <Widget>[
-                                    SliverGrid(
-                                      gridDelegate:
-                                          SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 3,
-                                        mainAxisSpacing: 1.0,
-                                        crossAxisSpacing: 1.0,
-                                      ),
-                                      delegate: SliverChildBuilderDelegate(
-                                        (BuildContext context, int index) {
-                                          AssetEntity asset = images[index];
-                                          return GestureDetector(
-                                            onTap: () {
-                                              setState(() {
-                                                if (selectedIndex == index &&
-                                                    indexCounter == 2) {
-                                                  images
-                                                      .removeAt(selectedIndex!);
-                                                  selectedIndex = null;
-                                                  indexCounter = 1;
-                                                } else if (selectedIndex ==
-                                                        null &&
-                                                    indexCounter == 1) {
-                                                  selectedIndex = index;
-                                                  indexCounter++;
-                                                } else if (selectedIndex !=
-                                                        index &&
-                                                    indexCounter == 1) {
-                                                  selectedIndex = index;
-                                                  indexCounter = 1;
-                                                } else if (selectedIndex !=
-                                                        index &&
-                                                    indexCounter == 2) {
-                                                  selectedIndex = index;
-                                                  indexCounter = 1;
-                                                } else if (selectedIndex ==
-                                                        index &&
-                                                    indexCounter == 1) {
-                                                  selectedIndex = index;
-                                                  indexCounter++;
-                                                }
-                                                print(
-                                                    'Index $index <> Selected $selectedIndex <> Counter $indexCounter');
-                                              });
-                                            },
-                                            child: Stack(
-                                              children: <Widget>[
-                                                Container(
-                                                  height: 100.0,
-                                                  width: 120.0,
-                                                  child: AssetThumbnail(
-                                                      asset: asset),
-                                                ),
-                                                if (selectedIndex == index)
-                                                  Container(
-                                                    height: 100.0,
-                                                    width: 120.0,
-                                                    color: Colors.red
-                                                        .withOpacity(0.5),
-                                                    child: Icon(
-                                                        Icons.delete_outlined,
-                                                        color: Colors.red),
-                                                  )
-                                              ],
-                                            ),
-                                          );
+                const SizedBox(height: 10),
+                images.isNotEmpty
+                    ? SizedBox(
+                        height: min(
+                            images.length > 3
+                                ? (images.length / 3).ceil() * 120.0
+                                : 100.0,
+                            MediaQuery.of(context).size.height),
+                        child: Column(children: <Widget>[
+                          Expanded(
+                            child: CustomScrollView(
+                              slivers: <Widget>[
+                                SliverGrid(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    mainAxisSpacing: 1.0,
+                                    crossAxisSpacing: 1.0,
+                                  ),
+                                  delegate: SliverChildBuilderDelegate(
+                                    (BuildContext context, int index) {
+                                      AssetEntity asset = images[index];
+                                      return GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            if (selectedIndex == index &&
+                                                indexCounter == 2) {
+                                              images.removeAt(selectedIndex!);
+                                              selectedIndex = null;
+                                              indexCounter = 1;
+                                            } else if (selectedIndex == null &&
+                                                indexCounter == 1) {
+                                              selectedIndex = index;
+                                              indexCounter++;
+                                            } else if (selectedIndex !=
+                                                    index &&
+                                                indexCounter == 1) {
+                                              selectedIndex = index;
+                                              indexCounter = 1;
+                                            } else if (selectedIndex !=
+                                                    index &&
+                                                indexCounter == 2) {
+                                              selectedIndex = index;
+                                              indexCounter = 1;
+                                            } else if (selectedIndex ==
+                                                    index &&
+                                                indexCounter == 1) {
+                                              selectedIndex = index;
+                                              indexCounter++;
+                                            }
+                                          });
                                         },
-                                        childCount: images.length,
-                                      ),
-                                    ),
-                                  ],
+                                        child: Stack(
+                                          children: <Widget>[
+                                            SizedBox(
+                                              height: 100.0,
+                                              width: 120.0,
+                                              child: AssetThumbnail(
+                                                  asset: asset),
+                                            ),
+                                            if (selectedIndex == index)
+                                              SizedBox(
+                                                height: 100.0,
+                                                width: 120.0,
+                                                child: ColoredBox(
+                                                  color: Colors.red
+                                                      .withValues(alpha: 0.5),
+                                                  child: const Icon(
+                                                      Icons.delete_outlined,
+                                                      color: Colors.red),
+                                                ),
+                                              )
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                    childCount: images.length,
+                                  ),
                                 ),
-                              )
-                            ]))
-                        : SizedBox.shrink()),
-                SizedBox(height: 10),
+                              ],
+                            ),
+                          )
+                        ]))
+                    : const SizedBox.shrink(),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: _accommodationDetailsNumBeds,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Number of Beds',
                     border: OutlineInputBorder(),
                   ),
@@ -322,31 +327,34 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 ..._accommodationDetails.keys.map((String key) {
                   return CheckboxListTile(
                     title: Text(key),
                     value: _accommodationDetails[key],
                     onChanged: (bool? value) {
-                      // Accept a nullable bool
                       if (value != null) {
-                        // Check if the value is not null
                         setState(() {
                           _accommodationDetails[key] = value;
                         });
                       }
                     },
                   );
-                }).toList(),
-                SizedBox(height: 10),
+                }),
+                const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Center(
                     child: ElevatedButton(
-                      child: Text('Submit'),
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          Provider.of<LocationProvider>(context, listen: false)
+                          final locationProvider = Provider.of<LocationProvider>(
+                              context,
+                              listen: false);
+                          final accommodationProvider =
+                              Provider.of<AccommodationProvider>(context,
+                                  listen: false);
+                          locationProvider
                               .craftGeoCode(
                                   '${_addressController.text} ${_selectedCity?.name} ${_selectedCountry?.name}')
                               .then((value) async {
@@ -394,13 +402,12 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                               ),
                               status: true,
                             );
-                            Provider.of<AccommodationProvider>(context,
-                                    listen: false)
+                            accommodationProvider
                                 .addAccommodation(accommodation);
-                            // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PartnerProfilePage()));
                           });
                         }
                       },
+                      child: const Text('Submit'),
                     ),
                   ),
                 ),

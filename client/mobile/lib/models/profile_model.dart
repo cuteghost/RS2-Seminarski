@@ -26,7 +26,7 @@ class Profile {
     required this.customerId,
   });
 
-  static Future<Profile> fromJson(jsonDecode) async {
+  static Future<Profile> fromJson(Map<String, dynamic> jsonDecode) async {
     Uint8List profilePictureBytes = base64Decode(jsonDecode['userImage']);
     Directory tempDir = await Directory.systemTemp.createTemp('profilePicture');
     File profilePictureFile = File('${tempDir.path}/profilePicture.jpg');

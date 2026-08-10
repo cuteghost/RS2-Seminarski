@@ -1,15 +1,3 @@
-buildscript {
-    ext.kotlin_version = '1.9.21'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
 allprojects {
     repositories {
         google()
@@ -23,6 +11,37 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(':app')
+}
+
+// Enforce consistent JVM targets across Java and Kotlin tasks in every
+// subproject. Plugins like flutter_facebook_auth still declare Java 1.8
+// internally; KGP 2.2.20 compiles Kotlin to 17 — Gradle 8 treats the
+// mismatch as an error. This hook aligns everything to 17.
+gradle.afterProject { project ->
+    if (project == rootProject) return
+    project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile.class).configureEach {
+        kotlinOptions.jvmTarget = '17'
+    }
+    project.tasks.withType(JavaCompile.class).configureEach {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+// AGP 8+ requires a 'namespace' in every library's build.gradle.
+// Older Flutter plugins only declare 'package' in their AndroidManifest.xml.
+// gradle.afterProject fires after each project is fully configured — no
+// "already evaluated" errors unlike Project.afterEvaluate.
+gradle.afterProject { project ->
+    if (project == rootProject) return
+    if (!project.plugins.hasPlugin('com.android.library')) return
+    def android = project.extensions.findByName('android')
+    if (android == null || android.namespace != null) return
+    def manifestFile = new File(project.projectDir, 'src/main/AndroidManifest.xml')
+    if (!manifestFile.exists()) return
+    def manifest = new XmlSlurper().parse(manifestFile)
+    def pkg = manifest['@package']?.text()
+    if (pkg) android.namespace = pkg
 }
 
 tasks.register("clean", Delete) {

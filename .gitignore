@@ -13,6 +13,9 @@ ebooking-api/API/*.jwk
 *.jwk
 ebooking-api/API/keys/
 
+# Ignore the script that sets environment variables for local development
+server/set-env-vars.ps1
+
 # Helpers folder and all contents
 helpers/
 

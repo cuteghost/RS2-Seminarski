@@ -9,7 +9,8 @@ class SuggestionContainer extends StatelessWidget {
   final String address;
   final VoidCallback? onTap;
 
-  SuggestionContainer({
+  const SuggestionContainer({
+    super.key,
     required this.image,
     required this.propertyName,
     required this.pricePerNight,
@@ -56,7 +57,7 @@ class SuggestionContainer extends StatelessWidget {
                       fontSize: 16.0,
                     ),
                   ),
-                  Text('\$${pricePerNight} per Night'),
+                  Text('\$$pricePerNight per Night'),
                   Text('Address: $address'),
                 ],
               ),

@@ -7,7 +7,6 @@ class SuggestionsService {
   Future<List<AccommodationGET>> fetchRecommendations(String customerId) async {
     final response = await http.get(Uri.parse(
         '${config.AppConfig.baseUrl}/api/Recommendation/suggestions/$customerId'));
-    print('Recommendations Response: ${response.body}');
     if (response.statusCode == 200) {
       return List<AccommodationGET>.from(
           json.decode(response.body).map((x) => AccommodationGET.fromJson(x)));

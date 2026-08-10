@@ -20,7 +20,6 @@ class CountryHttpService {
 
     if (response.statusCode == 200) {
       // Handle the response accordingly
-      print("Country added successfully");
     } else {
       // Handle the error
       throw Exception('Failed to add country');
@@ -30,7 +29,6 @@ class CountryHttpService {
   // Fetch list of countries
   static Future<List<Country>> fetchCountries() async {
     final response = await http.get(Uri.parse('$baseApiUrl/Country/GetCountries'));
-    print(response.body);
     if (response.statusCode == 200) {
       List<dynamic> countriesJson = json.decode(response.body);
       return countriesJson.map((json) => Country.fromJson(json)).toList();
@@ -50,7 +48,6 @@ class CountryHttpService {
 
     if (response.statusCode == 200) {
       // Handle the response accordingly
-      print("Country deleted successfully");
     } else {
       // Handle the error
       throw Exception('Failed to delete country');
@@ -73,14 +70,12 @@ class CountryHttpService {
 
       if (response.statusCode == 200) {
         // Handle the response accordingly
-        print("Country edited successfully");
       } else {
         // Handle the error
         throw Exception('Failed to edit country');
       }
     } catch (e) {
       // Handle or show error
-      print('Error editing country: $e');
     }
   }
 

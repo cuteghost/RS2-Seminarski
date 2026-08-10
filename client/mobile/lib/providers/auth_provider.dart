@@ -63,7 +63,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<bool> registerPartner(Partner partner) async {
-    return await _authService.registerPartner(partner);
+    return await _authService.registerPartner(partner.toJson());
   }
 
   Future<String> roleCheck() async {

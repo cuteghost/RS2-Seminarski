@@ -113,8 +113,7 @@ class AuthService {
           'email',
           'https://www.googleapis.com/auth/userinfo.profile',
         ],
-        serverClientId:
-            "29969402007-rrhvn645jvpelod7s187o7flse02u87h.apps.googleusercontent.com");
+        serverClientId: config.AppConfig.googleServerClientId);
     GoogleSignInAccount? googleUser = await googleSignIn.signIn();
     if (googleUser == null) return false;
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -136,7 +135,7 @@ class AuthService {
     }
   }
 
-  Future<bool> registerPartner(partner) async {
+  Future<bool> registerPartner(Map<String, dynamic> partner) async {
     String? token = await _secureStorage.getToken();
     final response = await http.post(
         Uri.parse('${config.AppConfig.baseUrl}/api/Partner/Add'),
@@ -145,7 +144,6 @@ class AuthService {
           'Content-Type': 'application/json'
         },
         body: jsonEncode(partner));
-    print('Response: ${response.body}');
     if (response.statusCode == 200) {
       await _secureStorage.deleteToken();
       await _secureStorage.saveToken(response.body);
@@ -155,14 +153,13 @@ class AuthService {
     }
   }
 
-  roleCheck() async {
+  Future<String> roleCheck() async {
     // Implement role check
     String? authToken = await _secureStorage.getToken();
     if (authToken != null) {
       // Check the role of the user
       // authToken is the JWT token. It holds the claim Role. Decode the token and check the role
       var payload = authToken.split('.')[1];
-      print('Payload: $payload');
       var normalizedPayload = base64Url.normalize(payload);
       var stringPayload = utf8.decode(base64Url.decode(normalizedPayload));
       var payloadMap = json.decode(stringPayload);

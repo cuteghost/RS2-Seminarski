@@ -29,8 +29,8 @@ class LoginPage extends StatelessWidget {
     await messageProvider.startSignalR();
     await messageProvider.getChats();
     for (var chat in messageProvider.chats) {
-      await messageProvider.getMessages(chat.Id);
-      await messageProvider.addToChat(chat.Id);
+      await messageProvider.getMessages(chat.id);
+      await messageProvider.addToChat(chat.id);
     }
     await profileProvider.getProfile();
     await adminProvider.getAccommodations();
@@ -38,6 +38,7 @@ class LoginPage extends StatelessWidget {
     await adminProvider.getReservations();
 
     // Navigate to DashboardPage on successful login
+    if (!context.mounted) return;
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardPage()));
   }
 

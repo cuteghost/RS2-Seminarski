@@ -8,32 +8,29 @@ import 'package:ebooking/screens/partner_screens/partner_register_screen.dart';
 import 'package:ebooking/widgets/edit_email_modal.dart';
 import 'package:ebooking/widgets/edit_password_modal.dart';
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:ebooking/screens/login_screen.dart';
 
 class PartnerProfilePage extends StatefulWidget {
+  const PartnerProfilePage({super.key});
+
   @override
-  _PartnerProfilePageState createState() => _PartnerProfilePageState();
+  PartnerProfilePageState createState() => PartnerProfilePageState();
 }
 
-class _PartnerProfilePageState extends State<PartnerProfilePage> {
+class PartnerProfilePageState extends State<PartnerProfilePage> {
   ValueNotifier<bool> hasChanges = ValueNotifier<bool>(false);
 
   @override
   Widget build(BuildContext context) {
+    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+    final locationProvider = Provider.of<LocationProvider>(context, listen: false);
     return FutureBuilder<List<dynamic>>(
       future: () async {
-        var profile = await Provider.of<ProfileProvider>(context, listen: false)
-            .getProfile();
-        var countries =
-            await Provider.of<LocationProvider>(context, listen: false)
-                .fetchCountries();
-        var partner = await Provider.of<ProfileProvider>(context, listen: false)
-            .getPartner();
-        var country =
-            await Provider.of<LocationProvider>(context, listen: false)
-                .getCountry(partner.countryId);
+        var profile = await profileProvider.getProfile();
+        var countries = await locationProvider.fetchCountries();
+        var partner = await profileProvider.getPartner();
+        var country = await locationProvider.getCountry(partner.countryId);
         return [profile, countries, partner, country];
       }(),
       builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
@@ -51,9 +48,8 @@ class _PartnerProfilePageState extends State<PartnerProfilePage> {
 
         final profile = snapshot.data?[0] as Profile?;
         final partnerProfile = snapshot.data?[2] as Partner?;
-        var _selectedCountry = snapshot.data?[3] as Country?;
-        print('Partner Id ${partnerProfile!.id}');
-        if (profile == null) {
+        var initialCountry = snapshot.data?[3] as Country?;
+        if (profile == null || partnerProfile == null) {
           return const Center(
             child: Text('No profile or partner profile found!'),
           );
@@ -104,7 +100,7 @@ class _PartnerProfilePageState extends State<PartnerProfilePage> {
         }
 
         ValueNotifier<Country?> selectedCountry =
-            ValueNotifier<Country?>(_selectedCountry);
+            ValueNotifier<Country?>(initialCountry);
         ValueNotifier<String?> selectedGender =
             ValueNotifier<String?>(profile.gender);
 
@@ -328,15 +324,15 @@ class _PartnerProfilePageState extends State<PartnerProfilePage> {
                               valueListenable: selectedCountry,
                               builder: (context, value, child) {
                                 return DropdownButtonFormField<Country>(
-                                  value: Provider.of<LocationProvider>(context,
+                                  initialValue: Provider.of<LocationProvider>(context,
                                               listen: true)
                                           .countries
-                                          .contains(_selectedCountry)
-                                      ? _selectedCountry
+                                          .contains(value)
+                                      ? value
                                       : null,
-                                  hint: _selectedCountry != null
-                                      ? Text(_selectedCountry.name)
-                                      : Text("Select Country"),
+                                  hint: value != null
+                                      ? Text(value!.name)
+                                      : const Text("Select Country"),
                                   onChanged: (Country? newValue) {
                                     if (newValue != null) {
                                       partnerProfile.countryId = newValue.id;
@@ -367,12 +363,10 @@ class _PartnerProfilePageState extends State<PartnerProfilePage> {
                               ),
                               onPressed: value
                                   ? () async {
-                                      bool success =
-                                          await Provider.of<ProfileProvider>(
-                                                  context,
-                                                  listen: false)
-                                              .updatePartner(
-                                                  partner: partnerProfile);
+                                      final provider = Provider.of<ProfileProvider>(
+                                          context, listen: false);
+                                      bool success = await provider
+                                          .updatePartner(partner: partnerProfile);
                                       if (success) {
                                         hasChanges.value = false;
                                       }
@@ -479,7 +473,7 @@ class _PartnerProfilePageState extends State<PartnerProfilePage> {
                               Row(
                                 children: [
                                   Icon(
-                                    MdiIcons.facebook,
+                                    Icons.facebook,
                                     size: 24.0,
                                   ),
                                   const SizedBox(width: 8.0),
@@ -495,7 +489,7 @@ class _PartnerProfilePageState extends State<PartnerProfilePage> {
                               Row(
                                 children: [
                                   Icon(
-                                    MdiIcons.google,
+                                    Icons.g_mobiledata,
                                     size: 24.0,
                                   ),
                                   const SizedBox(width: 8.0),

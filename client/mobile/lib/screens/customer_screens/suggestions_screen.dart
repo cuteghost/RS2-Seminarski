@@ -7,13 +7,13 @@ import 'package:provider/provider.dart';
 class SuggestionsScreen extends StatefulWidget {
   final String customerId;
 
-  SuggestionsScreen({required this.customerId});
+  const SuggestionsScreen({super.key, required this.customerId});
 
   @override
-  _SuggestionsScreenState createState() => _SuggestionsScreenState();
+  SuggestionsScreenState createState() => SuggestionsScreenState();
 }
 
-class _SuggestionsScreenState extends State<SuggestionsScreen> {
+class SuggestionsScreenState extends State<SuggestionsScreen> {
   late Future<List<dynamic>> _recommendations;
 
   @override

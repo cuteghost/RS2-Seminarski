@@ -3,13 +3,13 @@ import 'package:ebooking/providers/profile_provider.dart';
 import 'package:provider/provider.dart';
 
 class EditPasswordModal extends StatefulWidget {
-  const EditPasswordModal() : super();
+  const EditPasswordModal({super.key});
 
   @override
-  _EditPasswordModalState createState() => _EditPasswordModalState();
+  EditPasswordModalState createState() => EditPasswordModalState();
 }
 
-class _EditPasswordModalState extends State<EditPasswordModal> {
+class EditPasswordModalState extends State<EditPasswordModal> {
   late TextEditingController _oldPasswordController;
   late TextEditingController _newPasswordController;
 
@@ -21,6 +21,13 @@ class _EditPasswordModalState extends State<EditPasswordModal> {
   }
 
   @override
+  void dispose() {
+    _oldPasswordController.dispose();
+    _newPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
@@ -29,7 +36,7 @@ class _EditPasswordModalState extends State<EditPasswordModal> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Edit Email Address',
+              'Edit Password',
               style: TextStyle(
                 fontSize: 20.0,
                 fontWeight: FontWeight.bold,
@@ -39,7 +46,7 @@ class _EditPasswordModalState extends State<EditPasswordModal> {
             TextFormField(
               obscureText: true,
               controller: _oldPasswordController,
-              decoration: InputDecoration(labelText: 'Old Password'),
+              decoration: const InputDecoration(labelText: 'Old Password'),
             ),
             const SizedBox(height: 16.0),
             TextFormField(
@@ -50,17 +57,18 @@ class _EditPasswordModalState extends State<EditPasswordModal> {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () async {
-                String message =
-                    await Provider.of<ProfileProvider>(context, listen: false)
-                        .updatePassword(_oldPasswordController.text,
-                            _newPasswordController.text);
+                final profileProvider =
+                    Provider.of<ProfileProvider>(context, listen: false);
+                String message = await profileProvider.updatePassword(
+                    _oldPasswordController.text, _newPasswordController.text);
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text(message),
                   duration: const Duration(seconds: 3),
                 ));
                 Navigator.pop(context);
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         ),

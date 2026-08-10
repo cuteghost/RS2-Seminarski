@@ -14,7 +14,7 @@ class Partner {
       required this.taxId,
       required this.phoneNumber});
 
-  static Future<Partner> fromJson(jsonDecode) async {
+  static Future<Partner> fromJson(Map<String, dynamic> jsonDecode) async {
     return Future.value(Partner(
       id: jsonDecode['id'],
       userId: jsonDecode['userId'],

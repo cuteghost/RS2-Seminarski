@@ -18,16 +18,13 @@ class SignalRService {
                   transport: HttpTransportType.webSockets,
                   accessTokenFactory: () async =>
                       '${await secureStorage.getToken()}',
-                  logging: (level, message) => print('SIGNALR -> $message'),
                 ))
             .build();
 
   Future<void> startConnection() async {
     try {
       await _hubConnection.start();
-      print('Connection started');
     } catch (e) {
-      print('Error starting connection: $e');
       if (e.toString().contains(
           'Cannot start a HubConnection that is not in the \'Disconnected\' state.')) {
         await stopConnection();
@@ -41,7 +38,6 @@ class SignalRService {
       final response = await _hubConnection.invoke('GetChats');
       return (response as List).map((e) => ChatGET.fromJson(e)).toList();
     } catch (e) {
-      print('Error getting chats: $e');
       if (e.toString().contains(
           'Cannot send data if the connection is not in the \'Connected\' State.')) {
         await startConnection();
@@ -49,6 +45,15 @@ class SignalRService {
       }
       return [];
     }
+  }
+
+  MessageGET? handleIncommingDriverLocation(List<dynamic>? args) {
+    if (args != null) {
+      var jsonResponse = json.decode(json.encode(args[0]));
+      MessageGET data = MessageGET.fromJson(jsonResponse);
+      return data;
+    }
+    return null;
   }
 
   List<MessageGET>? handleReadMessages(List<dynamic>? args) {
@@ -71,10 +76,10 @@ class SignalRService {
       try {
         await _hubConnection.invoke('SendMessage', args: [messagePost]);
       } catch (e) {
-        print('Error sending message: $e');
+        // Ignore send errors — SignalR will retry on reconnect
       }
     } else {
-      print('Cannot send message. Not connected.');
+      // Not connected — message dropped; caller should handle reconnection
     }
   }
 
@@ -83,10 +88,10 @@ class SignalRService {
       try {
         await _hubConnection.invoke('ReadMessages', args: [chatId]);
       } catch (e) {
-        print('Error sending message: $e');
+        // Ignore read-receipt errors — non-critical
       }
     } else {
-      print('Cannot send message. Not connected.');
+      // Not connected — read receipt skipped
     }
   }
 
@@ -95,22 +100,12 @@ class SignalRService {
       if (_hubConnection.state == HubConnectionState.connected ||
           _hubConnection.state == HubConnectionState.connecting) {
         await _hubConnection.stop();
-        print('Connection stopped');
       } else {
-        print('Connection is already in state: ${_hubConnection.state}');
+        // Already stopped or in an intermediate state — nothing to do
       }
     } catch (e) {
-      print('Error stopping connection: $e');
+      // Ignore stop errors — connection will be cleaned up by GC
     }
-  }
-
-  MessageGET? handleIncommingDriverLocation(List<dynamic>? args) {
-    if (args != null) {
-      var jsonResponse = json.decode(json.encode(args[0]));
-      MessageGET data = MessageGET.fromJson(jsonResponse);
-      return data;
-    }
-    return null;
   }
 
   Future<List<MessageGET>> getMessages(String chatId) async {

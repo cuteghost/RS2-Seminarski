@@ -1,5 +1,5 @@
 import 'package:ebooking/models/reservation_model.dart';
-import 'package:ebooking/providers/reservation_provide.dart';
+import 'package:ebooking/providers/reservation_provider.dart';
 import 'package:ebooking/screens/customer_screens/reservation_confirmation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,20 +13,22 @@ class CheckoutScreen extends StatefulWidget {
   final String accommodationName;
   final ReservationPOST reservation;
 
-  CheckoutScreen(
-      {required this.numberOfDays,
-      required this.pricePerNight,
-      required this.accommodationId,
-      required this.accommodationName,
-      required this.reservation});
+  const CheckoutScreen({
+    super.key,
+    required this.numberOfDays,
+    required this.pricePerNight,
+    required this.accommodationId,
+    required this.accommodationName,
+    required this.reservation,
+  });
+
   @override
-  _CheckoutScreenState createState() => _CheckoutScreenState();
+  CheckoutScreenState createState() => CheckoutScreenState();
 }
 
-class _CheckoutScreenState extends State<CheckoutScreen> {
+class CheckoutScreenState extends State<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
-    Future.delayed(Duration(seconds: 5));
     return Scaffold(
       appBar: AppBar(
         title: Text('PaymentApp'),
@@ -41,7 +43,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               method: webview.WebViewRequestMethod.get));
         },
         onPageFinished: (String url) {
-          print('Page finished loading: $url');
           if (url == '${config.AppConfig.paymentUrl}/Paypal/Success') {
             Provider.of<ReservationProvider>(context, listen: false)
                 .makeReservation(widget.reservation);

@@ -54,14 +54,13 @@ class LocationService {
         body: json.encode(location.toJson()),
         headers: {'Content-Type': 'application/json'});
     if (response.statusCode == 200) {
-      print('Location Id: ${response.body}');
       return response.body;
     } else {
       throw Exception('Failed to create location');
     }
   }
 
-  getCountry(String countryId) async {
+  Future<Country?> getCountry(String countryId) async {
     final response = await http
         .get(Uri.parse('${AppConfig.baseUrl}/api/Country/Get/$countryId'));
     if (response.statusCode == 200) {

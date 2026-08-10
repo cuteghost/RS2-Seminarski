@@ -59,10 +59,8 @@ class ReservationService {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json'
         });
-    print(response.body);
     if (response.statusCode == 200) {
       final List<dynamic> reservationsJsonList = json.decode(response.body);
-      print(reservationsJsonList);
       return reservationsJsonList
           .map((item) => ReservationGET.fromJson(item))
           .toList();

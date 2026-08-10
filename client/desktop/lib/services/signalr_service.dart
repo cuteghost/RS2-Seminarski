@@ -12,7 +12,7 @@ class SignalRService {
   SignalRService({required this.secureStorage})
       : _hubConnection = HubConnectionBuilder()
             .withAutomaticReconnect()
-            .withUrl('https://messenger.cuteghost.online/chathub', HttpConnectionOptions(
+            .withUrl('${config.AppConfig.messengerUrl}/chathub', HttpConnectionOptions(
               transport: HttpTransportType.webSockets,
               accessTokenFactory: () async => '${await secureStorage.getToken()}',
             ))
@@ -21,9 +21,7 @@ class SignalRService {
   Future<void> startConnection() async {
     try {
       await _hubConnection.start();
-      print('Connection started');
     } catch (e) {
-      print('Error starting connection: $e');
       if (e.toString().contains('Cannot start a HubConnection that is not in the \'Disconnected\' state.')) {
         await stopConnection();
         await startConnection();
@@ -37,7 +35,6 @@ class SignalRService {
       final response = await _hubConnection.invoke('GetChats');
       return (response as List).map((e) => ChatGET.fromJson(e)).toList();
     } catch (e) {
-      print('Error getting chats: $e');
       if (e.toString().contains('Cannot send data if the connection is not in the \'Connected\' State.')) {
         await startConnection();
         return await getChats();
@@ -63,21 +60,22 @@ class SignalRService {
       try {
         await _hubConnection.invoke('SendMessage', args: [messagePost]);
       } catch (e) {
-        print('Error sending message: $e');
+        // Ignore send errors — SignalR will retry on reconnect
       }
     } else {
-      print('Cannot send message. Not connected.');
+      // Not connected — message dropped; caller should handle reconnection
     }
   }
+
   Future<void> readMessages(String chatId) async {
     if (_hubConnection.state == HubConnectionState.connected) {
       try {
         await _hubConnection.invoke('ReadMessages', args: [chatId]);
       } catch (e) {
-        print('Error sending message: $e');
+        // Ignore read-receipt errors — non-critical
       }
     } else {
-      print('Cannot send message. Not connected.');
+      // Not connected — read receipt skipped
     }
   }
 
@@ -85,12 +83,11 @@ class SignalRService {
     try {
       if (_hubConnection.state == HubConnectionState.connected || _hubConnection.state == HubConnectionState.connecting) {
         await _hubConnection.stop();
-        print('Connection stopped');
       } else {
-        print('Connection is already in state: ${_hubConnection.state}');
+        // Already stopped or in an intermediate state — nothing to do
       }
     } catch (e) {
-      print('Error stopping connection: $e');
+      // Ignore stop errors — connection will be cleaned up by GC
     }
   }
   

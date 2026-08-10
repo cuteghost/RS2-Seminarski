@@ -1,4 +1,3 @@
-import 'package:ebooking_desktop/models/partner_model.dart';
 import 'package:ebooking_desktop/models/profile_model.dart';
 import 'package:ebooking_desktop/services/auth_service.dart';
 import 'package:ebooking_desktop/config/config.dart' as config;
@@ -13,10 +12,10 @@ class ProfileService {
   Future<Profile> fetchProfile() async {
     String? token = await _secureStorage.getToken();
     final response = await http.get(
-      Uri.parse('${config.AppConfig.baseUrl}/api/Administrator/Details'), 
-      headers: {'Authorization': 'Bearer $token'}   
+      Uri.parse('${config.AppConfig.baseUrl}/api/Administrator/Details'),
+      headers: {'Authorization': 'Bearer $token'}
     );
-     if (response.statusCode == 200) {
+    if (response.statusCode == 200) {
       return Profile.fromJson(jsonDecode(response.body));
     }
     if (response.statusCode == 401) {
@@ -27,18 +26,16 @@ class ProfileService {
     }
   }
 
-  updateProfile(Profile profile) async{
+  Future<bool> updateProfile(Profile profile) async {
     String? token = await _secureStorage.getToken();
     final response = await http.patch(
-      Uri.parse('${config.AppConfig.baseUrl}/api/Customer/UpdateDetails'), 
+      Uri.parse('${config.AppConfig.baseUrl}/api/Customer/UpdateDetails'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
       },
       body: jsonEncode(profile.toJson())
     );
-    print('Update Profile Response: ${response.body}');
-    print('Update Profile Response Code: ${response.statusCode}');
     if (response.statusCode == 200) {
       return true;
     }
@@ -49,11 +46,11 @@ class ProfileService {
       throw Exception('Failed to update profile');
     }
   }
-  updateEmail(String newEmail, String password) async
-  {
+
+  Future<bool> updateEmail(String newEmail, String password) async {
     String? token = await _secureStorage.getToken();
     final response = await http.patch(
-      Uri.parse('${config.AppConfig.baseUrl}/api/User/UpdateEmail'), 
+      Uri.parse('${config.AppConfig.baseUrl}/api/User/UpdateEmail'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
@@ -73,11 +70,11 @@ class ProfileService {
       throw Exception('Failed to update email');
     }
   }
-  updatePassword(String oldPassword, String newPassword) async
-  {
+
+  Future<bool> updatePassword(String oldPassword, String newPassword) async {
     String? token = await _secureStorage.getToken();
     final response = await http.patch(
-      Uri.parse('${config.AppConfig.baseUrl}/api/User/UpdatePassword'), 
+      Uri.parse('${config.AppConfig.baseUrl}/api/User/UpdatePassword'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json'
@@ -95,40 +92,6 @@ class ProfileService {
     }
     else {
       throw Exception('Failed to update password');
-    }
-  }
-
-  fetchPartner() async{
-    final response = await http.get(Uri.parse('${config.AppConfig.baseUrl}/api/Partner/PartnerDetails'),
-          headers: {'Content-Type': 'application/json', 
-                    'Accept': 'application/json', 
-                    'Authorization': 'Bearer ${await _secureStorage.getToken()}'} );
-    if (response.statusCode == 200) {
-      print('Partner Response: ${response.body}');
-      return Partner.fromJson(jsonDecode(response.body));
-    }
-    else {
-      throw Exception('Failed to load partner ${response.statusCode}');
-    }
-  }
-
-  updatePartner(Partner partner) async {
-    final response = await http.patch(
-      Uri.parse('${config.AppConfig.baseUrl}/api/Partner/Update'), 
-      headers: {
-        'Authorization': 'Bearer ${await _secureStorage.getToken()}',
-        'Content-Type': 'application/json'
-      },
-      body: jsonEncode(partner.toJson())
-    );
-
-    if (response.statusCode == 200) {
-      return true;
-    }
-    else {
-      print('Update Partner Response: ${response.body}');
-      print('PartnerID ${partner.id}');
-      throw Exception('Failed to update partner');
     }
   }
 }

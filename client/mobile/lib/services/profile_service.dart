@@ -16,7 +16,6 @@ class ProfileService {
     final response = await http.get(
         Uri.parse('${config.AppConfig.baseUrl}/api/Customer/details'),
         headers: {'Authorization': 'Bearer $token'});
-    print('Profile Response: ${response.body}');
     if (response.statusCode == 200) {
       return Profile.fromJson(jsonDecode(response.body));
     }
@@ -27,7 +26,7 @@ class ProfileService {
     }
   }
 
-  updateProfile(Profile profile) async {
+  Future<bool> updateProfile(Profile profile) async {
     String? token = await _secureStorage.getToken();
     final response = await http.patch(
         Uri.parse('${config.AppConfig.baseUrl}/api/Customer/UpdateDetails'),
@@ -36,8 +35,6 @@ class ProfileService {
           'Content-Type': 'application/json'
         },
         body: jsonEncode(profile.toJson()));
-    print('Update Profile Response: ${response.body}');
-    print('Update Profile Response Code: ${response.statusCode}');
     if (response.statusCode == 200) {
       return true;
     }
@@ -48,7 +45,7 @@ class ProfileService {
     }
   }
 
-  updateEmail(String newEmail, String password) async {
+  Future<bool> updateEmail(String newEmail, String password) async {
     String? token = await _secureStorage.getToken();
     final response = await http.patch(
         Uri.parse('${config.AppConfig.baseUrl}/api/User/UpdateEmail'),
@@ -67,7 +64,7 @@ class ProfileService {
     }
   }
 
-  updatePassword(String oldPassword, String newPassword) async {
+  Future<bool> updatePassword(String oldPassword, String newPassword) async {
     String? token = await _secureStorage.getToken();
     final response = await http.patch(
         Uri.parse('${config.AppConfig.baseUrl}/api/User/UpdatePassword'),
@@ -87,7 +84,7 @@ class ProfileService {
     }
   }
 
-  fetchPartner() async {
+  Future<Partner> fetchPartner() async {
     final response = await http.get(
         Uri.parse('${config.AppConfig.baseUrl}/api/Partner/PartnerDetails'),
         headers: {
@@ -96,14 +93,13 @@ class ProfileService {
           'Authorization': 'Bearer ${await _secureStorage.getToken()}'
         });
     if (response.statusCode == 200) {
-      print('Partner Response: ${response.body}');
       return Partner.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load partner ${response.statusCode}');
     }
   }
 
-  updatePartner(Partner partner) async {
+  Future<bool> updatePartner(Partner partner) async {
     final response = await http.patch(
         Uri.parse('${config.AppConfig.baseUrl}/api/Partner/Update'),
         headers: {
@@ -115,8 +111,6 @@ class ProfileService {
     if (response.statusCode == 200) {
       return true;
     } else {
-      print('Update Partner Response: ${response.body}');
-      print('PartnerID ${partner.id}');
       throw Exception('Failed to update partner');
     }
   }

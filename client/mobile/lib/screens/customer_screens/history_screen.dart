@@ -2,13 +2,15 @@ import 'dart:io';
 
 import 'package:ebooking/models/accomodation_model.dart';
 import 'package:ebooking/models/reservation_model.dart';
-import 'package:ebooking/providers/reservation_provide.dart';
-import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
+import 'package:ebooking/providers/reservation_provider.dart';
+import 'package:ebooking/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking/screens/customer_screens/feedback_screen.dart';
 import 'package:provider/provider.dart';
 
 class ReservationHistoryPage extends StatelessWidget {
+  const ReservationHistoryPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +24,6 @@ class ReservationHistoryPage extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
-                print('Stack trace: ${snapshot.stackTrace}');
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else {
                 return ListView.builder(
@@ -148,18 +149,6 @@ class ReservationHistoryPage extends StatelessWidget {
               ),
             ),
           ),
-          // Pokuso pokuso
-          // Right sign
-          // IconButton(
-          //   icon: Icon(
-          //     Icons.arrow_right,
-          //     size: 30.0,
-          //     color: Colors.blue,
-          //   ),
-          //   onPressed: () {
-          //     Navigator.push(context, MaterialPageRoute(builder: (context) => AccommodationDetailsScreen(accommodation: accommodation)));
-          //   },
-          // ),
         ],
       ),
     );

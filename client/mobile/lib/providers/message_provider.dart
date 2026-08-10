@@ -6,7 +6,7 @@ class MessageProvider with ChangeNotifier {
   final SignalRService signalRService;
 
   List<ChatGET> _chats = [];
-  Map<String, List<MessageGET>> _messages = {};
+  final Map<String, List<MessageGET>> _messages = {};
 
   List<ChatGET> get chats => _chats;
   Map<String, List<MessageGET>> get messages => _messages;
@@ -24,15 +24,14 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<void> startSignalR() async {
-    print('From inside StartSignalR');
     await signalRService.startConnection();
     signalRService.onReceiveMessage('ReceiveMessage', (args) {
       if (args == null) return;
       final data = signalRService.handleIncommingDriverLocation(args);
-      _messages[data!.ChatId]!.add(data);
+      _messages[data!.chatId]!.add(data);
       for (var c in chats) {
-        if (c.Id == data.ChatId) {
-          c.Messages.add(data);
+        if (c.id == data.chatId) {
+          c.messages.add(data);
           break;
         }
       }
@@ -42,13 +41,13 @@ class MessageProvider with ChangeNotifier {
       if (args == null) return;
       final data = signalRService.handleReadMessages(args);
 
-      if (_messages[data![0].ChatId] == null) return;
-      for (var i = 0; i < _messages[data[0].ChatId]!.length; i++) {
-        _messages[data[0].ChatId]![i].IsRead = data[0].IsRead;
+      if (_messages[data![0].chatId] == null) return;
+      for (var i = 0; i < _messages[data[0].chatId]!.length; i++) {
+        _messages[data[0].chatId]![i].isRead = data[0].isRead;
       }
       for (var c in chats) {
-        if (c.Id == data[0].ChatId) {
-          c.Messages = data;
+        if (c.id == data[0].chatId) {
+          c.messages = data;
           break;
         }
       }

@@ -1,4 +1,3 @@
-import 'package:ebooking/models/city_model.dart';
 import 'package:ebooking/models/country_model.dart';
 import 'package:ebooking/models/partner_model.dart';
 import 'package:ebooking/providers/auth_provider.dart';
@@ -10,18 +9,13 @@ import 'package:provider/provider.dart';
 class PartnerRegisterScreen extends StatefulWidget {
   final String userId;
 
-  const PartnerRegisterScreen({Key? key, required this.userId})
-      : super(key: key);
+  const PartnerRegisterScreen({super.key, required this.userId});
+
   @override
-  _PartnerRegisterScreenState createState() =>
-      _PartnerRegisterScreenState(userId: userId);
+  PartnerRegisterScreenState createState() => PartnerRegisterScreenState();
 }
 
-class _PartnerRegisterScreenState extends State<PartnerRegisterScreen> {
-  final String userId;
-
-  _PartnerRegisterScreenState({required this.userId});
-
+class PartnerRegisterScreenState extends State<PartnerRegisterScreen> {
   @override
   void initState() {
     super.initState();
@@ -38,7 +32,7 @@ class _PartnerRegisterScreenState extends State<PartnerRegisterScreen> {
   final zipCodeController = TextEditingController();
 
   Country? _selectedCountry;
-  City? _selectedCity;
+
   @override
   void dispose() {
     phoneController.dispose();
@@ -92,22 +86,16 @@ class _PartnerRegisterScreenState extends State<PartnerRegisterScreen> {
                     return null;
                   },
                 ),
-                DropdownButtonFormField(
-                  value: _selectedCountry,
+                DropdownButtonFormField<Country>(
+                  initialValue: _selectedCountry,
                   hint: const Text('Select Country'),
                   onChanged: (Country? newValue) async {
                     setState(() {
                       if (newValue != null) {
                         _selectedCountry = newValue;
-                        // _selectedCity = null;
                       }
                     });
-
-                    // if(_selectedCountry != null){
-                    //   await Provider.of<LocationProvider>(context, listen: false).fetchCities(_selectedCountry?.id);
-                    // }
                   },
-                  //fill items with countries from provider
                   items: (Provider.of<LocationProvider>(context, listen: true)
                           .countries)
                       .map<DropdownMenuItem<Country>>((Country country) {
@@ -115,37 +103,16 @@ class _PartnerRegisterScreenState extends State<PartnerRegisterScreen> {
                         value: country, child: Text(country.name));
                   }).toList(),
                 ),
-                // DropdownButtonFormField(
-                //   value: _selectedCity,
-                //   hint: const Text('Select City'),
-                //   onChanged: (City? newValue) {
-                //     setState(() {
-                //       _selectedCity = newValue;
-                //     });
-                //   },
-                //   items: (Provider.of<LocationProvider>(context ,listen: true).cities).map<DropdownMenuItem<City>>((City city) {
-                //     return DropdownMenuItem<City>(value: city, child: Text(city.name));
-                //   }).toList(),
-                // ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        // Provider.of<LocationProvider>(context, listen: false).craftGeoCode('${addressController.text} ${_selectedCity?.name} ${_selectedCountry?.name}').then((value) {
-                        //   Location location = Location(
-                        //     latitude: value[0],
-                        //     longitude: value[1],
-                        //     address: addressController.text,
-                        //     cityId: _selectedCity?.id ?? '',
-                        //   );
-                        //   Provider.of<LocationProvider>(context, listen: false).createLocation(location).then((locationId) {
-                        //create partner
                         if (_selectedCountry != null &&
                             _selectedCountry?.id != null) {
                           Country toPass = _selectedCountry!;
                           Partner partner = Partner(
-                            userId: userId,
+                            userId: widget.userId,
                             countryId: toPass.id,
                             taxName: taxNameController.text,
                             taxId: int.parse(taxIdController.text),
@@ -153,13 +120,13 @@ class _PartnerRegisterScreenState extends State<PartnerRegisterScreen> {
                           );
                           Provider.of<AuthProvider>(context, listen: false)
                               .registerPartner(partner);
+                          if (!context.mounted) return;
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => PartnerProfilePage()));
+                                  builder: (context) =>
+                                      const PartnerProfilePage()));
                         }
-                        // });
-                        // });
                       }
                     },
                     child: const Text('Submit'),

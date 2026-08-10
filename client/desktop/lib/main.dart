@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:ebooking_desktop/providers/admin_provider.dart';
 import 'package:ebooking_desktop/services/admin_service.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +13,7 @@ import 'package:ebooking_desktop/pages/login.dart';
 
 void main() {
   final SecureStorage secureStorage = SecureStorage();
-  HttpOverrides.global = X509Override();
-  
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => AuthProvider(authService: AuthService(secureStorage: secureStorage))),
@@ -24,12 +21,12 @@ void main() {
       ChangeNotifierProvider(create: (context) => MessageProvider(signalRService: SignalRService(secureStorage: secureStorage))),
       ChangeNotifierProvider(create: (context) => AdminProvider(adminService: AdminService(secureStorage: secureStorage))),
     ],
-    child: MyApp(),
+    child: const MyApp(),
   ));
 }
 
 class MyApp extends StatelessWidget {
-  MyApp();
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,51 +39,44 @@ class MyApp extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
+              body: Center(child: CircularProgressIndicator()),
             );
           }
           if (snapshot.hasError) {
-            print (snapshot.error);
-            
             return const Scaffold(
-              body: Center(
-                child: Text('An error occurred'),
-              ),
+              body: Center(child: Text('An error occurred')),
             );
-          } 
-          else {
+          } else {
             final isLoggedIn = snapshot.data![0] as bool;
             final role = snapshot.data![1] as String;
-            
+
             if (isLoggedIn && role == 'Administrator') {
+              // Capture providers synchronously before the async chain
+              final messageProvider = Provider.of<MessageProvider>(context, listen: false);
+              final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+              final adminProvider = Provider.of<AdminProvider>(context, listen: false);
+
               return FutureBuilder(
-                future: Future.wait([Provider.of<MessageProvider>(context, listen: false).startSignalR().then(
-                        (_) => Provider.of<MessageProvider>(context, listen: false).getChats().then((_) async => {
-                          for(var c in Provider.of<MessageProvider>(context, listen: false).chats) {
-                            await Provider.of<MessageProvider>(context, listen: false).getMessages(c.Id),
-                            await Provider.of<MessageProvider>(context, listen: false).addToChat(c.Id),
-                          },
-                          await Provider.of<ProfileProvider>(context, listen: false).getProfile(),
-                          await Provider.of<AdminProvider>(context, listen: false).getAccommodations(),
-                          await Provider.of<AdminProvider>(context, listen: false).getProfiles(),
-                          await Provider.of<AdminProvider>(context, listen: false).getReservations(),
-                        }),
-                )]), 
+                future: messageProvider.startSignalR().then(
+                  (_) => messageProvider.getChats().then((_) async {
+                    for (var c in messageProvider.chats) {
+                      await messageProvider.getMessages(c.id);
+                      await messageProvider.addToChat(c.id);
+                    }
+                    await profileProvider.getProfile();
+                    await adminProvider.getAccommodations();
+                    await adminProvider.getProfiles();
+                    await adminProvider.getReservations();
+                  }),
+                ),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Scaffold(
-                      body: Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      body: Center(child: CircularProgressIndicator()),
                     );
                   } else if (snapshot.hasError) {
-                    print(snapshot.error);
                     return const Scaffold(
-                      body: Center(
-                        child: Text('An error occurred'),
-                      ),
+                      body: Center(child: Text('An error occurred')),
                     );
                   } else {
                     return DashboardApp();
@@ -98,16 +88,7 @@ class MyApp extends StatelessWidget {
             }
           }
         },
-      ), 
+      ),
     );
-  }
-}
-
-class X509Override extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
   }
 }

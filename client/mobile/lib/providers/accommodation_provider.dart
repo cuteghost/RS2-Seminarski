@@ -4,7 +4,6 @@ import 'package:ebooking/models/accomodation_model.dart';
 
 class AccommodationProvider with ChangeNotifier {
   final AccommodationService accommodationService;
-  AccommodationGET? _accommodation = null;
 
   AccommodationProvider({required this.accommodationService});
 

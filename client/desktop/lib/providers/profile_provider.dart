@@ -1,4 +1,3 @@
-import 'package:ebooking_desktop/models/partner_model.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking_desktop/models/profile_model.dart';
 import 'package:ebooking_desktop/services/profile_service.dart';

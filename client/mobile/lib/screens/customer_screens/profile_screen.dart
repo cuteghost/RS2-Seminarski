@@ -5,16 +5,17 @@ import 'package:ebooking/screens/partner_screens/partner_register_screen.dart';
 import 'package:ebooking/widgets/edit_email_modal.dart';
 import 'package:ebooking/widgets/edit_password_modal.dart';
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:ebooking/screens/login_screen.dart';
 
 class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  ProfilePageState createState() => ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class ProfilePageState extends State<ProfilePage> {
   ValueNotifier<bool> hasChanges = ValueNotifier<bool>(false);
 
   @override
@@ -345,7 +346,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               Row(
                                 children: [
                                   Icon(
-                                    MdiIcons.facebook,
+                                    Icons.facebook,
                                     size: 24.0,
                                   ),
                                   const SizedBox(width: 8.0),
@@ -361,7 +362,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               Row(
                                 children: [
                                   Icon(
-                                    MdiIcons.google,
+                                    Icons.g_mobiledata,
                                     size: 24.0,
                                   ),
                                   const SizedBox(width: 8.0),

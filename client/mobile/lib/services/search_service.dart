@@ -21,7 +21,6 @@ class SearchService {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json'
         });
-    print(response.statusCode);
     if (response.statusCode != 200) {
       throw Exception('Failed to search accomodation');
     } else {

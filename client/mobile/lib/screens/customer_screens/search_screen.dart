@@ -8,12 +8,14 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:ebooking/screens/customer_screens/results_screen.dart';
 
 class SearchAccommodationsScreen extends StatefulWidget {
+  const SearchAccommodationsScreen({super.key});
+
   @override
-  _SearchAccommodationsScreenState createState() =>
-      _SearchAccommodationsScreenState();
+  SearchAccommodationsScreenState createState() =>
+      SearchAccommodationsScreenState();
 }
 
-class _SearchAccommodationsScreenState
+class SearchAccommodationsScreenState
     extends State<SearchAccommodationsScreen> {
   DateTime? fromDate; // Selected from date
   DateTime? toDate; // Selected to date
@@ -156,7 +158,7 @@ class _SearchAccommodationsScreenState
               ),
               // Location Input
               DropdownButtonFormField(
-                value: _selectedCountry,
+                initialValue: _selectedCountry,
                 hint: const Text('Select Country'),
                 onChanged: (Country? newValue) async {
                   setState(() {
@@ -167,8 +169,8 @@ class _SearchAccommodationsScreenState
                   });
 
                   if (_selectedCountry != null) {
-                    await Provider.of<LocationProvider>(context, listen: false)
-                        .fetchCities(_selectedCountry?.id);
+                    final locationProvider = Provider.of<LocationProvider>(context, listen: false);
+                    await locationProvider.fetchCities(_selectedCountry?.id);
                   }
                 },
                 //fill items with countries from provider
@@ -180,7 +182,7 @@ class _SearchAccommodationsScreenState
                 }).toList(),
               ),
               DropdownButtonFormField(
-                value: _selectedCity,
+                initialValue: _selectedCity,
                 hint: const Text('Select City'),
                 onChanged: (City? newValue) {
                   setState(() {
@@ -284,7 +286,7 @@ class _SearchAccommodationsScreenState
                 ),
               ),
               // Calendar Input Field
-              Container(
+              SizedBox(
                 height: MediaQuery.of(context).size.height * 0.5,
                 child: TableCalendar(
                   firstDay: DateTime.now(),
@@ -310,7 +312,6 @@ class _SearchAccommodationsScreenState
                         toDate = selectedDay;
                       });
                     }
-                    print('fromDate: $fromDate, toDate: $toDate');
                   },
                   onFormatChanged: (format) {
                     setState(() {
@@ -349,6 +350,7 @@ class _SearchAccommodationsScreenState
                       await Provider.of<SearchProvider>(context, listen: false)
                           .search(priceFrom.toDouble(), priceTo.toDouble(),
                               _selectedCity!.name, fromDate!, toDate!);
+                  if (!context.mounted) return;
                   Navigator.push(
                       context,
                       MaterialPageRoute(

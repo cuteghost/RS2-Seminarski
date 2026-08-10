@@ -4,7 +4,7 @@ import 'package:ebooking/models/accomodation_model.dart';
 import 'package:ebooking/providers/accommodation_provider.dart';
 import 'package:ebooking/screens/login_screen.dart';
 import 'package:ebooking/screens/customer_screens/search_screen.dart';
-import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
+import 'package:ebooking/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking/screens/customer_screens/accommodation_details_screen.dart';
 import 'package:ebooking/screens/customer_screens/history_screen.dart';
@@ -13,11 +13,13 @@ import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 
 class DiscoverPropertiesPage extends StatefulWidget {
+  const DiscoverPropertiesPage({super.key});
+
   @override
-  _DiscoverPropertiesPageState createState() => _DiscoverPropertiesPageState();
+  DiscoverPropertiesPageState createState() => DiscoverPropertiesPageState();
 }
 
-class _DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
+class DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
   Position? _currentPosition;
   List<AccommodationGET> _nearbyAccommodations = [];
 
@@ -52,33 +54,21 @@ class _DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
                   _currentPosition!.latitude, _currentPosition!.longitude);
       return nearby;
     } else {
-      print('Current position is null');
       List<AccommodationGET> empty = [];
       return empty;
     }
-  }
-
-  void _openSearchAccommodations(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SearchAccommodationsScreen(),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Discover Properties'),
-        actions: //logout button
-            [
+        title: const Text('Discover Properties'),
+        actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: () {
               Provider.of<AuthProvider>(context, listen: false).logout();
-              // Navigate to the LoginScreen
               Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: (context) => LoginPage()));
             },
@@ -90,37 +80,39 @@ class _DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Search Input
-            Container(
-              padding: EdgeInsets.all(16.0),
+            ColoredBox(
               color: Colors.grey.shade200,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to the SearchAccommodationsPage when the button is pressed
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SearchAccommodationsScreen(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey.shade200,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Search for location or property',
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                    SizedBox(width: 8.0), // Adjust spacing
-                    Icon(Icons.search),
-                  ],
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const SearchAccommodationsScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade200,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Search for location or property',
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                      const SizedBox(width: 8.0),
+                      const Icon(Icons.search),
+                    ],
+                  ),
                 ),
               ),
             ),
             // Nearby Properties Header
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
                 'Nearby Accommodations',
@@ -131,16 +123,14 @@ class _DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
               ),
             ),
             // Nearby Properties Horizontal Scroll
-            !_nearbyAccommodations.isEmpty
+            _nearbyAccommodations.isNotEmpty
                 ? SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: List.generate(
-                        _nearbyAccommodations
-                            .length, // Number of nearby properties
+                        _nearbyAccommodations.length,
                         (index) => InkWell(
                           onTap: () {
-                            // Navigate to PropertyDetailsPage when a property is tapped
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -162,61 +152,16 @@ class _DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
                       ),
                     ),
                   )
-                : Container(
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                : const Center(
+                    child: CircularProgressIndicator(),
                   ),
-            // Property Header
-            // Padding(
-            //   padding: EdgeInsets.all(16.0),
-            //   child: Text(
-            //     'Accommodation Quick Filters',
-            //     style: TextStyle(
-            //       fontSize: 18.0,
-            //       fontWeight: FontWeight.bold,
-            //     ),
-            //   ),
-            // ),
-            // // Filters Horizontal Scroll
-            // SingleChildScrollView(
-            //   scrollDirection: Axis.horizontal,
-            //   child: Row(
-            //     children: [
-            //         FilterChip(
-            //           label: Text('Pool'),
-            //           onSelected: (bool selected) {},
-            //         ),
-            //         SizedBox(width: 8.0),
-            //         FilterChip(
-            //           label: Text('Bathub'),
-            //           onSelected: (bool selected) {},
-            //         ),
-            //         SizedBox(width: 8.0),
-            //         FilterChip(
-            //           label: Text('Terrace'),
-            //           onSelected: (bool selected) {},
-            //         ),
-            //         SizedBox(width: 8.0),
-            //         FilterChip(
-            //           label: Text('View'),
-            //           onSelected: (bool selected) {},
-            //         ),
-            //         SizedBox(width: 8.0),
-            //         FilterChip(
-            //           label: Text('Sea View'),
-            //           onSelected: (bool selected) {},
-            //         ),
-            //       ],
-            //     ),
-            //   ),
             // Reservation History
-            Container(
-              padding: EdgeInsets.all(16.0),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Reservation History',
                     style: TextStyle(
                       fontSize: 18.0,
@@ -225,16 +170,15 @@ class _DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // Handle reservation logic
-                      // Navigate to the BookingScreen
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ReservationHistoryPage(),
+                          builder: (context) =>
+                              const ReservationHistoryPage(),
                         ),
                       );
                     },
-                    child: Text('View All'),
+                    child: const Text('View All'),
                   ),
                 ],
               ),
@@ -242,7 +186,7 @@ class _DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(),
+      bottomNavigationBar: const CustomBottomNavigationBar(),
     );
   }
 }
@@ -252,14 +196,16 @@ class NearbyPropertyCard extends StatelessWidget {
   final String propertyName;
   final double pricePerNight;
 
-  NearbyPropertyCard(
-      {required this.image,
+  const NearbyPropertyCard(
+      {super.key,
+      required this.image,
       required this.propertyName,
       required this.pricePerNight});
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(8.0),
       width: 200.0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,19 +222,19 @@ class NearbyPropertyCard extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 8.0),
-          // Distance from Current Location
+          const SizedBox(height: 8.0),
           Text(
             propertyName,
-            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+            style:
+                const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
           ),
-          Text(
+          const Text(
             'Less than 10km away',
             style: TextStyle(fontSize: 12.0),
           ),
           Text(
-            '\$ ${pricePerNight} per night',
-            style: TextStyle(fontSize: 12.0),
+            '\$ $pricePerNight per night',
+            style: const TextStyle(fontSize: 12.0),
           ),
         ],
       ),

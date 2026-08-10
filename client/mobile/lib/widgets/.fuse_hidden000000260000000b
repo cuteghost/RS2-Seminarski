@@ -10,7 +10,7 @@ import 'package:ebooking/screens/partner_screens/partner_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking/utils/navigation_utils.dart';
 import 'package:ebooking/screens/partner_screens/add_accommodation_screen.dart';
-import 'package:ebooking/widgets/customIconButton.dart';
+import 'package:ebooking/widgets/custom_icon_button.dart';
 import 'package:icon_badge/icon_badge.dart';
 import 'package:provider/provider.dart';
 

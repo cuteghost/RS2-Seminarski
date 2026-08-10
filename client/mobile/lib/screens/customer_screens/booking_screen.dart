@@ -1,7 +1,7 @@
 import 'package:ebooking/models/accomodation_model.dart';
 import 'package:ebooking/models/reservation_model.dart';
-import 'package:ebooking/providers/reservation_provide.dart';
-import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
+import 'package:ebooking/providers/reservation_provider.dart';
+import 'package:ebooking/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -9,18 +9,18 @@ import 'package:ebooking/screens/customer_screens/checkout_screen.dart';
 
 class BookingScreen extends StatefulWidget {
   final AccommodationGET accommodation;
-  @override
-  _BookingScreenState createState() => _BookingScreenState();
 
-  BookingScreen({required this.accommodation});
+  const BookingScreen({super.key, required this.accommodation});
+
+  @override
+  BookingScreenState createState() => BookingScreenState();
 }
 
-class _BookingScreenState extends State<BookingScreen> {
-  int numberOfGuests = 1; // Initial number of guests
-  DateTime? fromDate; // Selected from date
-  DateTime? toDate; // Selected to date
-  CalendarFormat _calendarFormat = CalendarFormat.month;
-  ValueNotifier<DateTime> _selectedDay = ValueNotifier(DateTime.now());
+class BookingScreenState extends State<BookingScreen> {
+  int numberOfGuests = 1;
+  DateTime? fromDate;
+  DateTime? toDate;
+  final CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime firstFreeDay = DateTime.now();
 
   @override
@@ -34,28 +34,25 @@ class _BookingScreenState extends State<BookingScreen> {
   Widget build(BuildContext context) {
     List<Map<String, DateTime>> reservedDates =
         Provider.of<ReservationProvider>(context).reservedDates;
-    print('Reserved Dates: $reservedDates');
-    // Convert the list of maps to a list of DateTime ranges
     List<DateTimeRange> reservedRanges = reservedDates.map((map) {
       return DateTimeRange(start: map['Start']!, end: map['End']!);
     }).toList();
     while (reservedRanges.any((range) =>
         firstFreeDay.isAfter(range.start) &&
         firstFreeDay.isBefore(range.end))) {
-      firstFreeDay = firstFreeDay.add(Duration(days: 1));
+      firstFreeDay = firstFreeDay.add(const Duration(days: 1));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Book Your Stay'),
+        title: const Text('Book Your Stay'),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Number of Guests
-            Text(
+            const Text(
               'Number of guests',
               style: TextStyle(
                 fontSize: 18.0,
@@ -66,7 +63,7 @@ class _BookingScreenState extends State<BookingScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
-                  icon: Icon(Icons.remove),
+                  icon: const Icon(Icons.remove),
                   onPressed: () {
                     setState(() {
                       if (numberOfGuests > 1) {
@@ -77,13 +74,13 @@ class _BookingScreenState extends State<BookingScreen> {
                 ),
                 Text(
                   numberOfGuests.toString(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.add),
+                  icon: const Icon(Icons.add),
                   onPressed: () {
                     setState(() {
                       numberOfGuests++;
@@ -92,9 +89,8 @@ class _BookingScreenState extends State<BookingScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 16.0),
-            // Calendar
-            Text(
+            const SizedBox(height: 16.0),
+            const Text(
               'Select Dates',
               style: TextStyle(
                 fontSize: 18.0,
@@ -110,7 +106,7 @@ class _BookingScreenState extends State<BookingScreen> {
               ),
               child: TableCalendar(
                 firstDay: DateTime.now(),
-                lastDay: DateTime.now().add(Duration(days: 365)),
+                lastDay: DateTime.now().add(const Duration(days: 365)),
                 focusedDay: firstFreeDay,
                 calendarFormat: _calendarFormat,
                 startingDayOfWeek: StartingDayOfWeek.monday,
@@ -118,7 +114,7 @@ class _BookingScreenState extends State<BookingScreen> {
                   formatButtonVisible: false,
                   decoration: BoxDecoration(
                     color: Colors.lightBlue,
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(10.0),
                       topRight: Radius.circular(10.0),
                     ),
@@ -126,7 +122,7 @@ class _BookingScreenState extends State<BookingScreen> {
                 ),
                 onDaySelected: (selectedDay, focusedDay) {
                   setState(() {
-                    this.firstFreeDay = focusedDay;
+                    firstFreeDay = focusedDay;
                   });
 
                   if (reservedRanges.any((range) =>
@@ -138,19 +134,16 @@ class _BookingScreenState extends State<BookingScreen> {
                     });
                     return;
                   } else if (fromDate == null || toDate != null) {
-                    // If from date is null or both from and to dates are selected, reset the selection
                     setState(() {
                       fromDate = selectedDay;
                       toDate = null;
                     });
                   } else if (selectedDay.isBefore(fromDate!)) {
-                    // If selected day is before the current from date, reset the selection
                     setState(() {
                       fromDate = selectedDay;
                       toDate = null;
                     });
                   } else {
-                    // If fromDate is already selected, check if the range from fromDate to selectedDay includes any reserved dates
                     if (reservedRanges.any((range) =>
                         (range.start.isAfter(fromDate!) &&
                             range.start.isBefore(selectedDay)) ||
@@ -162,24 +155,23 @@ class _BookingScreenState extends State<BookingScreen> {
                       });
                       return;
                     } else {
-                      // If the range does not include reserved dates, set the toDate
                       setState(() {
                         toDate = selectedDay;
                       });
                     }
                   }
-                  print('fromDate: $fromDate, toDate: $toDate');
                 },
                 selectedDayPredicate: (day) {
-                  // Highlight the selected date and the range between from and to dates
                   if (reservedRanges.any((range) =>
                       (day.isAfter(range.start) && day.isBefore(range.end)) ||
-                      isSameDay(range.end, day))) return false;
+                      isSameDay(range.end, day))) {
+                    return false;
+                  }
                   return (fromDate != null &&
                           toDate != null &&
                           ((day.isAfter(fromDate!) &&
                                   day.isBefore(
-                                      toDate!.add(Duration(days: 1)))) ||
+                                      toDate!.add(const Duration(days: 1)))) ||
                               isSameDay(day, fromDate!) ||
                               isSameDay(day, toDate!))) ||
                       (fromDate != null &&
@@ -191,7 +183,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     color: Colors.indigo[400],
                     shape: BoxShape.circle,
                   ),
-                  todayTextStyle: TextStyle(
+                  todayTextStyle: const TextStyle(
                     color: Colors.black,
                   ),
                   todayDecoration: reservedRanges.any((range) =>
@@ -209,7 +201,6 @@ class _BookingScreenState extends State<BookingScreen> {
                         ),
                 ),
                 calendarBuilders: CalendarBuilders(
-                  // Use this builder to customize the appearance of the reserved dates
                   defaultBuilder: (context, date, events) {
                     DateTime dateOnly =
                         DateTime(date.year, date.month, date.day);
@@ -220,7 +211,6 @@ class _BookingScreenState extends State<BookingScreen> {
                             range.end.year, range.end.month, range.end.day)) ||
                         (dateOnly.isAfter(range.start) &&
                             dateOnly.isBefore(range.end)))) {
-                      // If the date is in a reserved range, return a widget with a custom appearance
                       return Center(
                         child: Container(
                           decoration: BoxDecoration(
@@ -232,7 +222,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           child: Center(
                             child: Text(
                               date.day.toString(),
-                              style: TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black),
                             ),
                           ),
                         ),
@@ -250,7 +240,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           child: Center(
                             child: Text(
                               date.day.toString(),
-                              style: TextStyle(color: Colors.white),
+                              style: const TextStyle(color: Colors.white),
                             ),
                           ),
                         ),
@@ -267,7 +257,7 @@ class _BookingScreenState extends State<BookingScreen> {
                           child: Center(
                             child: Text(
                               date.day.toString(),
-                              style: TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black),
                             ),
                           ),
                         ),
@@ -277,19 +267,18 @@ class _BookingScreenState extends State<BookingScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 30.0),
-            // Confirm Booking Button
+            const SizedBox(height: 30.0),
             ElevatedButton(
               onPressed: () async {
                 if (fromDate == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text('Please select a valid date range'),
                     ),
                   );
                   return;
-                } else if (toDate == null) {
-                  toDate = fromDate;
+                } else {
+                  toDate ??= fromDate;
                 }
                 ReservationPOST reservation = ReservationPOST(
                   accommodationId: widget.accommodation.id,
@@ -297,7 +286,6 @@ class _BookingScreenState extends State<BookingScreen> {
                   endDate: toDate!,
                   numberOfGuests: numberOfGuests,
                 );
-                // await Provider.of<ReservationProvider>(context, listen: false).makeReservation(reservation);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -313,12 +301,12 @@ class _BookingScreenState extends State<BookingScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.lightBlue,
               ),
-              child: Text('Confirm Booking'),
+              child: const Text('Confirm Booking'),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(),
+      bottomNavigationBar: const CustomBottomNavigationBar(),
     );
   }
 }

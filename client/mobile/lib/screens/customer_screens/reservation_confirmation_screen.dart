@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 
 class ReservationConfirmationPage extends StatelessWidget {
   final String accommodationName;
-  ReservationConfirmationPage({required this.accommodationName});
+
+  const ReservationConfirmationPage({super.key, required this.accommodationName});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +29,7 @@ class ReservationConfirmationPage extends StatelessWidget {
 
             // Success message
             Text(
-              'You have successfully paid your stay at ${accommodationName}.',
+              'You have successfully paid your stay at $accommodationName.',
               style: TextStyle(
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,

@@ -1,6 +1,6 @@
 import 'package:ebooking/models/accomodation_model.dart';
 import 'package:ebooking/providers/accommodation_provider.dart';
-import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
+import 'package:ebooking/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -8,11 +8,13 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class MapPage extends StatefulWidget {
+  const MapPage({super.key});
+
   @override
-  _MapPageState createState() => _MapPageState();
+  MapPageState createState() => MapPageState();
 }
 
-class _MapPageState extends State<MapPage> {
+class MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
   late LocationData userLocation; // Store user's current location
   Future? _initMapFuture;
@@ -54,7 +56,6 @@ class _MapPageState extends State<MapPage> {
       // Permission has been granted
       // Now you can proceed to get the location
     } else {
-      print('Location permission is not granted');
     }
   }
 
@@ -63,11 +64,9 @@ class _MapPageState extends State<MapPage> {
 
     try {
       LocationData? userLocation = await location.getLocation();
-      print('Got User location $userLocation');
       return userLocation;
     } catch (e) {
       // Handle the case where location services are disabled or an error occurs
-      print('Error getting location: $e');
       return null;
     }
   }
@@ -115,7 +114,7 @@ class _MapPageState extends State<MapPage> {
 
   Set<Marker> _buildMarkers() {
     // Add markers for user's current location and nearby properties
-    Set<Marker> markers = Set();
+    Set<Marker> markers = {};
 
     // Marker for user's current location
     markers.add(

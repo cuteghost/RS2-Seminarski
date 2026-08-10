@@ -156,9 +156,9 @@ class AccommodationImages {
 
   Map<String, dynamic> toJson() {
     List<String> imagesBase64 = [];
-    images.forEach((element) {
+    for (var element in images) {
       imagesBase64.add(imageToBase64(element!));
-    });
+    }
     Map<String, dynamic> imagesMap = {};
     for (int i = 0; i < imagesBase64.length; i++) {
       imagesMap['image${i + 1}'] = imagesBase64[i];
@@ -253,12 +253,12 @@ class AccommodationPOST {
 }
 
 enum TypesOfAccommodation {
-  House,
-  Hotel,
-  Resort,
-  Apartment,
-  Villa,
-  Hostel,
-  Cottage,
-  Penthouse
+  house,
+  hotel,
+  resort,
+  apartment,
+  villa,
+  hostel,
+  cottage,
+  penthouse
 }

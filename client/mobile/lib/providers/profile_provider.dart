@@ -52,7 +52,7 @@ class ProfileProvider with ChangeNotifier {
     return await profileService.fetchPartner();
   }
 
-  updatePartner({required Partner partner}) async {
-    await profileService.updatePartner(partner);
+  Future<bool> updatePartner({required Partner partner}) async {
+    return await profileService.updatePartner(partner);
   }
 }

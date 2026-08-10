@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:ebooking_desktop/models/accomodation_model.dart';
 import 'package:ebooking_desktop/models/profile_model.dart';
 import 'package:ebooking_desktop/models/reservation_model.dart';
@@ -11,17 +9,16 @@ import 'package:ebooking_desktop/config/config.dart' as config;
 
 class AdminService {
   final SecureStorage _secureStorage;
-  
+
   AdminService({required SecureStorage secureStorage}) : _secureStorage = secureStorage;
 
-  getAccommodations() async{
+  Future<List<AccommodationGET>> getAccommodations() async {
     final token = await _secureStorage.getToken();
     final url = Uri.parse('${config.AppConfig.baseUrl}/api/Administrator/Accommodations');
     return await http.get(url, headers: {
       'Authorization': 'Bearer $token',
       'Accept': 'application/json',
     }).then((response) {
-      print(response.statusCode);
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((e) => AccommodationGET.fromJson(e)).toList();
@@ -31,7 +28,7 @@ class AdminService {
     });
   }
 
-  getProfiles() async {
+  Future<List<Profile>> getProfiles() async {
     final token = await _secureStorage.getToken();
     final url = Uri.parse('${config.AppConfig.baseUrl}/api/Administrator/Customers');
     return await http.get(url, headers: {
@@ -48,7 +45,7 @@ class AdminService {
     });
   }
 
-  getReservations() async{
+  Future<List<ReservationGET>> getReservations() async {
     
     final token = await _secureStorage.getToken();
     final url = Uri.parse('${config.AppConfig.baseUrl}/api/Administrator/Reservations?start=${DateTime.now().subtract(Duration(days: 30)).toIso8601String()}&end=${DateTime.now().toIso8601String()}');
@@ -64,22 +61,5 @@ class AdminService {
       }
     });
   }
-
-  lowestRents() async{
-    final token = await _secureStorage.getToken();
-    final url = Uri.parse('${config.AppConfig.baseUrl}/api/Administrator/AccommodationWithLowestRents');
-    return await http.get(url, headers: {
-      'Authorization': 'Bearer $token',
-      'Accept': 'application/json',
-    }).then((response) {
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return AccommodationGET.fromJson(data);
-      } else {
-        throw Exception('Failed to load accommodations');
-      }
-    });
-  }
-
 
 }

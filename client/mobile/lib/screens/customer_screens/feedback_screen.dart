@@ -7,17 +7,23 @@ import 'package:provider/provider.dart';
 class FeedbackPage extends StatefulWidget {
   final String accommodationID;
 
-  FeedbackPage({required this.accommodationID});
+  const FeedbackPage({super.key, required this.accommodationID});
 
   @override
-  _FeedbackPageState createState() => _FeedbackPageState();
+  FeedbackPageState createState() => FeedbackPageState();
 }
 
-class _FeedbackPageState extends State<FeedbackPage> {
+class FeedbackPageState extends State<FeedbackPage> {
   double rating = 5.0;
   bool? enjoyedStay = true;
   bool? recommendUs = true;
   TextEditingController commentsController = TextEditingController();
+
+  @override
+  void dispose() {
+    commentsController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,21 +107,17 @@ class _FeedbackPageState extends State<FeedbackPage> {
             style: TextStyle(fontSize: 18.0),
           ),
         ),
-        Row(
-          children: [
-            Radio<bool>(
-              value: true,
-              groupValue: value,
-              onChanged: onChanged,
-            ),
-            Text('Yes'),
-            Radio<bool>(
-              value: false,
-              groupValue: value,
-              onChanged: onChanged,
-            ),
-            Text('No'),
-          ],
+        RadioGroup<bool>(
+          groupValue: value,
+          onChanged: onChanged,
+          child: Row(
+            children: [
+              Radio<bool>(value: true),
+              const Text('Yes'),
+              Radio<bool>(value: false),
+              const Text('No'),
+            ],
+          ),
         ),
       ],
     );

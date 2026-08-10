@@ -20,17 +20,13 @@ class AccommodationService {
         },
         body: json.encode(accommodation.toJson()));
     if (response.statusCode == 200) {
-      print('Accommodation added successfully');
       return true;
     } else {
-      print('Failed to add accommodation');
-      print(response.body);
-      print(response.statusCode);
       return false;
     }
   }
 
-  getMyAccommodations() async {
+  Future<List<AccommodationGET>> getMyAccommodations() async {
     final response = await http.get(
         Uri.parse(
             '${config.AppConfig.baseUrl}/api/Accommodation/GetMyAccommodation'),
@@ -41,17 +37,13 @@ class AccommodationService {
         });
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      print(response.body);
       return data.map((json) => AccommodationGET.fromJson(json)).toList();
     } else {
-      print('Failed to fetch accommodations');
-      print(response.body);
-      print(response.statusCode);
       return [];
     }
   }
 
-  fetchAccommodation(String accommodationId) async {
+  Future<AccommodationGET> fetchAccommodation(String accommodationId) async {
     final response = await http.get(
         Uri.parse(
             '${config.AppConfig.baseUrl}/api/Accommodation/GetAccommodationById?id=$accommodationId'),
@@ -64,10 +56,7 @@ class AccommodationService {
       final data = json.decode(response.body);
       return AccommodationGET.fromJson(data);
     } else {
-      print('Failed to fetch accommodation');
-      print(response.body);
-      print(response.statusCode);
-      return null;
+      throw Exception('Failed to fetch accommodation');
     }
   }
 
@@ -81,12 +70,8 @@ class AccommodationService {
         },
         body: json.encode(accommodation.toJson()));
     if (response.statusCode == 200) {
-      print('Accommodation updated successfully');
       return true;
     } else {
-      print('Failed to update accommodation');
-      print(response.body);
-      print(response.statusCode);
       return false;
     }
   }
@@ -94,7 +79,6 @@ class AccommodationService {
   Future<List<AccommodationGET>> fetchNearbyAccommodations(
       double lat, double long) async {
     // Fetch nearby accommodations based on the latitude and longitude
-    print('Latitude: $lat Longitude: $long');
     final response = await http.get(
         Uri.parse(
             '${config.AppConfig.baseUrl}/api/Accommodation/GetNearby?latitude=$lat&longitude=$long'),
@@ -109,9 +93,6 @@ class AccommodationService {
           .map((json) => AccommodationGET.fromJson(json))
           .toList();
     } else {
-      print('Failed to fetch nearby accommodations');
-      print(response.body);
-      print(response.statusCode);
       List<AccommodationGET> empty = [];
       return empty;
     }

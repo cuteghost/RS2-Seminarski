@@ -30,7 +30,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  material_design_icons_flutter: 7.0.7296
   table_calendar: ^3.1.1
   flutter_rounded_date_picker: ^3.0.4
   flutter_credit_card: ^4.0.1
@@ -50,7 +49,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   carousel_slider: ^4.0.0
   syncfusion_flutter_charts: ^25.2.6
-  wechat_assets_picker: ^9.0.3
+  wechat_assets_picker: ^10.1.1
   geolocator: ^12.0.0
   signalr_core: ^1.1.2
   icon_badge: ^1.0.0

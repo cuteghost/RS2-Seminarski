@@ -1,19 +1,19 @@
 import 'package:ebooking/models/accomodation_model.dart';
-import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
+import 'package:ebooking/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking/screens/customer_screens/booking_screen.dart';
 
 class AccommodationDetailsScreen extends StatefulWidget {
   final AccommodationGET accommodation;
 
-  AccommodationDetailsScreen({required this.accommodation});
+  const AccommodationDetailsScreen({super.key, required this.accommodation});
 
   @override
-  _AccommodationDetailsScreenState createState() =>
-      _AccommodationDetailsScreenState();
+  AccommodationDetailsScreenState createState() =>
+      AccommodationDetailsScreenState();
 }
 
-class _AccommodationDetailsScreenState
+class AccommodationDetailsScreenState
     extends State<AccommodationDetailsScreen> {
   late AccommodationGET accommodation;
 
@@ -34,14 +34,13 @@ class _AccommodationDetailsScreenState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Image Gallery
-            Container(
+            SizedBox(
               height: 200.0,
               child: PageView.builder(
-                itemCount: accommodation
-                    .images.images.length, // Number of property images
+                itemCount: accommodation.images.images.length,
                 itemBuilder: (context, index) {
                   return Container(
-                    margin: EdgeInsets.all(8.0),
+                    margin: const EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
                       image: DecorationImage(
@@ -55,12 +54,11 @@ class _AccommodationDetailsScreenState
             ),
             // Property Details
             Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Property Name and Status
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
@@ -72,28 +70,21 @@ class _AccommodationDetailsScreenState
                       ),
                     ],
                   ),
-                  SizedBox(height: 8.0),
-                  // Address
+                  const SizedBox(height: 8.0),
                   Text('Address: ${accommodation.location.address}'),
-                  SizedBox(height: 8.0),
-                  // Check-in Hours
-                  Text('Check-in Hours: 12:00 - 22:00'),
-                  SizedBox(height: 8.0),
-                  // Price
+                  const SizedBox(height: 8.0),
+                  const Text('Check-in Hours: 12:00 - 22:00'),
+                  const SizedBox(height: 8.0),
                   Text('\$${accommodation.pricePerNight} per night'),
-                  SizedBox(height: 16.0),
-                  // Short Description
+                  const SizedBox(height: 16.0),
                   Text(
-                    '${accommodation.description}',
-                    style: TextStyle(fontSize: 16.0),
+                    accommodation.description,
+                    style: const TextStyle(fontSize: 16.0),
                   ),
-                  SizedBox(height: 16.0),
-                  // Reserve Now Button
+                  const SizedBox(height: 16.0),
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Handle reservation logic
-                        // Navigate to the BookingScreen
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -102,71 +93,17 @@ class _AccommodationDetailsScreenState
                           ),
                         );
                       },
-                      child: Text('Reserve Now'),
+                      child: const Text('Reserve Now'),
                     ),
                   ),
-                  SizedBox(height: 16.0),
-                  // Recommended Sites
-                  // Text(
-                  //   'Recommended Sites to Visit',
-                  //   style: TextStyle(
-                  //     fontSize: 18.0,
-                  //     fontWeight: FontWeight.bold,
-                  //   ),
-                  // ),
-                  // SizedBox(height: 8.0),
-                  // Two Recommended Sites
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //   children: [
-                  //     RecommendedSiteCard(
-                  //         title: 'Site 1',
-                  //         imagePath: 'assets/images/Image.jpeg'),
-                  //     RecommendedSiteCard(
-                  //         title: 'Site 2',
-                  //         imagePath: 'assets/images/Image.jpeg'),
-                  //   ],
-                  // ),
+                  const SizedBox(height: 16.0),
                 ],
               ),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(),
+      bottomNavigationBar: const CustomBottomNavigationBar(),
     );
   }
 }
-
-// class RecommendedSiteCard extends StatelessWidget {
-//   final String title;
-//   final String imagePath;
-
-//   RecommendedSiteCard({required this.title, required this.imagePath});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 150.0,
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           // Recommended Site Image
-//           Container(
-//             height: 100.0,
-//             decoration: BoxDecoration(
-//               borderRadius: BorderRadius.circular(8.0),
-//               image: DecorationImage(
-//                 image: AssetImage(imagePath),
-//                 fit: BoxFit.cover,
-//               ),
-//             ),
-//           ),
-//           SizedBox(height: 8.0),
-//           // Recommended Site Title
-//           Text(title),
-//         ],
-//       ),
-//     );
-//   }
-// }

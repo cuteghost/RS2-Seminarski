@@ -5,29 +5,23 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:ebooking_desktop/widgets/drawer.dart';
 import 'package:provider/provider.dart';
 
-void main() {
-  runApp(DashboardApp());
-}
-
 class DashboardApp extends StatelessWidget {
+  const DashboardApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Dashboard',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: DashboardPage(),
-    );
+    return DashboardPage();
   }
 }
 
 class DashboardPage extends StatelessWidget {
+  DashboardPage({super.key});
+
   // Dummy data for the bar chart
   final List<BarChartGroupData> barGroups = [
     BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 8)]),
   ];
+
   // Function to build a stat card
   Widget buildStatCard({required IconData icon, required String label, required String value}) {
     return Card(
@@ -54,7 +48,7 @@ class DashboardPage extends StatelessWidget {
     final reservations = Provider.of<AdminProvider>(context, listen: false).reservations;
     calculateNumberOfRentsPerDay() {
       final List<BarChartGroupData> barGroups = [];
-      
+
       List<DateTime> last30Days = [];
       DateTime today = DateTime.now();
       for (int i = 0; i < 30; i++) {
@@ -82,7 +76,7 @@ class DashboardPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            
+
             SizedBox(height: 32),
             Wrap(
               alignment: WrapAlignment.spaceEvenly,
@@ -116,7 +110,7 @@ class DashboardPage extends StatelessWidget {
               style: TextStyle(fontSize: 20),
             ),
             SizedBox(height: 16),
-            Container(
+            SizedBox(
               height: 250,
               child: BarChart(
                 BarChartData(
@@ -128,13 +122,12 @@ class DashboardPage extends StatelessWidget {
                       width: 1,
                     ),
                   ),
-                  
+
                   barGroups: calculateNumberOfRentsPerDay(),
                 ),
               ),
-
             ),
-            
+
           ],
         ),
       ),
@@ -148,11 +141,11 @@ class DashboardStat extends StatelessWidget {
   final String value;
 
   const DashboardStat({
-    Key? key,
+    super.key,
     required this.icon,
     required this.label,
     required this.value,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,6 @@
 import 'package:ebooking/models/accomodation_model.dart';
 import 'package:ebooking/screens/customer_screens/accommodation_details_screen.dart';
-import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
+import 'package:ebooking/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking/screens/customer_screens/filters_screen.dart';
 import 'package:ebooking/widgets/results_container.dart';
@@ -9,13 +9,13 @@ class SearchResultPage extends StatefulWidget {
   final List<AccommodationGET> accommodations;
   final int numberOfDays;
 
-  SearchResultPage({required this.accommodations, required this.numberOfDays});
+  const SearchResultPage({super.key, required this.accommodations, required this.numberOfDays});
 
   @override
-  _SearchResultsState createState() => _SearchResultsState();
+  SearchResultsState createState() => SearchResultsState();
 }
 
-class _SearchResultsState extends State<SearchResultPage> {
+class SearchResultsState extends State<SearchResultPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +76,7 @@ class RoundedFilterButton extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  RoundedFilterButton({required this.icon, required this.label});
+  const RoundedFilterButton({super.key, required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {

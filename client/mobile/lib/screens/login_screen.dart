@@ -4,8 +4,6 @@ import 'package:ebooking/providers/profile_provider.dart';
 import 'package:ebooking/screens/customer_screens/customer_register_screen.dart';
 import 'package:ebooking/screens/partner_screens/partner_discover_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:ebooking/screens/customer_screens/discover_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -13,11 +11,7 @@ class LoginPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  void initState() {
-    Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-  }
+  LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +23,7 @@ class LoginPage extends StatelessWidget {
               children: [
                 Container(
                   height: MediaQuery.of(context).size.height * 0.35,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage('assets/images/Image.jpeg'),
                       fit: BoxFit.cover,
@@ -41,8 +35,8 @@ class LoginPage extends StatelessWidget {
                   left: 0,
                   right: 0,
                   child: Container(
-                    padding: EdgeInsets.all(20.0),
-                    child: Column(
+                    padding: const EdgeInsets.all(20.0),
+                    child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
@@ -69,161 +63,124 @@ class LoginPage extends StatelessWidget {
               ],
             ),
             Container(
-              margin: EdgeInsets.all(20.0),
-              padding: EdgeInsets.all(20.0),
+              margin: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(20.0),
               decoration: BoxDecoration(
                 color: Colors.blue[200],
                 borderRadius: BorderRadius.circular(20.0),
               ),
               child: Column(
                 children: [
-                  SizedBox(height: 20.0),
-                  Text(
+                  const SizedBox(height: 20.0),
+                  const Text(
                     'Sign in',
                     style: TextStyle(
                       fontSize: 16.0,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 20.0),
+                  const SizedBox(height: 20.0),
                   TextField(
                     controller: _emailController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Email',
                     ),
                   ),
-                  SizedBox(height: 15.0),
+                  const SizedBox(height: 15.0),
                   TextField(
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Password',
                     ),
                   ),
-                  SizedBox(height: 20.0),
+                  const SizedBox(height: 20.0),
                   ElevatedButton(
                     onPressed: () async {
-                      if (await Provider.of<AuthProvider>(context,
-                                  listen: false)
-                              .login(_emailController.text,
-                                  _passwordController.text) ==
-                          true) {
-                        await Provider.of<MessageProvider>(context,
-                                listen: false)
-                            .startSignalR()
-                            .then((_) async => await Provider.of<
-                                    MessageProvider>(context, listen: false)
-                                .getChats()
-                                .then((_) async => {
-                                      for (var c
-                                          in Provider.of<MessageProvider>(
-                                                  context,
-                                                  listen: false)
-                                              .chats)
-                                        {
-                                          print('CHAT ID: ${c.Id}'),
-                                          await Provider.of<MessageProvider>(
-                                                  context,
-                                                  listen: false)
-                                              .getMessages(c.Id)
-                                              .then((_) async => {
-                                                    await Provider.of<
-                                                                MessageProvider>(
-                                                            context,
-                                                            listen: false)
-                                                        .addToChat(c.Id)
-                                                  })
-                                        },
-                                      await Provider.of<ProfileProvider>(
-                                              context,
-                                              listen: false)
-                                          .getProfile(),
-                                    }));
-                        if (await Provider.of<AuthProvider>(context,
-                                    listen: false)
-                                .roleCheck() ==
-                            "Customer") {
+                      final authProvider =
+                          Provider.of<AuthProvider>(context, listen: false);
+                      final messageProvider =
+                          Provider.of<MessageProvider>(context, listen: false);
+                      final profileProvider =
+                          Provider.of<ProfileProvider>(context, listen: false);
+
+                      final loggedIn = await authProvider.login(
+                          _emailController.text, _passwordController.text);
+                      if (loggedIn == true) {
+                        await messageProvider.startSignalR();
+                        await messageProvider.getChats();
+                        for (var c in messageProvider.chats) {
+                          await messageProvider.getMessages(c.id);
+                          await messageProvider.addToChat(c.id);
+                        }
+                        await profileProvider.getProfile();
+                        if (!context.mounted) return;
+                        final role = await authProvider.roleCheck();
+                        if (!context.mounted) return;
+                        if (role == "Customer") {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      DiscoverPropertiesPage()));
+                                      const DiscoverPropertiesPage()));
                         } else {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => PartnerDiscoverPage()));
+                                  builder: (context) =>
+                                      const PartnerDiscoverPage()));
                         }
                       } else {
                         // Handle login failure
                       }
                     },
-                    child: Text('CONTINUE'),
+                    child: const Text('CONTINUE'),
                   ),
-                  SizedBox(height: 20.0),
-                  Text('OR USE ONE OF THESE OPTIONS'),
-                  SizedBox(height: 20.0),
+                  const SizedBox(height: 20.0),
+                  const Text('OR USE ONE OF THESE OPTIONS'),
+                  const SizedBox(height: 20.0),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SocialMediaButton(
                         icon: Icons.facebook,
                         onPressed: () async {
-                          // Invoke Facebook login through provider
-                          await Provider.of<AuthProvider>(context,
-                                  listen: false)
-                              .loginWithFacebook();
-                          if (await Provider.of<AuthProvider>(context,
-                                      listen: false)
-                                  .checkLoggedInStatus() ==
-                              true) {
-                            await Provider.of<MessageProvider>(context,
-                                    listen: false)
-                                .startSignalR()
-                                .then((_) async => await Provider.of<
-                                        MessageProvider>(context, listen: false)
-                                    .getChats()
-                                    .then((_) async => {
-                                          for (var c
-                                              in Provider.of<MessageProvider>(
-                                                      context,
-                                                      listen: false)
-                                                  .chats)
-                                            {
-                                              print('CHAT ID: ${c.Id}'),
-                                              await Provider.of<
-                                                          MessageProvider>(
-                                                      context,
-                                                      listen: false)
-                                                  .getMessages(c.Id)
-                                                  .then((_) async => {
-                                                        await Provider.of<
-                                                                    MessageProvider>(
-                                                                context,
-                                                                listen: false)
-                                                            .addToChat(c.Id)
-                                                      })
-                                            },
-                                          await Provider.of<ProfileProvider>(
-                                                  context,
-                                                  listen: false)
-                                              .getProfile(),
-                                        }));
-                            if (await Provider.of<AuthProvider>(context,
-                                        listen: false)
-                                    .roleCheck() ==
-                                "Customer") {
+                          final authProvider = Provider.of<AuthProvider>(
+                              context,
+                              listen: false);
+                          final messageProvider = Provider.of<MessageProvider>(
+                              context,
+                              listen: false);
+                          final profileProvider = Provider.of<ProfileProvider>(
+                              context,
+                              listen: false);
+
+                          await authProvider.loginWithFacebook();
+                          final loggedIn =
+                              await authProvider.checkLoggedInStatus();
+                          if (loggedIn == true) {
+                            await messageProvider.startSignalR();
+                            await messageProvider.getChats();
+                            for (var c in messageProvider.chats) {
+                              await messageProvider.getMessages(c.id);
+                              await messageProvider.addToChat(c.id);
+                            }
+                            await profileProvider.getProfile();
+                            if (!context.mounted) return;
+                            final role = await authProvider.roleCheck();
+                            if (!context.mounted) return;
+                            if (role == "Customer") {
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          DiscoverPropertiesPage()));
+                                          const DiscoverPropertiesPage()));
                             } else {
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          PartnerDiscoverPage()));
+                                          const PartnerDiscoverPage()));
                             }
                           } else {
                             // Handle login failure
@@ -231,62 +188,44 @@ class LoginPage extends StatelessWidget {
                         },
                       ),
                       SocialMediaButton(
-                        icon: MdiIcons.google,
+                        icon: Icons.g_mobiledata,
                         onPressed: () async {
-                          await Provider.of<AuthProvider>(context,
-                                  listen: false)
-                              .loginWithGoogle();
-                          if (await Provider.of<AuthProvider>(context,
-                                      listen: false)
-                                  .checkLoggedInStatus() ==
-                              true) {
-                            await Provider.of<MessageProvider>(context,
-                                    listen: false)
-                                .startSignalR()
-                                .then((_) async => await Provider.of<
-                                        MessageProvider>(context, listen: false)
-                                    .getChats()
-                                    .then((_) async => {
-                                          for (var c
-                                              in Provider.of<MessageProvider>(
-                                                      context,
-                                                      listen: false)
-                                                  .chats)
-                                            {
-                                              print('CHAT ID: ${c.Id}'),
-                                              await Provider.of<
-                                                          MessageProvider>(
-                                                      context,
-                                                      listen: false)
-                                                  .getMessages(c.Id)
-                                                  .then((_) async => {
-                                                        await Provider.of<
-                                                                    MessageProvider>(
-                                                                context,
-                                                                listen: false)
-                                                            .addToChat(c.Id)
-                                                      })
-                                            },
-                                          await Provider.of<ProfileProvider>(
-                                                  context,
-                                                  listen: false)
-                                              .getProfile(),
-                                        }));
-                            if (await Provider.of<AuthProvider>(context,
-                                        listen: false)
-                                    .roleCheck() ==
-                                "Customer") {
+                          final authProvider = Provider.of<AuthProvider>(
+                              context,
+                              listen: false);
+                          final messageProvider = Provider.of<MessageProvider>(
+                              context,
+                              listen: false);
+                          final profileProvider = Provider.of<ProfileProvider>(
+                              context,
+                              listen: false);
+
+                          await authProvider.loginWithGoogle();
+                          final loggedIn =
+                              await authProvider.checkLoggedInStatus();
+                          if (loggedIn == true) {
+                            await messageProvider.startSignalR();
+                            await messageProvider.getChats();
+                            for (var c in messageProvider.chats) {
+                              await messageProvider.getMessages(c.id);
+                              await messageProvider.addToChat(c.id);
+                            }
+                            await profileProvider.getProfile();
+                            if (!context.mounted) return;
+                            final role = await authProvider.roleCheck();
+                            if (!context.mounted) return;
+                            if (role == "Customer") {
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          DiscoverPropertiesPage()));
+                                          const DiscoverPropertiesPage()));
                             } else {
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          PartnerDiscoverPage()));
+                                          const PartnerDiscoverPage()));
                             }
                           } else {
                             // Handle login failure
@@ -298,16 +237,16 @@ class LoginPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Want to start booking?'),
+                      const Text('Want to start booking?'),
                       TextButton(
                         onPressed: () {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      CustomerRegisterScreen()));
+                                      const CustomerRegisterScreen()));
                         },
-                        child: Text('Sign up'),
+                        child: const Text('Sign up'),
                       ),
                     ],
                   ),
@@ -325,7 +264,8 @@ class SocialMediaButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
 
-  SocialMediaButton({required this.icon, required this.onPressed});
+  const SocialMediaButton(
+      {super.key, required this.icon, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

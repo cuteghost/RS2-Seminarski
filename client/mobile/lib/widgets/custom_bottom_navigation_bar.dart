@@ -9,15 +9,18 @@ import 'package:ebooking/screens/customer_screens/profile_screen.dart';
 import 'package:ebooking/screens/customer_screens/suggestions_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:icon_badge/icon_badge.dart';
-import 'package:ebooking/widgets/customIconButton.dart';
+import 'package:ebooking/widgets/custom_icon_button.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {
+  const CustomBottomNavigationBar({super.key});
+
   @override
-  _CustomBottomNavigationBarState createState() =>
-      _CustomBottomNavigationBarState();
+  CustomBottomNavigationBarState createState() =>
+      CustomBottomNavigationBarState();
 }
 
-class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
+class CustomBottomNavigationBarState
+    extends State<CustomBottomNavigationBar> {
   final List<Widget> _pages = [];
 
   @override
@@ -25,11 +28,11 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
     super.initState();
     var profile = Provider.of<ProfileProvider>(context, listen: false).profile;
     _pages.addAll([
-      ContactListScreen(),
-      ReservationHistoryPage(),
-      SuggestionsScreen(customerId: profile.customerId), // Pass userId here
-      ProfilePage(),
-      MapPage(),
+      const ContactListScreen(),
+      const ReservationHistoryPage(),
+      SuggestionsScreen(customerId: profile.customerId),
+      const ProfilePage(),
+      const MapPage(),
     ]);
   }
 
@@ -39,13 +42,13 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
     return Consumer<MessageProvider>(
         builder: (context, messageProvider, child) {
       int counter = 0;
-      messageProvider.chats.forEach((c) {
-        c.Messages.forEach((m) {
-          if (m.IsRead == false && m.Sender != profile.id) {
+      for (var c in messageProvider.chats) {
+        for (var m in c.messages) {
+          if (m.isRead == false && m.sender != profile.id) {
             counter++;
           }
-        });
-      });
+        }
+      }
       return BottomAppBar(
           color: Colors.blue,
           padding: EdgeInsets.zero,
@@ -62,49 +65,49 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    SizedBox(width: 20),
+                    const SizedBox(width: 20),
                     CustomIconButton(
                         icon: counter != 0
                             ? IconBadge(
-                                icon: Icon(Icons.message),
+                                icon: const Icon(Icons.message),
                                 itemCount: counter,
                                 badgeColor: Colors.red,
                                 itemColor: Colors.white,
                                 maxCount: 99,
                                 hideZero: true)
-                            : Icon(Icons.message),
+                            : const Icon(Icons.message),
                         label: 'Messages',
                         onPressed: () {
-                          navigateToPage(context, ContactListScreen());
+                          navigateToPage(context, const ContactListScreen());
                         }),
                     CustomIconButton(
-                        icon: Icon(Icons.work_history),
+                        icon: const Icon(Icons.work_history),
                         label: 'Reservations',
                         onPressed: () {
-                          navigateToPage(context, ReservationHistoryPage());
+                          navigateToPage(
+                              context, const ReservationHistoryPage());
                         }),
                     CustomIconButton(
-                        icon: Icon(Icons.flag),
+                        icon: const Icon(Icons.flag),
                         label: 'Suggestions',
                         onPressed: () {
                           navigateToPage(
                               context,
-                              SuggestionsScreen(
-                                  customerId: profile.id)); // Pass userId here
+                              SuggestionsScreen(customerId: profile.id));
                         }),
                     CustomIconButton(
-                        icon: Icon(Icons.person),
+                        icon: const Icon(Icons.person),
                         label: 'Profile',
                         onPressed: () {
-                          navigateToPage(context, ProfilePage());
+                          navigateToPage(context, const ProfilePage());
                         }),
                     CustomIconButton(
-                        icon: Icon(Icons.map),
+                        icon: const Icon(Icons.map),
                         label: 'Map',
                         onPressed: () {
-                          navigateToPage(context, MapPage());
+                          navigateToPage(context, const MapPage());
                         }),
-                    SizedBox(width: 20),
+                    const SizedBox(width: 20),
                   ],
                 ),
               )));

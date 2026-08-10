@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 class FiltersPage extends StatefulWidget {
+  const FiltersPage({super.key});
+
   @override
-  _FiltersPageState createState() => _FiltersPageState();
+  FiltersPageState createState() => FiltersPageState();
 }
 
-class _FiltersPageState extends State<FiltersPage> {
+class FiltersPageState extends State<FiltersPage> {
   bool freeCancellation = false;
   double ratings = 5.0;
   List<bool> accommodationButtonStates = List.generate(8, (index) => false);
@@ -15,17 +17,18 @@ class _FiltersPageState extends State<FiltersPage> {
   bool freeCancellationButtonState = false;
   int priceFrom = 0;
   int priceTo = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Filters'),
+        title: const Text('Filters'),
         actions: [
           TextButton(
             onPressed: () {
               // Apply Filters logic
             },
-            child: Text(
+            child: const Text(
               'Apply Filters',
               style: TextStyle(color: Colors.blue),
             ),
@@ -33,7 +36,7 @@ class _FiltersPageState extends State<FiltersPage> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -41,12 +44,11 @@ class _FiltersPageState extends State<FiltersPage> {
               showModalBottomSheet(
                 context: context,
                 builder: (BuildContext context) {
-                  // You can return the widget for your modal content here
-                  return Container(
+                  return SizedBox(
                       height: 200.0,
                       child: Expanded(
                           child: TextField(
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                             labelText: 'Location',
                             labelStyle: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -55,14 +57,12 @@ class _FiltersPageState extends State<FiltersPage> {
                       )));
                 },
               );
-              // Open Location Modal
             }),
             _buildFilterButton('Price', () {
               showModalBottomSheet(
                 context: context,
                 builder: (BuildContext context) {
-                  // You can return the widget for your modal content here
-                  return Container(
+                  return SizedBox(
                     height: 200.0,
                     child: Row(children: [
                       Expanded(
@@ -73,7 +73,7 @@ class _FiltersPageState extends State<FiltersPage> {
                               priceFrom = int.tryParse(value) ?? 0;
                             });
                           },
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                               labelText: 'From',
                               labelStyle: TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -81,7 +81,7 @@ class _FiltersPageState extends State<FiltersPage> {
                               )),
                         ),
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Expanded(
                         child: TextField(
                           keyboardType: TextInputType.number,
@@ -90,7 +90,7 @@ class _FiltersPageState extends State<FiltersPage> {
                               priceTo = int.tryParse(value) ?? 0;
                             });
                           },
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                               labelText: 'To',
                               labelStyle: TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -130,10 +130,8 @@ class _FiltersPageState extends State<FiltersPage> {
                 label: ratings.toString(),
               ),
             ]),
-            _buildFilterSection(
-                'Meals',
-                ['Breakfast Included', 'Kitchen Facilities'],
-                mealsButtonStates),
+            _buildFilterSection('Meals',
+                ['Breakfast Included', 'Kitchen Facilities'], mealsButtonStates),
             _buildFilterSection(
                 'Room Facilities',
                 [
@@ -171,7 +169,7 @@ class _FiltersPageState extends State<FiltersPage> {
   Widget _buildFilterButton(String label, VoidCallback onPressed) {
     return TextButton(
       onPressed: () {
-        onPressed(); // Execute the provided onPressed callback
+        onPressed();
       },
       child: Text(label),
     );
@@ -199,12 +197,12 @@ class _FiltersPageState extends State<FiltersPage> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(
             header,
-            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
           ),
         ),
         Wrap(
+          spacing: 8.0,
           children: buttons,
-          spacing: 8.0, // Adjust the spacing between buttons
         ),
       ],
     );
@@ -214,10 +212,10 @@ class _FiltersPageState extends State<FiltersPage> {
       String label, bool isToggled, VoidCallback onPressed) {
     return ElevatedButton(
       onPressed: onPressed,
-      child: Text(label),
       style: ElevatedButton.styleFrom(
         backgroundColor: isToggled ? Colors.blue : null,
       ),
+      child: Text(label),
     );
   }
 
@@ -229,12 +227,12 @@ class _FiltersPageState extends State<FiltersPage> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(
             header,
-            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
           ),
         ),
         Wrap(
+          spacing: 8.0,
           children: buttons,
-          spacing: 8.0, // Adjust the spacing between buttons
         ),
       ],
     );

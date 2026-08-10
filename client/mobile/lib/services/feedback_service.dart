@@ -20,7 +20,6 @@ class FeedbackService {
           'Content-Type': 'application/json'
         },
         body: json.encode(feedback.toJson()));
-    print(response.statusCode);
     if (response.statusCode != 200) {
       throw Exception('Failed to make feedback');
     } else {

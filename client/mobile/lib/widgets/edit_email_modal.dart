@@ -5,14 +5,13 @@ import 'package:provider/provider.dart';
 class EditEmailModal extends StatefulWidget {
   final String currentEmail;
 
-  const EditEmailModal({Key? key, required this.currentEmail})
-      : super(key: key);
+  const EditEmailModal({super.key, required this.currentEmail});
 
   @override
-  _EditEmailModalState createState() => _EditEmailModalState();
+  EditEmailModalState createState() => EditEmailModalState();
 }
 
-class _EditEmailModalState extends State<EditEmailModal> {
+class EditEmailModalState extends State<EditEmailModal> {
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
 
@@ -21,6 +20,13 @@ class _EditEmailModalState extends State<EditEmailModal> {
     super.initState();
     _emailController = TextEditingController(text: widget.currentEmail);
     _passwordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -41,7 +47,7 @@ class _EditEmailModalState extends State<EditEmailModal> {
             const SizedBox(height: 16.0),
             TextFormField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: 'New Email Address'),
+              decoration: const InputDecoration(labelText: 'New Email Address'),
             ),
             const SizedBox(height: 16.0),
             TextFormField(
@@ -52,17 +58,18 @@ class _EditEmailModalState extends State<EditEmailModal> {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () async {
-                String message =
-                    await Provider.of<ProfileProvider>(context, listen: false)
-                        .updateEmail(
-                            _emailController.text, _passwordController.text);
+                final profileProvider =
+                    Provider.of<ProfileProvider>(context, listen: false);
+                String message = await profileProvider.updateEmail(
+                    _emailController.text, _passwordController.text);
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text(message),
                   duration: const Duration(seconds: 3),
                 ));
                 Navigator.pop(context);
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         ),

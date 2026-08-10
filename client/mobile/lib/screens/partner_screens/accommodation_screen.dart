@@ -1,6 +1,6 @@
 import 'package:ebooking/models/accomodation_model.dart';
 import 'package:ebooking/providers/accommodation_provider.dart';
-import 'package:ebooking/widgets/CustomBottomNavigationBar.dart';
+import 'package:ebooking/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
 import 'package:permission_handler/permission_handler.dart';
@@ -10,13 +10,13 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 class AccommodationScreen extends StatefulWidget {
   final AccommodationGET accommodation;
 
-  AccommodationScreen({required this.accommodation});
+  const AccommodationScreen({super.key, required this.accommodation});
 
   @override
-  _AccommodationScreenState createState() => _AccommodationScreenState();
+  AccommodationScreenState createState() => AccommodationScreenState();
 }
 
-class _AccommodationScreenState extends State<AccommodationScreen> {
+class AccommodationScreenState extends State<AccommodationScreen> {
   ValueNotifier<bool> hasChanges = ValueNotifier<bool>(false);
   late AccommodationGET accommodation;
 
@@ -86,7 +86,7 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     _addressController.dispose();
     _nameController.dispose();
     _priceController.dispose();
@@ -105,6 +105,7 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
     }
 
     List<AssetEntity> resultList = <AssetEntity>[];
+    if (!mounted) return;
     try {
       resultList = await AssetPicker.pickAssets(
             context,
@@ -115,8 +116,8 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
             ),
           ) ??
           [];
-    } on Exception catch (e) {
-      print(e);
+    } on Exception catch (_) {
+      // Ignore picker errors — user may have cancelled
     }
 
     if (!mounted) return;
@@ -130,7 +131,7 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Accommodation Details'),
+        title: const Text('Accommodation Details'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -145,36 +146,29 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                       borderRadius: BorderRadius.circular(8.0),
                       color: Colors.grey[200],
                     ),
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Column(children: [
                       const Text('Basic Information',
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.black)),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       TextFormField(
-                        // controller: _nameController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Name',
                           border: OutlineInputBorder(),
                         ),
-                        // validator: (value) {
-                        //   if (value!.isEmpty) {
-                        //     return 'Please enter the accommodation name';
-                        //   }
-                        //   return null;
-                        // },
                         onChanged: (value) {
                           hasChanges.value = true;
                           accommodation.name = value;
                         },
                         initialValue: accommodation.name,
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       TextFormField(
                         controller: _priceController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Price Per Night',
                           border: OutlineInputBorder(),
                         ),
@@ -186,10 +180,10 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       TextFormField(
                         controller: _descriptionController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Description',
                           border: OutlineInputBorder(),
                         ),
@@ -200,8 +194,8 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 10),
-                      Container(
+                      const SizedBox(height: 10),
+                      SizedBox(
                           height: 200.0,
                           child: maps.GoogleMap(
                             initialCameraPosition: maps.CameraPosition(
@@ -211,8 +205,8 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                                 zoom: 14.4746,
                                 tilt: 2.0),
                             markers: () {
-                              Set<maps.Marker> _markers = {};
-                              _markers.add(
+                              final markers = <maps.Marker>{};
+                              markers.add(
                                 maps.Marker(
                                   markerId: maps.MarkerId(accommodation.name),
                                   position: maps.LatLng(
@@ -220,17 +214,17 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                                       accommodation.location.longitude),
                                 ),
                               );
-                              return _markers;
+                              return markers;
                             }(),
                           )),
                     ])),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8.0),
                     color: Colors.grey[200],
                   ),
-                  padding: EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
                       const Text('Accommodation Details',
@@ -238,15 +232,14 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.black)),
-                      SizedBox(height: 10),
-                      Container(
+                      const SizedBox(height: 10),
+                      SizedBox(
                         height: 200.0,
                         child: PageView.builder(
-                          // itemCount: accommodation.images.images.length + 1 , // Number of property images
                           itemBuilder: (context, index) {
                             if (index == accommodation.images.images.length) {
                               return IconButton(
-                                icon: Icon(Icons.add),
+                                icon: const Icon(Icons.add),
                                 onPressed: () async {
                                   await loadImages();
                                   for (var element in images) {
@@ -267,7 +260,7 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                                 child: Stack(
                                   children: [
                                     Container(
-                                      margin: EdgeInsets.all(8.0),
+                                      margin: const EdgeInsets.all(8.0),
                                       decoration: BoxDecoration(
                                         borderRadius:
                                             BorderRadius.circular(8.0),
@@ -296,18 +289,19 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                                             });
                                           },
                                           child: Container(
-                                            margin: EdgeInsets.all(8.0),
+                                            margin: const EdgeInsets.all(8.0),
                                             width: 173,
                                             decoration: BoxDecoration(
-                                              color:
-                                                  Colors.blue.withOpacity(0.5),
-                                              borderRadius: BorderRadius.only(
+                                              color: Colors.blue
+                                                  .withValues(alpha: 0.5),
+                                              borderRadius:
+                                                  const BorderRadius.only(
                                                 topLeft: Radius.circular(8.0),
                                                 bottomLeft:
                                                     Radius.circular(8.0),
                                               ),
                                             ),
-                                            child: Column(
+                                            child: const Column(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
                                               children: <Widget>[
@@ -335,18 +329,19 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                                             });
                                           },
                                           child: Container(
-                                            margin: EdgeInsets.all(8.0),
+                                            margin: const EdgeInsets.all(8.0),
                                             width: 174,
                                             decoration: BoxDecoration(
-                                              color:
-                                                  Colors.red.withOpacity(0.5),
-                                              borderRadius: BorderRadius.only(
+                                              color: Colors.red
+                                                  .withValues(alpha: 0.5),
+                                              borderRadius:
+                                                  const BorderRadius.only(
                                                 topRight: Radius.circular(8.0),
                                                 bottomRight:
                                                     Radius.circular(8.0),
                                               ),
                                             ),
-                                            child: Column(
+                                            child: const Column(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
                                               children: <Widget>[
@@ -370,10 +365,10 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                           itemCount: accommodation.images.images.length + 1,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       TextFormField(
                         controller: _accommodationDetailsNumBeds,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Number of Beds',
                           border: OutlineInputBorder(),
                         ),
@@ -385,26 +380,24 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       ..._accommodationDetails.keys.map((String key) {
                         return CheckboxListTile(
                           title: Text(key),
                           value: _accommodationDetails[key],
                           onChanged: (bool? value) {
-                            // Accept a nullable bool
                             if (value != null) {
-                              // Check if the value is not null
                               setState(() {
                                 _accommodationDetails[key] = value;
                               });
                             }
                           },
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Center(
                   child: ElevatedButton(
                     onPressed: () async {
@@ -431,8 +424,7 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                           soundProof: _accommodationDetails['Soundproof']!,
                           breakfast: _accommodationDetails['Breakfast']!,
                         );
-                        AccommodationPATCH _accommodationToUpdate =
-                            AccommodationPATCH(
+                        final accommodationToUpdate = AccommodationPATCH(
                           id: accommodation.id,
                           status: accommodation.status,
                           images: accommodation.images,
@@ -443,24 +435,26 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                           typeOfAccommodation:
                               accommodation.typeOfAccommodation,
                         );
-                        final result = await Provider.of<AccommodationProvider>(
-                                context,
-                                listen: false)
-                            .updateAccommodation(_accommodationToUpdate);
+                        final provider = Provider.of<AccommodationProvider>(
+                            context,
+                            listen: false);
+                        final result = await provider
+                            .updateAccommodation(accommodationToUpdate);
+                        if (!context.mounted) return;
                         if (result) {
                           showDialog(
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: Text('Success'),
-                                  content: Text(
+                                  title: const Text('Success'),
+                                  content: const Text(
                                       'Accommodation updated successfully'),
                                   actions: <Widget>[
                                     TextButton(
                                       onPressed: () {
                                         Navigator.of(context).pop();
                                       },
-                                      child: Text('OK'),
+                                      child: const Text('OK'),
                                     ),
                                   ],
                                 );
@@ -470,12 +464,12 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                               context: context,
                               applicationName: 'Error',
                               children: <Widget>[
-                                Text('Failed to update accommodation'),
+                                const Text('Failed to update accommodation'),
                               ]);
                         }
                       }
                     },
-                    child: Text('Save'),
+                    child: const Text('Save'),
                   ),
                 ),
               ],
@@ -483,7 +477,7 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(),
+      bottomNavigationBar: const CustomBottomNavigationBar(),
     );
   }
 }

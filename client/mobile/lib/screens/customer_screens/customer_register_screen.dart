@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CustomerRegisterScreen extends StatefulWidget {
+  const CustomerRegisterScreen({super.key});
+
   @override
-  _CustomerRegisterScreenState createState() => _CustomerRegisterScreenState();
+  CustomerRegisterScreenState createState() => CustomerRegisterScreenState();
 }
 
-class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
+class CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -37,9 +39,9 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
   }
 
   Future<void> _pickImage() async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
     // Pick an image
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
         _profileImage = File(image.path);
@@ -167,18 +169,19 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        if (await Provider.of<AuthProvider>(context,
-                                    listen: false)
-                                .register(
-                              emailController.text,
-                              passwordController.text,
-                              firstNameController.text,
-                              lastNameController.text,
-                              displayNameController.text,
-                              _profileImage!,
-                              _dateOfBirth!.toIso8601String().split('T')[0],
-                            ) ==
-                            true) {
+                        final authProvider =
+                            Provider.of<AuthProvider>(context, listen: false);
+                        final registered = await authProvider.register(
+                          emailController.text,
+                          passwordController.text,
+                          firstNameController.text,
+                          lastNameController.text,
+                          displayNameController.text,
+                          _profileImage!,
+                          _dateOfBirth!.toIso8601String().split('T')[0],
+                        );
+                        if (registered == true) {
+                          if (!context.mounted) return;
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(

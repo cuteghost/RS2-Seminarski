@@ -3,7 +3,7 @@ import 'package:ebooking/providers/feedback_provider.dart';
 import 'package:ebooking/providers/location_provider.dart';
 import 'package:ebooking/providers/message_provider.dart';
 import 'package:ebooking/providers/profile_provider.dart';
-import 'package:ebooking/providers/reservation_provide.dart';
+import 'package:ebooking/providers/reservation_provider.dart';
 import 'package:ebooking/providers/search_provider.dart';
 import 'package:ebooking/providers/suggestion_provider.dart';
 import 'package:ebooking/screens/partner_screens/partner_discover_screen.dart';
@@ -56,14 +56,12 @@ void main() {
             SuggestionProvider(suggestionService: SuggestionsService()),
       ),
     ],
-    child: MyApp(),
+    child: const MyApp(),
   ));
 }
 
-class SuggestionService {}
-
 class MyApp extends StatelessWidget {
-  MyApp();
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -84,8 +82,6 @@ class MyApp extends StatelessWidget {
             );
           }
           if (snapshot.hasError) {
-            print(snapshot.error);
-
             return const Scaffold(
               body: Center(
                 child: Text('An error occurred'),
@@ -96,31 +92,21 @@ class MyApp extends StatelessWidget {
             final role = snapshot.data![1] as String;
             final permissionStatus = snapshot.data![2] as PermissionStatus;
             if (isLoggedIn && permissionStatus.isGranted) {
+              // Capture providers synchronously before the async chain
+              final messageProvider =
+                  Provider.of<MessageProvider>(context, listen: false);
+              final profileProvider =
+                  Provider.of<ProfileProvider>(context, listen: false);
+
               return FutureBuilder(
-                future: Future.wait([
-                  Provider.of<MessageProvider>(context, listen: false)
-                      .startSignalR()
-                      .then((_) => Provider.of<MessageProvider>(context,
-                              listen: false)
-                          .getChats()
-                          .then((_) async => {
-                                for (var c in Provider.of<MessageProvider>(
-                                        context,
-                                        listen: false)
-                                    .chats)
-                                  {
-                                    await Provider.of<MessageProvider>(context,
-                                            listen: false)
-                                        .getMessages(c.Id),
-                                    await Provider.of<MessageProvider>(context,
-                                            listen: false)
-                                        .addToChat(c.Id)
-                                  },
-                                await Provider.of<ProfileProvider>(context,
-                                        listen: false)
-                                    .getProfile(),
-                              }))
-                ]),
+                future: messageProvider.startSignalR().then((_) =>
+                    messageProvider.getChats().then((_) async {
+                      for (var c in messageProvider.chats) {
+                        await messageProvider.getMessages(c.id);
+                        await messageProvider.addToChat(c.id);
+                      }
+                      await profileProvider.getProfile();
+                    })),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Scaffold(
@@ -129,7 +115,6 @@ class MyApp extends StatelessWidget {
                       ),
                     );
                   } else if (snapshot.hasError) {
-                    print(snapshot.error);
                     return const Scaffold(
                       body: Center(
                         child: Text('An error occurred'),

@@ -1,8 +1,8 @@
-import 'package:ebooking_desktop/pages/countries/manageCountry.dart';
+import 'package:ebooking_desktop/pages/countries/manage_country.dart';
 import 'package:ebooking_desktop/pages/dashboard.dart';
 import 'package:ebooking_desktop/pages/login.dart';
-import 'package:ebooking_desktop/pages/manageProperties.dart';
-import 'package:ebooking_desktop/pages/manageUsers.dart';
+import 'package:ebooking_desktop/pages/manage_properties.dart';
+import 'package:ebooking_desktop/pages/manage_users.dart';
 import 'package:ebooking_desktop/pages/messenger_screen.dart';
 import 'package:ebooking_desktop/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
@@ -33,23 +33,23 @@ class CustomDrawer extends StatelessWidget {
             leading: const Icon(Icons.home),
             title: const Text('Home'),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>  DashboardPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => DashboardPage()));
             },
           ),
           ListTile(
             leading: const Icon(Icons.location_city_outlined),
             title: const Text('Manage Locations'),
-            onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context)=> const ManageCountryPage())); },
+            onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => const ManageCountryPage())); },
           ),
           ListTile(
             leading: const Icon(Icons.supervised_user_circle_rounded),
             title: const Text('Manage Users'),
-            onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context)=> const UsersManagementPage())); },
+            onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => const UsersManagementPage())); },
           ),
           ListTile(
             leading: const Icon(Icons.house),
             title: const Text('Manage Properties'),
-            onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context)=> const PropertyManagementPage())); },
+            onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => const PropertyManagementPage())); },
           ),
           ListTile(
             leading: const Icon(Icons.message),

@@ -11,7 +11,8 @@ class AccommodationContainer extends StatelessWidget {
   final String price;
   final VoidCallback? onTap;
 
-  AccommodationContainer({
+  const AccommodationContainer({
+    super.key,
     required this.image,
     required this.propertyName,
     required this.reviews,
@@ -26,8 +27,8 @@ class AccommodationContainer extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.all(16.0),
-        padding: EdgeInsets.all(16.0),
+        margin: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
           border: Border.all(color: Colors.grey),
@@ -46,7 +47,7 @@ class AccommodationContainer extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(width: 16.0),
+            const SizedBox(width: 16.0),
             // Property Details
             Expanded(
               child: Column(
@@ -54,7 +55,7 @@ class AccommodationContainer extends StatelessWidget {
                 children: [
                   Text(
                     propertyName,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16.0,
                     ),
@@ -73,13 +74,13 @@ class AccommodationContainer extends StatelessWidget {
                   backgroundColor: Colors.blue,
                   child: Text(
                     reviewScore.toString(),
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
-                SizedBox(height: 8.0),
+                const SizedBox(height: 8.0),
                 Text(
                   '$price \$',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16.0,
                   ),

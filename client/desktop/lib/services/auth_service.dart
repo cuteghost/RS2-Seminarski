@@ -17,7 +17,6 @@ class AuthService {
     final response = await http.post(url,
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': email, 'password': password}));
-    print(response.body);
     if (response.statusCode == 200) {
       await _secureStorage.saveToken(response.body);
       return true;
@@ -81,14 +80,13 @@ class AuthService {
     }
   }
 
-  roleCheck() async{
+  Future<String> roleCheck() async {
     // Implement role check
     String? authToken = await _secureStorage.getToken();
     if (authToken != null) {
       // Check the role of the user
       // authToken is the JWT token. It holds the claim Role. Decode the token and check the role
       var payload = authToken.split('.')[1];
-      print('Payload: $payload');
       var normalizedPayload = base64Url.normalize(payload);
       var stringPayload = utf8.decode(base64Url.decode(normalizedPayload));
       var payloadMap = json.decode(stringPayload);
