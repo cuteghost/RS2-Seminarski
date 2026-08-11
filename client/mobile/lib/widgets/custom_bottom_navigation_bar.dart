@@ -8,7 +8,7 @@ import 'package:ebooking/screens/customer_screens/maps_screen.dart';
 import 'package:ebooking/screens/customer_screens/profile_screen.dart';
 import 'package:ebooking/screens/customer_screens/suggestions_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:icon_badge/icon_badge.dart';
+import 'package:ebooking/widgets/count_badge.dart';
 import 'package:ebooking/widgets/custom_icon_button.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {
@@ -68,7 +68,7 @@ class CustomBottomNavigationBarState
                     const SizedBox(width: 20),
                     CustomIconButton(
                         icon: counter != 0
-                            ? IconBadge(
+                            ? CountBadge(
                                 icon: const Icon(Icons.message),
                                 itemCount: counter,
                                 badgeColor: Colors.red,

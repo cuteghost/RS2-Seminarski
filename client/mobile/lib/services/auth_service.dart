@@ -10,6 +10,15 @@ import 'package:ebooking/config/config.dart' as config;
 class AuthService {
   final SecureStorage _secureStorage;
 
+  /// google_sign_in 7.x requires [GoogleSignIn.initialize] to be called exactly
+  /// once per process before any other method on the singleton.
+  static Future<void>? _googleSignInInit;
+
+  static const List<String> _googleScopes = <String>[
+    'email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+  ];
+
   AuthService({required SecureStorage secureStorage})
       : _secureStorage = secureStorage;
 
@@ -106,22 +115,45 @@ class AuthService {
     }
   }
 
+  /// Runs [GoogleSignIn.initialize] once per process, as 7.x requires. On
+  /// failure the cached future is cleared so a later attempt can retry.
+  Future<void> _ensureGoogleSignInInitialized() {
+    return _googleSignInInit ??= GoogleSignIn.instance
+        .initialize(serverClientId: config.AppConfig.googleServerClientId)
+        .catchError((Object error) {
+      _googleSignInInit = null;
+      throw error;
+    });
+  }
+
   Future<bool> loginWithGoogle() async {
     await _secureStorage.deleteToken();
-    GoogleSignIn googleSignIn = GoogleSignIn(
-        scopes: [
-          'email',
-          'https://www.googleapis.com/auth/userinfo.profile',
-        ],
-        serverClientId: config.AppConfig.googleServerClientId);
-    GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-    if (googleUser == null) return false;
-    GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    final GoogleSignInAccount googleUser;
+    final GoogleSignInClientAuthorization authorization;
+    try {
+      await _ensureGoogleSignInInitialized();
+
+      // Throws GoogleSignInException instead of returning null when the user
+      // cancels, so the old `googleUser == null` check becomes this catch.
+      googleUser = await GoogleSignIn.instance
+          .authenticate(scopeHint: _googleScopes);
+
+      // 7.x moved the access token off GoogleSignInAuthentication; it now comes
+      // from the authorization client, which the server contract still needs.
+      authorization = await googleUser.authorizationClient
+              .authorizationForScopes(_googleScopes) ??
+          await googleUser.authorizationClient.authorizeScopes(_googleScopes);
+    } on GoogleSignInException {
+      return false;
+    }
+
+    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
     final response = await http.post(
       Uri.parse('${config.AppConfig.baseUrl}/api/Auth/google-login'),
       body: json.encode({
         'IdToken': googleAuth.idToken,
-        'AccessToken': googleAuth.accessToken
+        'AccessToken': authorization.accessToken
       }),
       headers: {'Content-Type': 'application/json'},
     );

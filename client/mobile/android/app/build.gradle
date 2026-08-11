@@ -1,3 +1,18 @@
+// ---------------------------------------------------------------------------
+// Recommended emulator AVD: Pixel 9 - API 36 (Android 16, Google Play image).
+// The AVD tracks targetSdk (36), not compileSdk.
+//
+// compileSdk 37: forced by permission_handler_android 14, whose AAR metadata
+//   requires consumers to compile against API 37 or later.
+// targetSdk 36: matches the Android toolchain bundled with Flutter 3.44.9
+//   (flutter_tools/lib/src/android/gradle_utils.dart: targetSdkVersion = '36'),
+//   so the app does not opt in to Android 17 runtime behaviour changes.
+//   Raising compileSdk independently of targetSdk is supported by AGP.
+// minSdk 24: the Flutter engine floor (gradle_utils.dart minSdkVersionInt).
+//
+// Toolchain is held at Flutter 3.44.9's validated ceiling:
+// Gradle 9.3.1, AGP 9.1.1, Kotlin 2.3.20.
+// ---------------------------------------------------------------------------
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -27,23 +42,23 @@ def facebookAppId = localProperties.getProperty('facebook.app.id') ?: ''
 def facebookClientToken = localProperties.getProperty('facebook.client.token') ?: ''
 def googleApiKey = localProperties.getProperty('google.api.key') ?: ''
 
+// Gradle 9 deprecates the Groovy "space assignment" DSL (`propName value`);
+// it is removed in Gradle 10, so every property below uses `=` assignment.
 android {
-    namespace "com.example.ebooking"
-    compileSdk 36
-    ndkVersion flutter.ndkVersion
+    namespace = "com.example.ebooking"
+    compileSdk = 37
+    ndkVersion = flutter.ndkVersion
 
     buildFeatures {
         buildConfig = true
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = '17'
-    }
+    // `kotlinOptions` is deprecated in KGP 2.x — see the `kotlin { }` block below.
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -51,53 +66,63 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.ebooking"
+        applicationId = "com.example.ebooking"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        // 24 is the Flutter engine floor; no upgraded plugin requires higher.
+        minSdk = 24
+        targetSdk = 36
+        versionCode = flutterVersionCode.toInteger()
+        versionName = flutterVersionName
         
         // Securely inject API keys into BuildConfig
         buildConfigField "String", "FACEBOOK_APP_ID", "\"${facebookAppId}\""
         buildConfigField "String", "FACEBOOK_CLIENT_TOKEN", "\"${facebookClientToken}\""
         buildConfigField "String", "GOOGLE_API_KEY", "\"${googleApiKey}\""
         
-        // Make available to AndroidManifest.xml
-        manifestPlaceholders = [
+        // Make available to AndroidManifest.xml.
+        // Must be putAll, not `=`: the Flutter Gradle plugin injects the
+        // `applicationName` placeholder that AndroidManifest.xml relies on, and
+        // reassigning the map drops it ("requires a placeholder substitution
+        // but no value for <applicationName> is provided").
+        manifestPlaceholders.putAll([
             facebookAppId: facebookAppId,
             facebookClientToken: facebookClientToken,
             googleApiKey: googleApiKey
-        ]
+        ])
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
-            
+            signingConfig = signingConfigs.debug
+
             // Enable code obfuscation and optimization
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled = true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
     signingConfigs {
         debug {
-            keyAlias 'androiddebugkey'
-            keyPassword '${DB_PASSWORD}'
-            storeFile file('mykey.jks')
-            storePassword '${DB_PASSWORD}'
-
+            keyAlias = 'androiddebugkey'
+            keyPassword = '${DB_PASSWORD}'
+            storeFile = file('mykey.jks')
+            storePassword = '${DB_PASSWORD}'
         }
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
 flutter {
-    source '../..'
+    source = '../..'
 }
 
 dependencies {

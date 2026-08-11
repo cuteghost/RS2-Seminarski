@@ -2,8 +2,8 @@ import 'package:ebooking/models/accomodation_model.dart';
 import 'package:ebooking/providers/accommodation_provider.dart';
 import 'package:ebooking/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +16,7 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
-  late LocationData userLocation; // Store user's current location
+  late Position userLocation; // Store user's current location
   Future? _initMapFuture;
   List<AccommodationGET> _nearbyAccommodations = [];
 
@@ -36,13 +36,13 @@ class MapPageState extends State<MapPage> {
     var nearby =
         await Provider.of<AccommodationProvider>(context, listen: false)
             .fetchNearbyAccommodations(
-                userLocation.latitude!, userLocation.longitude!);
+                userLocation.latitude, userLocation.longitude);
     return nearby;
   }
 
   Future<void> initMap() async {
     await _requestLocationPermission();
-    LocationData? location = await _getUserLocation();
+    Position? location = await _getUserLocation();
 
     if (location != null) {
       setState(() {
@@ -59,11 +59,13 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  Future<LocationData?> _getUserLocation() async {
-    Location location = Location();
-
+  Future<Position?> _getUserLocation() async {
     try {
-      LocationData? userLocation = await location.getLocation();
+      Position userLocation = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
       return userLocation;
     } catch (e) {
       // Handle the case where location services are disabled or an error occurs
@@ -98,9 +100,9 @@ class MapPageState extends State<MapPage> {
                 },
                 initialCameraPosition: CameraPosition(
                   target: LatLng(
-                      userLocation.latitude!,
+                      userLocation.latitude,
                       userLocation
-                          .longitude!), // Default to San Francisco's coordinates
+                          .longitude), // Default to San Francisco's coordinates
                   zoom: 15.0,
                 ),
                 // Add markers for user's current location and nearby properties
@@ -121,8 +123,8 @@ class MapPageState extends State<MapPage> {
       Marker(
         markerId: MarkerId('user_location'),
         position: LatLng(
-          userLocation.latitude!,
-          userLocation.longitude!,
+          userLocation.latitude,
+          userLocation.longitude,
         ),
         infoWindow: InfoWindow(title: 'Your Location'),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),

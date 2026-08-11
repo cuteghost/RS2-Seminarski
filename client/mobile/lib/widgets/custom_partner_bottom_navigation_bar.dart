@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:ebooking/utils/navigation_utils.dart';
 import 'package:ebooking/screens/partner_screens/add_accommodation_screen.dart';
 import 'package:ebooking/widgets/custom_icon_button.dart';
-import 'package:icon_badge/icon_badge.dart';
+import 'package:ebooking/widgets/count_badge.dart';
 import 'package:provider/provider.dart';
 
 class CustomPartnerBottomNavigationBar extends StatefulWidget {
@@ -56,7 +56,7 @@ class CustomPartnerBottomNavigationBarState
                     const SizedBox(width: 20),
                     CustomIconButton(
                         icon: counter != 0
-                            ? IconBadge(
+                            ? CountBadge(
                                 icon: const Icon(Icons.message),
                                 itemCount: counter,
                                 badgeColor: Colors.red,

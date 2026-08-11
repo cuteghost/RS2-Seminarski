@@ -37,7 +37,9 @@ class DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
 
   Future<void> _getCurrentLocation() async {
     final Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+      ),
     );
     if (mounted) {
       setState(() {

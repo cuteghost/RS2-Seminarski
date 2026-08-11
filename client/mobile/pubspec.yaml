@@ -19,48 +19,65 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.0 <4.0.0'
+  sdk: '>=3.12.0 <4.0.0'
+  flutter: '>=3.44.0'
 
 # Dependencies specify other packages that your package needs in order to work.
-# To automatically upgrade your package dependencies to the latest versions
-# consider running `flutter pub upgrade --major-versions`. Alternatively,
-# dependencies can be manually updated by changing the version numbers below to
-# the latest version available on pub.dev. To see which dependencies have newer
-# versions available, run `flutter pub outdated`.
+#
+# Upgrade policy for this project:
+#  - Do NOT run `flutter pub upgrade --major-versions` as a blanket command.
+#    Bump packages individually and read the changelog for major versions.
+#  - Only adopt a version that has been on pub.dev for at least 7 days
+#    (supply-chain soak period). Use `flutter pub outdated` to see candidates.
 dependencies:
   flutter:
     sdk: flutter
-  table_calendar: ^3.1.1
-  flutter_rounded_date_picker: ^3.0.4
-  flutter_credit_card: ^4.0.1
-  cupertino_icons: ^1.0.2
-  google_maps_flutter: ^2.0.10
-  location: ^6.0.2
-  permission_handler: ^11.1.0
-  http: ^1.2.1
-  flutter_secure_storage: ^9.2.2
-  provider: ^6.1.1
-  flutter_facebook_auth: ^7.0.0
-  json_annotation: ^4.8.1
-  image_picker: ^1.1.2
-  flutter_svg: ^2.0.10+1
-  google_sign_in: ^6.2.1
-  fl_chart: ^0.68.0
-  flutter_launcher_icons: ^0.13.1
-  carousel_slider: ^4.0.0
-  syncfusion_flutter_charts: ^25.2.6
-  wechat_assets_picker: ^10.1.1
-  geolocator: ^12.0.0
+  cupertino_icons: ^1.0.9
+  # Exact pin: 3.2.1 was published 2026-08-09 and is younger than the 7-day
+  # supply-chain soak period. Relax to ^3.2.1 on/after 2026-08-16.
+  table_calendar: 3.2.0
+  google_maps_flutter: ^2.18.0
+  geolocator: ^14.0.3
+  permission_handler: ^13.0.0
+  http: ^1.6.0
+  # 11.0.0 was published 2026-08-06; held back by the 7-day supply-chain rule.
+  flutter_secure_storage: ^10.3.1
+  provider: ^6.1.5+1
+  flutter_facebook_auth: ^7.2.0
+  image_picker: ^1.2.3
+  google_sign_in: ^7.2.0
+  wechat_assets_picker: ^10.1.3
+  # Unmaintained since 1.1.2 (2024-02-09) and pins web_socket_channel to 2.x.
+  # No newer release exists; migrate to signalr_netcore when this becomes a blocker.
   signalr_core: ^1.1.2
-  icon_badge: ^1.0.0
-  webview_flutter: ^3.0.0
+  webview_flutter: ^4.14.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
-flutter_icons:
-  android: true 
+# signalr_core 1.1.2 pins web_socket_channel ^2.4.3, which drags in package:web ^0.5.0
+# and blocks google_maps_flutter >=2.18.0 (needs package:web ^1.0.0).
+# signalr_core only uses WebSocketChannel, WebSocketChannel.connect and IOWebSocketChannel
+# (lib/src/transports/web_socket_channel_{api,html,io}.dart) — all unchanged in
+# web_socket_channel 3.x — so this override is source-compatible.
+# Remove it once signalr_core is replaced by signalr_netcore.
+dependency_overrides:
+  web_socket_channel: ^3.0.3
+
+  # Transitive packages whose newest release is younger than the 7-day
+  # supply-chain soak period. Each pin below is still inside the range its
+  # parent package declares, so nothing is being force-downgraded past a
+  # real constraint. Drop a pin once its newer version has aged past 7 days.
+  photo_manager: 3.11.0 # 3.12.0 published 2026-08-09
+  permission_handler_apple: 9.5.0 # 9.6.0 published 2026-08-10
+  flutter_secure_storage_linux: 3.0.1 # 3.0.2 published 2026-08-06
+  flutter_secure_storage_platform_interface: 2.0.2 # 2.0.3 published 2026-08-05
+  win32: 6.3.0 # 6.4.0 published 2026-08-05
+
+flutter_launcher_icons:
+  android: true
   ios: true
   image_path: "assets/icon/eBooking.png"
   # The "flutter_lints" package below contains a set of recommended lints to

@@ -15,12 +15,16 @@ subprojects {
 
 // Enforce consistent JVM targets across Java and Kotlin tasks in every
 // subproject. Plugins like flutter_facebook_auth still declare Java 1.8
-// internally; KGP 2.2.20 compiles Kotlin to 17 — Gradle 8 treats the
+// internally; KGP 2.3.20 compiles Kotlin to 17 — Gradle treats the
 // mismatch as an error. This hook aligns everything to 17.
 gradle.afterProject { project ->
     if (project == rootProject) return
     project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile.class).configureEach {
-        kotlinOptions.jvmTarget = '17'
+        // `kotlinOptions` is deprecated in KGP 2.x; `compilerOptions` is the
+        // replacement and is what Flutter's own Android template now uses.
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
     project.tasks.withType(JavaCompile.class).configureEach {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -39,7 +43,9 @@ gradle.afterProject { project ->
     if (android == null || android.namespace != null) return
     def manifestFile = new File(project.projectDir, 'src/main/AndroidManifest.xml')
     if (!manifestFile.exists()) return
-    def manifest = new XmlSlurper().parse(manifestFile)
+    // Gradle 9 ships Groovy 4, which dropped the auto-imported
+    // groovy.util.XmlSlurper alias — it must be fully qualified now.
+    def manifest = new groovy.xml.XmlSlurper().parse(manifestFile)
     def pkg = manifest['@package']?.text()
     if (pkg) android.namespace = pkg
 }

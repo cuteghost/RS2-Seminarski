@@ -2,7 +2,7 @@ import 'package:ebooking/models/message_model.dart';
 import 'package:ebooking/providers/message_provider.dart';
 import 'package:ebooking/providers/profile_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:icon_badge/icon_badge.dart';
+import 'package:ebooking/widgets/count_badge.dart';
 import 'package:provider/provider.dart';
 
 class ContactListScreen extends StatelessWidget {
@@ -72,7 +72,7 @@ class ContactListScreen extends StatelessWidget {
                               );
                             },
                             trailing: counter[index][chats[index].id] != 0
-                                ? IconBadge(
+                                ? CountBadge(
                                     icon: const Icon(Icons.arrow_forward_ios),
                                     itemCount:
                                         counter[index][chats[index].id]!,

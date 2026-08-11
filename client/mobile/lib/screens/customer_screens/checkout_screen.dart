@@ -27,33 +27,43 @@ class CheckoutScreen extends StatefulWidget {
 }
 
 class CheckoutScreenState extends State<CheckoutScreen> {
+  late final webview.WebViewController _webViewController;
+
+  @override
+  void initState() {
+    super.initState();
+    // webview_flutter 4.x replaced the declarative WebView widget with a
+    // controller built up front and rendered via WebViewWidget. The request
+    // is a GET, which is loadRequest's default.
+    _webViewController = webview.WebViewController()
+      ..setJavaScriptMode(webview.JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        webview.NavigationDelegate(
+          onPageFinished: (String url) {
+            if (!mounted) return;
+            if (url == '${config.AppConfig.paymentUrl}/Paypal/Success') {
+              Provider.of<ReservationProvider>(context, listen: false)
+                  .makeReservation(widget.reservation);
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ReservationConfirmationPage(
+                          accommodationName: widget.accommodationName)));
+            }
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(
+          '${config.AppConfig.paymentUrl}/paypal?numberOfDays=${widget.numberOfDays}&pricePerNight=${widget.pricePerNight}&accommodationId=${widget.accommodationId}&accommodationName=${widget.accommodationName}'));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('PaymentApp'),
       ),
-      body: webview.WebView(
-        initialUrl: '',
-        javascriptMode: webview.JavascriptMode.unrestricted,
-        onWebViewCreated: (webview.WebViewController webViewController) {
-          webViewController.loadRequest(webview.WebViewRequest(
-              uri: Uri.parse(
-                  '${config.AppConfig.paymentUrl}/paypal?numberOfDays=${widget.numberOfDays}&pricePerNight=${widget.pricePerNight}&accommodationId=${widget.accommodationId}&accommodationName=${widget.accommodationName}'),
-              method: webview.WebViewRequestMethod.get));
-        },
-        onPageFinished: (String url) {
-          if (url == '${config.AppConfig.paymentUrl}/Paypal/Success') {
-            Provider.of<ReservationProvider>(context, listen: false)
-                .makeReservation(widget.reservation);
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ReservationConfirmationPage(
-                        accommodationName: widget.accommodationName)));
-          }
-        },
-      ),
+      body: webview.WebViewWidget(controller: _webViewController),
     );
   }
 }
