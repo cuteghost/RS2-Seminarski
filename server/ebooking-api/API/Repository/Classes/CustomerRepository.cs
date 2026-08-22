@@ -26,41 +26,25 @@ public class CustomerRepository : ICustomerRepository
 
     public async Task<bool> AddCustomer(User user, Customer customer)
     {
-        try
-        {
-            if (await _userRepository.Get(u => u.Email == user.Email) != null) return false;
-            user.Password = _hasher.Hash(user.Password);
-            await _userRepository.Add(user);
+        if (await _userRepository.Get(u => u.Email == user.Email) != null) return false;
+        user.Password = _hasher.Hash(user.Password);
+        await _userRepository.Add(user);
 
-            customer.User = user;
+        customer.User = user;
 
-            await _customerRepository.Add(customer);
+        await _customerRepository.Add(customer);
 
-            return true;
-        }
-        catch (Exception)
-        {
-
-            throw;
-        }
+        return true;
     }
 
     public async Task<Customer> GetCustomerDetails(Guid id, string JWT)
     {
-        try
-        {
-            var customer = await _customerRepository.Get(c => c.Id == id, false, c => c.User);
+        var customer = await _customerRepository.Get(c => c.Id == id, false, c => c.User);
 
-            if (customer == null) return null;
-            if (_tokenHandler.GetEmailFromJWT(JWT) != customer.User.Email) return null;
-            customer.User.Password = "";
-            return customer;
-        }
-        catch (Exception)
-        {
-
-            throw;
-        }
+        if (customer == null) return null;
+        if (_tokenHandler.GetEmailFromJWT(JWT) != customer.User.Email) return null;
+        customer.User.Password = "";
+        return customer;
     }
 
     public async Task<bool> UpdateCustomer(Customer customer)

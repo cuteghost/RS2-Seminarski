@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Models.Constants;
 
 namespace Authentication.Services.TokenHandlerService;
 
@@ -113,9 +114,9 @@ public class TokenHandlerService : ITokenHandlerService
         var partners = await _dbContext.Partners.Include(s => s.User).AsNoTracking().ToListAsync();
         var customers = await _dbContext.Customers.Include(s => s.User).AsNoTracking().ToListAsync();
 
-        if (administrators.Any(a => a.User.Email == email)) return "Administrator";
-        if (partners.Any(p => p.User.Email == email)) return "Partner";
-        if (customers.Any(c => c.User.Email == email)) return "Customer";
+        if (administrators.Any(a => a.User.Email == email)) return Roles.Administrator;
+        if (partners.Any(p => p.User.Email == email)) return Roles.Partner;
+        if (customers.Any(c => c.User.Email == email)) return Roles.Customer;
 
         return "";
     }

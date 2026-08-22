@@ -1,7 +1,6 @@
 ﻿using Database;
 using Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Models.DTO.CountryDTO;
 using Models.Domain;
 using System.Linq.Expressions;
 
@@ -105,6 +104,26 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class, ISoft
         }
         return false;
         
+    }
+    public async Task<(IEnumerable<T> Items, int TotalCount)> GetPaged(int page, int pageSize, bool includeDeleted = false, params Expression<Func<T, object>>[] includeProperties)
+    {
+        IQueryable<T> query = _entity;
+
+        if (!includeDeleted)
+        {
+            query = query.Where(e => !e.IsDeleted);
+        }
+        foreach (var includeProperty in includeProperties)
+            query = query.Include(includeProperty);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
     }
 
 }

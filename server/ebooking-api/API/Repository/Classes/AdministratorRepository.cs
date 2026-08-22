@@ -27,30 +27,17 @@ public class AdministratorRepository : IAdministratorRepository
         _tokenHandler = tokenHandlerService;
     }
 
-    public Task<IEnumerable<Customer>> GetAllCustomers()
-    {
-        throw new NotImplementedException();
-    }
-
     public Task<object?> GetAllPartners()
     {
         throw new NotImplementedException();
     }
     public async Task<Administrator> GetAdminDetails(Guid id, string JWT)
     {
-        try
-        {
-            var admin = await _adminRepository.Get(c => c.Id == id, false, c => c.User);
+        var admin = await _adminRepository.Get(c => c.Id == id, false, c => c.User);
 
-            if (admin == null) return null;
-            if (_tokenHandler.GetEmailFromJWT(JWT) != admin.User.Email) return null;
-            admin.User.Password = "";
-            return admin;
-        }
-        catch (Exception)
-        {
-
-            throw;
-        }
+        if (admin == null) return null;
+        if (_tokenHandler.GetEmailFromJWT(JWT) != admin.User.Email) return null;
+        admin.User.Password = "";
+        return admin;
     }
 }

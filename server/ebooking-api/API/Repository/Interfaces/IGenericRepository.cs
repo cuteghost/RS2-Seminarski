@@ -16,8 +16,5 @@ public interface IGenericRepository<T> where T : class
 
     public Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>> predicate, bool includeDeleted = false, params Expression<Func<T, object>>[] includeProperties);
 
-
-    //public Task<T> Get(Expression<Func<T, bool>> predicate, bool includeDeleted = false, params Expression<Func<T, object>>[] includeProperties);
-
-
+    public Task<(IEnumerable<T> Items, int TotalCount)> GetPaged(int page, int pageSize, bool includeDeleted = false, params Expression<Func<T, object>>[] includeProperties);
 }

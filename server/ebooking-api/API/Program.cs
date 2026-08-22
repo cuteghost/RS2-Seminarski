@@ -85,9 +85,9 @@ builder.Services.AddScoped<ICountryService, CountryService>();
 // Specific repository registrations
 #region SpecificRepositories
 builder.Services.AddScoped<ILoginRepository, LoginRepository>();
-builder.Services.AddTransient<ICustomerRepository, CustomerRepository>();
-builder.Services.AddTransient<IUserRepository, UserRepository>();
-builder.Services.AddTransient<IAdministratorRepository, AdministratorRepository>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAdministratorRepository, AdministratorRepository>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 #endregion
