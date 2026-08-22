@@ -10,6 +10,7 @@ import 'package:ebooking/screens/partner_screens/partner_discover_screen.dart';
 import 'package:ebooking/services/accommodation_service.dart';
 import 'package:ebooking/services/auth_service.dart';
 import 'package:ebooking/services/feedback_service.dart';
+import 'package:ebooking/services/location_service.dart';
 import 'package:ebooking/services/profile_service.dart';
 import 'package:ebooking/services/reservation_service.dart';
 import 'package:ebooking/services/search_service.dart';
@@ -26,7 +27,7 @@ void main() {
   final SecureStorage secureStorage = SecureStorage();
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (context) => LocationProvider()),
+      ChangeNotifierProvider(create: (context) => LocationProvider(locationService: LocationService(secureStorage: secureStorage))),
       ChangeNotifierProvider(
           create: (context) => AuthProvider(
               authService: AuthService(secureStorage: secureStorage))),

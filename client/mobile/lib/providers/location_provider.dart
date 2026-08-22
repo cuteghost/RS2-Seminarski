@@ -11,7 +11,10 @@ class LocationProvider with ChangeNotifier {
   List<Country> get countries => _countries;
   List<City> get cities => _cities;
 
-  final LocationService _locationService = LocationService();
+  final LocationService _locationService;
+
+  LocationProvider({required LocationService locationService})
+      : _locationService = locationService;
 
   Future<void> fetchCountries() async {
     _countries = await _locationService.getCountries();

@@ -4,19 +4,31 @@ import 'package:ebooking/models/country_model.dart';
 import 'package:ebooking/models/location_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:ebooking/config/config.dart';
+import 'package:ebooking/services/auth_service.dart';
 
 class LocationService {
+  final SecureStorage _secureStorage;
+
+  LocationService({required SecureStorage secureStorage})
+      : _secureStorage = secureStorage;
+
   Future<List<Country>> getCountries() async {
-    final response = await http
-        .get(Uri.parse('${AppConfig.baseUrl}/api/Country/GetCountries'));
+    final token = await _secureStorage.getToken();
+    final response = await http.get(
+        Uri.parse('${AppConfig.baseUrl}/api/Country/GetCountries'),
+        headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200) {
-      final List<dynamic> countryJsonList = json.decode(response.body);
+      // Backend now wraps list responses: { message, data: [...], page, pageSize, totalCount, totalPages }
+      final Map<String, dynamic> decoded = json.decode(response.body);
+      final List<dynamic> countryJsonList = decoded['data'] ?? [];
       return countryJsonList.map((item) => Country.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load countries');
     }
   }
 
+  // NOTE: /api/City/GetCityByCountry is not implemented on the backend yet.
+  // City is next in line for the golden-template rollout — this stays broken until then.
   Future<List<City>> getCities(String? countryId) async {
     if (countryId == null) {
       throw Exception('Country ID is null');
@@ -61,10 +73,14 @@ class LocationService {
   }
 
   Future<Country?> getCountry(String countryId) async {
-    final response = await http
-        .get(Uri.parse('${AppConfig.baseUrl}/api/Country/Get/$countryId'));
+    final token = await _secureStorage.getToken();
+    final response = await http.get(
+        Uri.parse('${AppConfig.baseUrl}/api/Country/Get/$countryId'),
+        headers: {'Authorization': 'Bearer $token'});
     if (response.statusCode == 200) {
-      return Country.fromJson(json.decode(response.body));
+      // Backend now wraps single-item responses: { message, data: {...} }
+      final Map<String, dynamic> decoded = json.decode(response.body);
+      return Country.fromJson(decoded['data']);
     } else {
       return null;
     }
