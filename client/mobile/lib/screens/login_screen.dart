@@ -109,10 +109,10 @@ class LoginPage extends StatelessWidget {
                       if (loggedIn == true) {
                         await messageProvider.startSignalR();
                         await messageProvider.getChats();
-                        for (var c in messageProvider.chats) {
+                        await Future.wait(messageProvider.chats.map((c) async {
                           await messageProvider.getMessages(c.id);
                           await messageProvider.addToChat(c.id);
-                        }
+                        }));
                         await profileProvider.getProfile();
                         if (!context.mounted) return;
                         final role = await authProvider.roleCheck();
@@ -131,7 +131,14 @@ class LoginPage extends StatelessWidget {
                                       const PartnerDiscoverPage()));
                         }
                       } else {
-                        // Handle login failure
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Incorrect email or password. Please try again.'),
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
                       }
                     },
                     child: const Text('CONTINUE'),
@@ -161,10 +168,11 @@ class LoginPage extends StatelessWidget {
                           if (loggedIn == true) {
                             await messageProvider.startSignalR();
                             await messageProvider.getChats();
-                            for (var c in messageProvider.chats) {
+                            await Future.wait(
+                                messageProvider.chats.map((c) async {
                               await messageProvider.getMessages(c.id);
                               await messageProvider.addToChat(c.id);
-                            }
+                            }));
                             await profileProvider.getProfile();
                             if (!context.mounted) return;
                             final role = await authProvider.roleCheck();
@@ -183,7 +191,14 @@ class LoginPage extends StatelessWidget {
                                           const PartnerDiscoverPage()));
                             }
                           } else {
-                            // Handle login failure
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Facebook login failed. Please try again.'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
                           }
                         },
                       ),
@@ -206,10 +221,11 @@ class LoginPage extends StatelessWidget {
                           if (loggedIn == true) {
                             await messageProvider.startSignalR();
                             await messageProvider.getChats();
-                            for (var c in messageProvider.chats) {
+                            await Future.wait(
+                                messageProvider.chats.map((c) async {
                               await messageProvider.getMessages(c.id);
                               await messageProvider.addToChat(c.id);
-                            }
+                            }));
                             await profileProvider.getProfile();
                             if (!context.mounted) return;
                             final role = await authProvider.roleCheck();
@@ -228,7 +244,14 @@ class LoginPage extends StatelessWidget {
                                           const PartnerDiscoverPage()));
                             }
                           } else {
-                            // Handle login failure
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Google login failed. Please try again.'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
                           }
                         },
                       ),

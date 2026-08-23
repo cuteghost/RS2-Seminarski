@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Models.Domain;
 using Repository.Interfaces;
 using Authentication.Services.HashService;
-using Authentication.Services.TokenHandlerService;
 
 namespace Repository.Classes;
 
@@ -13,15 +12,13 @@ public class CustomerRepository : ICustomerRepository
     private readonly IGenericRepository<Customer> _customerRepository;
     private readonly IGenericRepository<User> _userRepository;
     private readonly IHashService _hasher;
-    private readonly ITokenHandlerService _tokenHandler;
 
-    public CustomerRepository(IHashService hasher, IGenericRepository<Customer> customerRepository, IGenericRepository<User> userRepository, ApplicationDbContext applicationDbContext, ITokenHandlerService tokenHandler)
+    public CustomerRepository(IHashService hasher, IGenericRepository<Customer> customerRepository, IGenericRepository<User> userRepository, ApplicationDbContext applicationDbContext)
     {
         _customerRepository = customerRepository;
         _userRepository = userRepository;
         _hasher = hasher;
         _dbContext = applicationDbContext;
-        _tokenHandler = tokenHandler;
     }
 
     public async Task<bool> AddCustomer(User user, Customer customer)
@@ -42,7 +39,6 @@ public class CustomerRepository : ICustomerRepository
         var customer = await _customerRepository.Get(c => c.Id == id, false, c => c.User);
 
         if (customer == null) return null;
-        if (_tokenHandler.GetEmailFromJWT(JWT) != customer.User.Email) return null;
         customer.User.Password = "";
         return customer;
     }
@@ -68,7 +64,6 @@ public class CustomerRepository : ICustomerRepository
     {
         var customer = await GetCustomerById(id);
         if (customer == null) return false;
-        if (customer.User.Email != _tokenHandler.GetEmailFromJWT(JWT)) return false;
         if (await _customerRepository.Delete(c => c.Id == id))
             if (await _userRepository.Delete(c => c.Id == customer.User.Id))
                 return true;

@@ -20,31 +20,41 @@ class ProfileProvider with ChangeNotifier {
     return _profile;
   }
 
-  Future<String> updateEmail(String newEmail, String password) async {
+  /// Returns (success, message). The caller uses `success` to decide whether
+  /// to close the modal — it should stay open on failure so the user can see
+  /// the error and correct it, instead of silently closing either way.
+  Future<(bool success, String message)> updateEmail(
+      String newEmail, String password) async {
     if (newEmail == '' || password == '') {
-      return 'Please fill in all fields';
+      return (false, 'Please fill in all fields');
     }
-    //regex to validate email
     RegExp emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (newEmail != '' && emailRegex.hasMatch(newEmail)) {
-      if (await profileService.updateEmail(newEmail, password) == true) {
-        return 'Email updated successfully';
-      } else {
-        return 'Failed to update email';
-      }
-    } else {
-      return 'Invalid email address';
+    if (!emailRegex.hasMatch(newEmail)) {
+      return (false, 'Please enter a valid email address');
+    }
+    try {
+      await profileService.updateEmail(newEmail, password);
+      // Keep the in-memory profile in sync so screens reading it immediately
+      // reflect the change without needing a full re-fetch.
+      _profile.emailAddress = newEmail;
+      notifyListeners();
+      return (true, 'Email updated successfully');
+    } catch (e) {
+      return (false, 'Incorrect password. Please try again.');
     }
   }
 
-  Future<String> updatePassword(String oldPassword, String newPassword) async {
+  /// Returns (success, message), same rationale as updateEmail above.
+  Future<(bool success, String message)> updatePassword(
+      String oldPassword, String newPassword) async {
     if (oldPassword == '' || newPassword == '') {
-      return 'Please fill in all fields';
+      return (false, 'Please fill in all fields');
     }
-    if (await profileService.updatePassword(oldPassword, newPassword) == true) {
-      return 'Password updated successfully';
-    } else {
-      return 'Failed to update password';
+    try {
+      await profileService.updatePassword(oldPassword, newPassword);
+      return (true, 'Password updated successfully');
+    } catch (e) {
+      return (false, 'Incorrect old password. Please try again.');
     }
   }
 

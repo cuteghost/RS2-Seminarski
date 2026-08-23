@@ -102,10 +102,10 @@ class MyApp extends StatelessWidget {
               return FutureBuilder(
                 future: messageProvider.startSignalR().then((_) =>
                     messageProvider.getChats().then((_) async {
-                      for (var c in messageProvider.chats) {
+                      await Future.wait(messageProvider.chats.map((c) async {
                         await messageProvider.getMessages(c.id);
                         await messageProvider.addToChat(c.id);
-                      }
+                      }));
                       await profileProvider.getProfile();
                     })),
                 builder: (context, snapshot) {

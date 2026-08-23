@@ -43,7 +43,7 @@ class ProfilePageState extends State<ProfilePage> {
         }
 
         void editEmail() {
-          showModalBottomSheet(
+          showModalBottomSheet<bool>(
             context: context,
             isScrollControlled: true,
             builder: (context) => SingleChildScrollView(
@@ -54,7 +54,15 @@ class ProfilePageState extends State<ProfilePage> {
                 child: EditEmailModal(currentEmail: profile.emailAddress),
               ),
             ),
-          );
+          ).then((updated) {
+            // The provider's Profile object is mutated in place on a
+            // successful email change (see ProfileProvider.updateEmail), so a
+            // plain rebuild is enough to show the new value here — no need to
+            // re-fetch from the server.
+            if (updated == true) {
+              setState(() {});
+            }
+          });
         }
 
         void editPassword() {

@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
+<domain-config cleartextTrafficPermitted="true">
+    <!-- 10.0.2.2 is the Android emulator's alias for the host machine's localhost.
+         WebView (used for the PayPal checkout screen) enforces Android's Network
+         Security Config, unlike Flutter's package:http calls which bypass it.
+         Without this, the checkout WebView fails with ERR_CLEARTEXT_NOT_PERMITTED. -->
+    <domain includeSubdomains="false">10.0.2.2</domain>
+</domain-config>
 <domain-config>
     <domain includeSubdomains="true">192.168.23.191</domain>
     <trust-anchors>

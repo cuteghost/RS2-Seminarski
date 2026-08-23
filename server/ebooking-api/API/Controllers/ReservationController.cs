@@ -115,7 +115,7 @@ public class ReservationController : Controller
                     r.IsRated = true;
                 }
             }
-            r.Thumbnail = r.accommodation.AccommodationImages.Image1;
+            r.Thumbnail = r.accommodation.AccommodationImages?.Image1 ?? Array.Empty<byte>();
         }
         foreach (var r in toReturn)
         {

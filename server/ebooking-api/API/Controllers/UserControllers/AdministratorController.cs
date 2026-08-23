@@ -127,7 +127,7 @@ public class AdministratorController : Controller
         var toReturn = _mapper.Map<List<ReservationGET>>(reservations);
         foreach (var r in toReturn)
         {
-            r.Thumbnail = r.accommodation.AccommodationImages.Image1;
+            r.Thumbnail = r.accommodation.AccommodationImages?.Image1 ?? Array.Empty<byte>();
             r.accommodation.AccommodationImages = null;
         }
         return Json(toReturn);
