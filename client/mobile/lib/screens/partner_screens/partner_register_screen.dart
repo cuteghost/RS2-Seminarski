@@ -1,3 +1,4 @@
+import 'package:ebooking/config/app_theme.dart';
 import 'package:ebooking/models/country_model.dart';
 import 'package:ebooking/models/partner_model.dart';
 import 'package:ebooking/providers/auth_provider.dart';
@@ -5,6 +6,7 @@ import 'package:ebooking/providers/location_provider.dart';
 import 'package:ebooking/screens/partner_screens/partner_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 
 class PartnerRegisterScreen extends StatefulWidget {
   final String userId;
@@ -26,111 +28,138 @@ class PartnerRegisterScreenState extends State<PartnerRegisterScreen> {
 
   final _formKey = GlobalKey<FormState>();
   final phoneController = TextEditingController();
-  final addressController = TextEditingController();
   final taxNameController = TextEditingController();
   final taxIdController = TextEditingController();
-  final zipCodeController = TextEditingController();
 
   Country? _selectedCountry;
+  bool _isSubmitting = false;
+  String? _formError;
 
   @override
   void dispose() {
     phoneController.dispose();
-    addressController.dispose();
     taxNameController.dispose();
     taxIdController.dispose();
-    zipCodeController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submit() async {
+    setState(() => _formError = null);
+    if (!_formKey.currentState!.validate()) return;
+    if (_selectedCountry == null) {
+      setState(() => _formError = 'Please select a country.');
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    final partner = Partner(
+      userId: widget.userId,
+      countryId: _selectedCountry!.id,
+      taxName: taxNameController.text,
+      taxId: int.parse(taxIdController.text),
+      phoneNumber: int.parse(phoneController.text),
+    );
+    // The old handler fired this without awaiting or checking the result,
+    // so it always navigated to the partner profile even on failure.
+    final success =
+        await Provider.of<AuthProvider>(context, listen: false).registerPartner(partner);
+    if (!mounted) return;
+
+    if (success) {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => const PartnerProfilePage()));
+    } else {
+      setState(() {
+        _isSubmitting = false;
+        _formError = 'Could not register as a partner. Please try again.';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final countries = Provider.of<LocationProvider>(context, listen: true).countries;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Register As Partner'),
-      ),
+      appBar: AppBar(title: const Text('Register as partner')),
       body: SingleChildScrollView(
         child: Form(
           key: _formKey,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(20.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Tax Name'),
+                  decoration: const InputDecoration(labelText: 'Tax name'),
                   controller: taxNameController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter tax name';
-                    }
-                    return null;
-                  },
+                  validator: (v) => (v == null || v.isEmpty) ? 'Please enter tax name' : null,
                 ),
+                const SizedBox(height: 14),
                 TextFormField(
                   decoration: const InputDecoration(labelText: 'Tax ID'),
                   controller: taxIdController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter tax ID';
-                    }
+                  keyboardType: TextInputType.number,
+                  // Fixes a crash: submitting used to call int.parse() on
+                  // whatever was typed here with no numeric validation,
+                  // so a single letter would throw a FormatException.
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Please enter tax ID';
+                    if (int.tryParse(v) == null) return 'Numbers only';
                     return null;
                   },
                 ),
+                const SizedBox(height: 14),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Phone Number'),
+                  decoration: const InputDecoration(labelText: 'Phone number'),
                   controller: phoneController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter phone number';
-                    }
+                  keyboardType: TextInputType.phone,
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Please enter phone number';
+                    if (int.tryParse(v) == null) return 'Numbers only';
                     return null;
                   },
                 ),
+                const SizedBox(height: 14),
                 DropdownButtonFormField<Country>(
                   initialValue: _selectedCountry,
-                  hint: const Text('Select Country'),
-                  onChanged: (Country? newValue) async {
-                    setState(() {
-                      if (newValue != null) {
-                        _selectedCountry = newValue;
-                      }
-                    });
-                  },
-                  items: (Provider.of<LocationProvider>(context, listen: true)
-                          .countries)
-                      .map<DropdownMenuItem<Country>>((Country country) {
-                    return DropdownMenuItem<Country>(
-                        value: country, child: Text(country.name));
-                  }).toList(),
+                  decoration: const InputDecoration(labelText: 'Country'),
+                  hint: const Text('Select country'),
+                  onChanged: (Country? newValue) => setState(() => _selectedCountry = newValue),
+                  items: countries
+                      .map<DropdownMenuItem<Country>>(
+                          (c) => DropdownMenuItem(value: c, child: Text(c.name)))
+                      .toList(),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        if (_selectedCountry != null &&
-                            _selectedCountry?.id != null) {
-                          Country toPass = _selectedCountry!;
-                          Partner partner = Partner(
-                            userId: widget.userId,
-                            countryId: toPass.id,
-                            taxName: taxNameController.text,
-                            taxId: int.parse(taxIdController.text),
-                            phoneNumber: int.parse(phoneController.text),
-                          );
-                          Provider.of<AuthProvider>(context, listen: false)
-                              .registerPartner(partner);
-                          if (!context.mounted) return;
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const PartnerProfilePage()));
-                        }
-                      }
-                    },
-                    child: const Text('Submit'),
+                if (_formError != null) ...[
+                  const SizedBox(height: 14),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.08),
+                      border: Border.all(color: AppColors.error.withValues(alpha: 0.28)),
+                      borderRadius: BorderRadius.circular(AppColors.radiusMd),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(PhosphorIcons.warningCircle(), size: 16, color: AppColors.error),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(_formError!,
+                              style: textTheme.bodySmall?.copyWith(color: AppColors.error)),
+                        ),
+                      ],
+                    ),
                   ),
+                ],
+                const SizedBox(height: 22),
+                OutlinedButton(
+                  onPressed: _isSubmitting ? null : _submit,
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('Submit'),
                 ),
               ],
             ),

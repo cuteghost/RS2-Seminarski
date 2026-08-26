@@ -40,6 +40,7 @@ dependencies:
   geolocator: ^14.0.3
   permission_handler: ^13.0.0
   http: ^1.6.0
+  intl: ^0.20.2
   # 11.0.0 was published 2026-08-06; held back by the 7-day supply-chain rule.
   flutter_secure_storage: ^10.3.1
   provider: ^6.1.5+1
@@ -51,6 +52,13 @@ dependencies:
   # No newer release exists; migrate to signalr_netcore when this becomes a blocker.
   signalr_core: ^1.1.2
   webview_flutter: ^4.14.1
+  # Nocturne redesign: icon set (readme.md → "Use Phosphor icons throughout")
+  # NOTE: using the `phosphor_icons` fork, not the original `phosphor_flutter`.
+  # phosphor_flutter's PhosphorIconData extends IconData, which stopped
+  # compiling once Flutter 3.44 made IconData a final class. This fork has
+  # the identical API (same PhosphorIcons.xxx() calls, same PhosphorIconsStyle
+  # enum) but doesn't extend IconData, so it isn't affected.
+  phosphor_icons: ^3.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -70,7 +78,6 @@ dependency_overrides:
   # supply-chain soak period. Each pin below is still inside the range its
   # parent package declares, so nothing is being force-downgraded past a
   # real constraint. Drop a pin once its newer version has aged past 7 days.
-  photo_manager: 3.11.0 # 3.12.0 published 2026-08-09
   permission_handler_apple: 9.5.0 # 9.6.0 published 2026-08-10
   flutter_secure_storage_linux: 3.0.1 # 3.0.2 published 2026-08-06
   flutter_secure_storage_platform_interface: 2.0.2 # 2.0.3 published 2026-08-05
@@ -78,7 +85,6 @@ dependency_overrides:
 
 flutter_launcher_icons:
   android: true
-  ios: true
   image_path: "assets/icon/eBooking.png"
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -99,6 +105,16 @@ flutter:
   assets: 
     - assets/images/
     - assets/Icons/azure-blue-dot.png
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

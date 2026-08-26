@@ -8,8 +8,7 @@ import 'package:ebooking/config/config.dart';
 class FeedbackService {
   final SecureStorage _secureStorage;
 
-  FeedbackService({required SecureStorage secureStorage})
-      : _secureStorage = secureStorage;
+  FeedbackService({required this._secureStorage});
 
   Future<void> makeFeedback(FeedbackPOST feedback) async {
     final token = await _secureStorage.getToken();

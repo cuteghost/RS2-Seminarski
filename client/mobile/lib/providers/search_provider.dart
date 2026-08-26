@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 
 class SearchProvider with ChangeNotifier {
   final SearchService _searchService;
-  SearchProvider({required SearchService searchService})
-      : _searchService = searchService;
+  SearchProvider({required this._searchService});
 
   Future<List<AccommodationGET>> search(double priceFrom, double priceTo,
       String city, DateTime checkIn, DateTime checkOut) async {

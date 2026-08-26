@@ -9,13 +9,15 @@ class MessagePOST {
     required this.chatId,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'content': content,
-      'timeStamp': DateTime.now().toIso8601String(),
-      'chatId': chatId,
-    };
-  }
+  /// BUGFIX: raniji `toJson` je ignorisao proslijeđeni `timeStamp` i uvijek
+  /// slao `DateTime.now()`. Sada šalje ono što mu je dato, i to u UTC —
+  /// Upute Dodatak A.4 traže standardizaciju na UTC kroz cijelu aplikaciju
+  /// jer se u Docker okruženju lokalna zona kontejnera razlikuje od hosta.
+  Map<String, dynamic> toJson() => {
+        'content': content,
+        'timeStamp': timeStamp.toUtc().toIso8601String(),
+        'chatId': chatId,
+      };
 }
 
 class MessageGET {
@@ -37,12 +39,14 @@ class MessageGET {
 
   factory MessageGET.fromJson(Map<String, dynamic> json) {
     return MessageGET(
-      sender: json['senderId'],
-      content: json['content'],
-      timeStamp: DateTime.parse(json['timeStamp']),
-      isRead: json['isRead'],
-      chatId: json['chatId'],
-      isCurrent: json['isCurrent'],
+      sender: json['senderId']?.toString() ?? '',
+      content: json['content']?.toString() ?? '',
+      timeStamp:
+          DateTime.tryParse(json['timeStamp']?.toString() ?? '')?.toLocal() ??
+              DateTime.now(),
+      isRead: json['isRead'] == true,
+      chatId: json['chatId']?.toString() ?? '',
+      isCurrent: json['isCurrent'] == true,
     );
   }
 }
@@ -50,15 +54,9 @@ class MessageGET {
 class ChatPOST {
   final String user2;
 
-  const ChatPOST({
-    required this.user2,
-  });
+  const ChatPOST({required this.user2});
 
-  Map<String, dynamic> toJson() {
-    return {
-      'user2Id': user2,
-    };
-  }
+  Map<String, dynamic> toJson() => {'user2Id': user2};
 }
 
 class ChatGET {
@@ -75,11 +73,24 @@ class ChatGET {
   });
 
   factory ChatGET.fromJson(Map<String, dynamic> json) {
+    final rawMessages = json['messages'];
     return ChatGET(
-      id: json['id'],
-      user1: json['user1'],
-      user2: json['user2'],
-      messages: (json['messages'] as List).map((e) => MessageGET.fromJson(e)).toList(),
+      id: json['id']?.toString() ?? '',
+      user1: json['user1']?.toString() ?? '',
+      user2: json['user2']?.toString() ?? '',
+      messages: rawMessages is List
+          ? rawMessages
+              .whereType<Map>()
+              .map((e) => MessageGET.fromJson(
+                  e.map((k, v) => MapEntry(k.toString(), v))))
+              .toList()
+          : <MessageGET>[],
     );
   }
+
+  /// Zadnja poruka u razgovoru — za pretpregled u listi.
+  /// BUGFIX: stari ekran je prikazivao `messages[0]` (NAJSTARIJU poruku)
+  /// i sjekao je na 11 znakova preko `substring`. Sada je zadnja poruka,
+  /// a skraćivanje radi `TextOverflow.ellipsis` u widgetu.
+  MessageGET? get lastMessage => messages.isEmpty ? null : messages.last;
 }

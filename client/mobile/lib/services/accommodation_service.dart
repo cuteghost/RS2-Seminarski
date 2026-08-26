@@ -7,8 +7,7 @@ import 'package:ebooking/models/accomodation_model.dart';
 class AccommodationService {
   final SecureStorage _secureStorage;
 
-  AccommodationService({required SecureStorage secureStorage})
-      : _secureStorage = secureStorage;
+  AccommodationService({required this._secureStorage});
 
   Future<bool> add(AccommodationPOST accommodation) async {
     final response = await http.post(

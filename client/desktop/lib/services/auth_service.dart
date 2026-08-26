@@ -1,117 +1,129 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:ebooking_desktop/config/config.dart' as config;
 
+import 'package:ebooking_desktop/config/config.dart' as config;
+import 'package:ebooking_desktop/services/api_response_handler.dart';
+
+/// Rezultat prijave — uspjeh + poruka, da UI može prikazati konkretan razlog
+/// neuspjeha umjesto da tiho ne uradi ništa.
+typedef LoginResult = ({bool success, String message});
 
 class AuthService {
   final SecureStorage _secureStorage;
-  
-  AuthService({required SecureStorage secureStorage}) : _secureStorage = secureStorage;
 
-  Future<bool> login(String email, String password) async {
+  AuthService({required SecureStorage secureStorage})
+      : _secureStorage = secureStorage;
+
+  /// `POST /api/Auth/login`
+  ///
+  /// Upute 5: "Login kredencijali šalju se u body-ju POST zahtjeva, nikada
+  /// kroz query string parametre." — ispunjeno.
+  ///
+  /// BUGFIX: ranije je vraćao goli `bool`, pa je `login.dart` na `false`
+  /// radio samo `return;` i korisnik nije dobijao NIKAKVU poruku. Sada se
+  /// razlog (pogrešna lozinka / nema mreže / server pao) propagira u UI.
+  Future<LoginResult> login(String email, String password) async {
     await _secureStorage.deleteToken();
-    final url = Uri.parse('${config.AppConfig.baseUrl}/api/Auth/login');
-    final response = await http.post(url,
+    try {
+      final response = await http.post(
+        Uri.parse('${config.AppConfig.baseUrl}/api/Auth/login'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({'email': email, 'password': password}));
-    if (response.statusCode == 200) {
-      await _secureStorage.saveToken(response.body);
-      return true;
-    } else {
-      return false;
+        body: json.encode({'email': email, 'password': password}),
+      );
+
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        await _secureStorage.saveToken(response.body);
+        return (success: true, message: 'Prijava uspješna.');
+      }
+
+      if (response.statusCode == 401 || response.statusCode == 400) {
+        return (
+          success: false,
+          message: 'Pogrešna e-mail adresa ili lozinka.',
+        );
+      }
+
+      return (
+        success: false,
+        message: ApiResponseHandler.extractMessage(response),
+      );
+    } catch (e) {
+      return (success: false, message: ApiResponseHandler.describe(e));
     }
   }
 
   Future<void> logout() async {
+    // NAPOMENA (Upute 5): "Logout mora invalidirati token na serveru, a ne
+    // samo lokalno obrisati token." Backend trenutno nema logout endpoint
+    // niti token blacklist — prijavljeno kao nedostajuća backend funkcionalnost.
     await _secureStorage.deleteToken();
   }
 
+  /// `GET /api/Auth/status` — provjerava da li je sačuvani token još validan
+  /// i osvježava ga.
   Future<bool> checkLoggedIn() async {
-    String? token = await _secureStorage.getToken();
-    http.Response response = await http.get(
-      Uri.parse('${config.AppConfig.baseUrl}/api/Auth/status'),
-      headers: {'Authorization': 'Bearer $token'}
-    );
-    if (response.statusCode == 200) {
-      await _secureStorage.saveToken(response.body);
-      return true;
-    }
-    else {
-      await _secureStorage.deleteToken();
-      return false;
-    }
-  }
+    final token = await _secureStorage.getToken();
+    if (token == null || token.isEmpty) return false;
 
-  Future<bool> register(String email, String password, String displayName, String firstName, String lastName, String birthDate, File image) async {
-    final url = Uri.parse('${config.AppConfig.baseUrl}/api/Customer/register');
-    List<int> imageBytes = image.readAsBytesSync();
-    String base64image = base64Encode(imageBytes);
-    
-    final response = await http.post(url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'displayName': displayName, 
-          'firstName': firstName, 
-          'lastName': lastName,  
-          'birthDate': birthDate, 
-          'image': base64image, 
-          'email': email, 
-          'password': password}));
-    if (response.statusCode == 200) {
-      await _secureStorage.saveToken(response.body);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  void deleteAccount() async {
-    final url = Uri.parse('${config.AppConfig.baseUrl}/api/Customer/Delete');
-    String? token = await _secureStorage.getToken();
-    final response = await http.delete(url, headers: {'Authorization': 'Bearer $token'});
-    if (response.statusCode == 200) {
-      await _secureStorage.deleteToken();
-    }
-    else {
-      throw Exception('Failed to delete account');
-    }
-  }
-
-  Future<String> roleCheck() async {
-    // Implement role check
-    String? authToken = await _secureStorage.getToken();
-    if (authToken != null) {
-      // Check the role of the user
-      // authToken is the JWT token. It holds the claim Role. Decode the token and check the role
-      var payload = authToken.split('.')[1];
-      var normalizedPayload = base64Url.normalize(payload);
-      var stringPayload = utf8.decode(base64Url.decode(normalizedPayload));
-      var payloadMap = json.decode(stringPayload);
-      if (payloadMap['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] == 'Administrator') {
-        return 'Administrator';
+    try {
+      final response = await http.get(
+        Uri.parse('${config.AppConfig.baseUrl}/api/Auth/status'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        await _secureStorage.saveToken(response.body);
+        return true;
       }
+      await _secureStorage.deleteToken();
+      return false;
+    } catch (_) {
+      // Server nedostupan pri startu — ne brišemo token da korisnik ne bi
+      // bio odjavljen samo zato što API još nije podignut.
+      return false;
     }
-    return '';
-  
+  }
+
+  /// Čita rolu iz JWT payload-a.
+  ///
+  /// NAPOMENA: ovo je samo dekodiranje payload-a radi rutiranja UI-ja —
+  /// NIJE sigurnosna provjera. Autorizacija se validira na serveru
+  /// (`[Authorize(Roles = Roles.Administrator)]`), gdje se i verifikuje potpis.
+  Future<String> roleCheck() async {
+    final token = await _secureStorage.getToken();
+    if (token == null || token.isEmpty) return '';
+
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return '';
+
+      final payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+      final claims = json.decode(payload);
+      if (claims is! Map<String, dynamic>) return '';
+
+      const roleClaim =
+          'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
+      final role = claims[roleClaim] ?? claims['role'];
+
+      if (role is String) return role;
+      if (role is List && role.isNotEmpty) return role.first.toString();
+      return '';
+    } catch (_) {
+      return '';
+    }
   }
 }
 
-class SecureStorage
-{
-  final _storage = FlutterSecureStorage(); 
+class SecureStorage {
+  final _storage = const FlutterSecureStorage();
 
-  Future<void> saveToken(String token) async {
-    await _storage.write(key: 'jwt_token', value: token);
-  }
+  static const _key = 'jwt_token';
 
-  Future<String?> getToken() async {
-    return await _storage.read(key: 'jwt_token');
-  }
+  Future<void> saveToken(String token) =>
+      _storage.write(key: _key, value: token);
 
-  Future<void> deleteToken() async {
-    await _storage.delete(key: 'jwt_token');
-  }
+  Future<String?> getToken() => _storage.read(key: _key);
+
+  Future<void> deleteToken() => _storage.delete(key: _key);
 }

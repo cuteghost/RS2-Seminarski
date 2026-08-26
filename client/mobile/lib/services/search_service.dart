@@ -8,8 +8,7 @@ import 'package:ebooking/config/config.dart';
 class SearchService {
   final SecureStorage _secureStorage;
 
-  SearchService({required SecureStorage secureStorage})
-      : _secureStorage = secureStorage;
+  SearchService({required this._secureStorage});
 
   Future<List<AccommodationGET>> search(double priceFrom, double priceTo,
       String city, DateTime checkIn, DateTime checkOut) async {

@@ -1,97 +1,70 @@
-import 'package:ebooking_desktop/models/profile_model.dart';
-import 'package:ebooking_desktop/services/auth_service.dart';
-import 'package:ebooking_desktop/config/config.dart' as config;
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import 'package:ebooking_desktop/config/config.dart' as config;
+import 'package:ebooking_desktop/models/profile_model.dart';
+import 'package:ebooking_desktop/services/api_response_handler.dart';
+import 'package:ebooking_desktop/services/auth_service.dart';
 
 class ProfileService {
   final SecureStorage _secureStorage;
 
-  ProfileService({required SecureStorage secureStorage}) : _secureStorage = secureStorage;
+  ProfileService({required SecureStorage secureStorage})
+      : _secureStorage = secureStorage;
 
+  Future<Map<String, String>> _headers({bool withBody = false}) async {
+    final token = await _secureStorage.getToken();
+    return {
+      'Accept': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+      if (withBody) 'Content-Type': 'application/json',
+    };
+  }
+
+  /// `GET /api/Administrator/Details`
   Future<Profile> fetchProfile() async {
-    String? token = await _secureStorage.getToken();
     final response = await http.get(
       Uri.parse('${config.AppConfig.baseUrl}/api/Administrator/Details'),
-      headers: {'Authorization': 'Bearer $token'}
+      headers: await _headers(),
     );
-    if (response.statusCode == 200) {
-      return Profile.fromJson(jsonDecode(response.body));
+    final data = ApiResponseHandler.unwrap(response);
+    if (data is! Map<String, dynamic>) {
+      throw const ApiException(500, 'Neočekivan oblik profila sa servera.');
     }
-    if (response.statusCode == 401) {
-        throw Exception('401 Unauthorized');
-    }
-    else {
-      throw Exception('Failed to load profile');
-    }
+    return Profile.fromJson(data);
   }
 
-  Future<bool> updateProfile(Profile profile) async {
-    String? token = await _secureStorage.getToken();
-    final response = await http.patch(
-      Uri.parse('${config.AppConfig.baseUrl}/api/Customer/UpdateDetails'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json'
-      },
-      body: jsonEncode(profile.toJson())
-    );
-    if (response.statusCode == 200) {
-      return true;
-    }
-    if (response.statusCode == 401) {
-        throw Exception('401 Unauthorized');
-    }
-    else {
-      throw Exception('Failed to update profile');
-    }
-  }
-
-  Future<bool> updateEmail(String newEmail, String password) async {
-    String? token = await _secureStorage.getToken();
+  /// `PATCH /api/User/UpdateEmail`
+  Future<String> updateEmail(String newEmail, String password) async {
     final response = await http.patch(
       Uri.parse('${config.AppConfig.baseUrl}/api/User/UpdateEmail'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json'
-      },
-      body: jsonEncode({
-        'email': newEmail,
-        'password': password
-      })
+      headers: await _headers(withBody: true),
+      body: jsonEncode({'email': newEmail, 'password': password}),
     );
-    if (response.statusCode == 200) {
-      return true;
-    }
+    // 401 ovdje znači "pogrešna lozinka", ne "istekla sesija" — backend
+    // koristi isti status za oboje. Prijavljeno kao backend nedostatak.
     if (response.statusCode == 401) {
-        throw Exception('Wrong Password');
+      throw const ApiException(401, 'Unesena lozinka nije ispravna.');
     }
-    else {
-      throw Exception('Failed to update email');
-    }
+    return ApiResponseHandler.successMessage(
+        response, 'E-mail adresa je uspješno izmijenjena.');
   }
 
-  Future<bool> updatePassword(String oldPassword, String newPassword) async {
-    String? token = await _secureStorage.getToken();
+  /// `PATCH /api/User/UpdatePassword`
+  Future<String> updatePassword(String oldPassword, String newPassword) async {
     final response = await http.patch(
       Uri.parse('${config.AppConfig.baseUrl}/api/User/UpdatePassword'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json'
-      },
+      headers: await _headers(withBody: true),
       body: jsonEncode({
         'oldPassword': oldPassword,
-        'newPassword': newPassword
-      })
+        'newPassword': newPassword,
+      }),
     );
-    if (response.statusCode == 200) {
-      return true;
-    }
     if (response.statusCode == 401) {
-        throw Exception('Wrong Password');
+      throw const ApiException(401, 'Trenutna lozinka nije ispravna.');
     }
-    else {
-      throw Exception('Failed to update password');
-    }
+    return ApiResponseHandler.successMessage(
+        response, 'Lozinka je uspješno izmijenjena.');
   }
 }

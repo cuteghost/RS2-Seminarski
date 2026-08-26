@@ -19,6 +19,32 @@ class SearchResultPage extends StatefulWidget {
 }
 
 class SearchResultsState extends State<SearchResultPage> {
+  late List<AccommodationGET> _visible;
+
+  @override
+  void initState() {
+    super.initState();
+    _visible = widget.accommodations;
+  }
+
+  void _applyFilters(AccommodationFilters filters) {
+    setState(() {
+      _visible = widget.accommodations.where((a) {
+        if (filters.minPrice != null && a.pricePerNight < filters.minPrice!) {
+          return false;
+        }
+        if (filters.maxPrice != null && a.pricePerNight > filters.maxPrice!) {
+          return false;
+        }
+        if (filters.minRating != null &&
+            filters.minRating! > 0 &&
+            a.reviewScore < filters.minRating!) {
+          return false;
+        }
+        return true;
+      }).toList();
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -64,9 +90,11 @@ class SearchResultsState extends State<SearchResultPage> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
-                  onPressed: () {
-                    Navigator.push(context,
+                  onPressed: () async {
+                    final result = await Navigator.push<AccommodationFilters>(
+                        context,
                         MaterialPageRoute(builder: (context) => FiltersPage()));
+                    if (result != null) _applyFilters(result);
                   },
                   icon: Icon(PhosphorIcons.slidersHorizontal(), size: 14),
                   label: const Text('Filters'),
@@ -75,7 +103,7 @@ class SearchResultsState extends State<SearchResultPage> {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: widget.accommodations.isEmpty
+              child: _visible.isEmpty
                   ? Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -102,13 +130,13 @@ class SearchResultsState extends State<SearchResultPage> {
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                      itemCount: widget.accommodations.length,
+                      itemCount: _visible.length,
                       separatorBuilder: (context, index) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: Divider(color: AppColors.divider),
                       ),
                       itemBuilder: (context, index) {
-                        final accommodation = widget.accommodations[index];
+                        final accommodation = _visible[index];
                         final image = accommodation.images.images.isNotEmpty
                             ? accommodation.images.images.first
                             : null;

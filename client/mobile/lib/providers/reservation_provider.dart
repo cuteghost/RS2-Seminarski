@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 
 class ReservationProvider with ChangeNotifier {
   final ReservationService _reservationService;
-  ReservationProvider({required ReservationService reservationService})
-      : _reservationService = reservationService;
+  ReservationProvider({required this._reservationService});
 
   List<Map<String, DateTime>> _reservedDates = [];
 

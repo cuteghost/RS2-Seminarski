@@ -8,8 +8,7 @@ import 'package:ebooking/config/config.dart';
 class ReservationService {
   final SecureStorage _secureStorage;
 
-  ReservationService({required SecureStorage secureStorage})
-      : _secureStorage = secureStorage;
+  ReservationService({required this._secureStorage});
 
   Future<void> makeReservation(ReservationPOST reservation) async {
     final token = await _secureStorage.getToken();

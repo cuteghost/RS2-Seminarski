@@ -1,3 +1,4 @@
+import 'package:ebooking/config/app_theme.dart';
 import 'package:ebooking/providers/accommodation_provider.dart';
 import 'package:ebooking/providers/feedback_provider.dart';
 import 'package:ebooking/providers/location_provider.dart';
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: AppTheme.dark,
       home: FutureBuilder(
         future: Future.wait([
           Provider.of<AuthProvider>(context, listen: false)

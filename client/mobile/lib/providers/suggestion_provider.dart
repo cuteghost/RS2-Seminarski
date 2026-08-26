@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 
 class SuggestionProvider with ChangeNotifier {
   final SuggestionsService _suggestionService;
-  SuggestionProvider({required SuggestionsService suggestionService})
-      : _suggestionService = suggestionService;
+  SuggestionProvider({required this._suggestionService});
 
   Future<List<AccommodationGET>> suggest(String customerId) async {
     return await _suggestionService.fetchRecommendations(customerId);

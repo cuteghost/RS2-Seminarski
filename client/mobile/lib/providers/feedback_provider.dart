@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 class FeedbackProvider with ChangeNotifier {
   final FeedbackService _feedbackService;
 
-  FeedbackProvider({required FeedbackService feedbackService})
-      : _feedbackService = feedbackService;
+  FeedbackProvider({required this._feedbackService});
 
   Future<void> makeFeedback(FeedbackPOST feedback) async {
     await _feedbackService.makeFeedback(feedback);

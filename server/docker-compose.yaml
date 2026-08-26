@@ -1,8 +1,8 @@
 services:
   webapi:
     build:
-      context: ./ebooking-api
-      dockerfile: Dockerfile-API
+      context: .
+      dockerfile: ebooking-api/API/Dockerfile 
     env_file:
       - .env
     environment:
@@ -29,8 +29,8 @@ services:
     
   messenger:
     build:
-      context: ./ebooking-api
-      dockerfile: Dockerfile-Messenger
+      context: .
+      dockerfile: ebooking-api/Messenger/Dockerfile
     env_file:
       - .env
     environment:
@@ -59,8 +59,8 @@ services:
 
   paymentapp:
     build:
-      context: ./ebooking-api
-      dockerfile: Dockerfile-PaymentApp
+      context: .
+      dockerfile: ebooking-api/PaymentApp/Dockerfile
     env_file:
       - .env
     environment:
@@ -71,6 +71,9 @@ services:
       - JWT_KEY=$JWT_KEY
       - JWT_ISSUER=$JWT_ISSUER
       - JWT_AUDIENCE=$JWT_AUDIENCE
+      - PAYPAL_CLIENT_ID=$PAYPAL_CLIENT_ID
+      - PAYPAL_SECRET_KEY=$PAYPAL_SECRET_KEY
+      - PAYPAL_ENV=$PAYPAL_ENV
     ports:
       - 6666:8080
     depends_on:
@@ -111,7 +114,6 @@ services:
   db:
     build:
       context: ./database
-      dockerfile: Dockerfile-Database
     ports:
       - "7777:1433"
     env_file:

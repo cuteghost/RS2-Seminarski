@@ -231,7 +231,7 @@ class DiscoverPropertiesPageState extends State<PartnerDiscoverPage> {
           ],
         ),
       ),
-      bottomNavigationBar: const CustomPartnerBottomNavigationBar(),
+      bottomNavigationBar: const CustomPartnerBottomNavigationBar(currentIndex: 0),
     );
   }
 }

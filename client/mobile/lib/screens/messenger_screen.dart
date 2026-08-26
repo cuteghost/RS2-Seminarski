@@ -1,8 +1,11 @@
+import 'package:ebooking/config/app_theme.dart';
 import 'package:ebooking/models/message_model.dart';
 import 'package:ebooking/providers/message_provider.dart';
 import 'package:ebooking/providers/profile_provider.dart';
+import 'package:ebooking/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:ebooking/widgets/count_badge.dart';
+import 'package:intl/intl.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:provider/provider.dart';
 
 class ContactListScreen extends StatelessWidget {
@@ -10,92 +13,102 @@ class ContactListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     var profile = Provider.of<ProfileProvider>(context, listen: false).profile;
     return FutureBuilder(
       future: Future.wait(
           [Provider.of<MessageProvider>(context, listen: false).getChats()]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
+          return Scaffold(body: Center(child: Text('Error: ${snapshot.error}')));
         } else {
           return Scaffold(
-            appBar: AppBar(
-                title: const Text('Messenger'),
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                )),
+            appBar: AppBar(title: const Text('Inbox')),
             body: Consumer<MessageProvider>(
               builder: (context, messageProvider, child) {
-                List<Map<String, int>> counter = [];
-                var chats = messageProvider.chats;
-                for (var c in chats) {
-                  Map<String, int> countMap = {c.id: 0};
-                  for (var m in c.messages) {
-                    if (m.isRead == false && m.sender != profile.id) {
-                      countMap[c.id] = countMap[c.id]! + 1;
-                    }
-                  }
-                  counter.add(countMap);
+                final chats = messageProvider.chats;
+
+                if (chats.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        'No conversations yet. Messages with hosts show up here.',
+                        style: textTheme.bodySmall,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
                 }
-                return ListView.builder(
+
+                return ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: chats.length,
+                  separatorBuilder: (context, index) =>
+                      Divider(color: AppColors.divider, height: 1, indent: 76),
                   itemBuilder: (context, index) {
-                    return Column(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(8.0),
-                            color: Colors.blue[100],
+                    final chat = chats[index];
+                    var unread = 0;
+                    for (var m in chat.messages) {
+                      if (m.isRead == false && m.sender != profile.id) {
+                        unread++;
+                      }
+                    }
+                    final lastMessage =
+                        chat.messages.isEmpty ? '' : chat.messages.last.content;
+
+                    return ListTile(
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                      leading: CircleAvatar(
+                        radius: 22,
+                        backgroundColor: AppColors.accentTint,
+                        child: Icon(PhosphorIcons.user(),
+                            color: AppColors.accentLink, size: 20),
+                      ),
+                      title: Text(chat.user2, style: textTheme.titleMedium),
+                      subtitle: Text(
+                        lastMessage,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodySmall,
+                      ),
+                      trailing: unread > 0
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 2),
+                              decoration: const BoxDecoration(
+                                color: AppColors.accent,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text('$unread',
+                                  style: const TextStyle(
+                                      fontSize: 11, color: AppColors.bg)),
+                            )
+                          : Icon(PhosphorIcons.caretRight(),
+                              size: 15, color: AppColors.textTertiary),
+                      onTap: () {
+                        Provider.of<MessageProvider>(context, listen: false)
+                            .readMessages(chat.id);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MessengerScreen(
+                              contactName: chat.user2,
+                              chatId: chat.id,
+                            ),
                           ),
-                          width: 400.0,
-                          child: ListTile(
-                            leading: const Icon(Icons.person),
-                            title: Text(chats[index].user2),
-                            onTap: () {
-                              Provider.of<MessageProvider>(context,
-                                      listen: false)
-                                  .readMessages(chats[index].id);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MessengerScreen(
-                                    contactName: chats[index].user2,
-                                    chatId: chats[index].id,
-                                  ),
-                                ),
-                              );
-                            },
-                            trailing: counter[index][chats[index].id] != 0
-                                ? CountBadge(
-                                    icon: const Icon(Icons.arrow_forward_ios),
-                                    itemCount:
-                                        counter[index][chats[index].id]!,
-                                    badgeColor: Colors.red,
-                                    itemColor: Colors.white,
-                                    maxCount: 99,
-                                    hideZero: true)
-                                : const Icon(Icons.arrow_forward_ios),
-                            subtitle: Text(
-                                chats[index].messages.isEmpty
-                                    ? ''
-                                    : chats[index].messages[0].content.length > 11
-                                        ? chats[index].messages[0].content.substring(0, 11)
-                                        : chats[index].messages[0].content),
-                          ),
-                        ),
-                        const SizedBox(height: 10.0),
-                      ],
+                        );
+                      },
                     );
                   },
                 );
               },
             ),
+            bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 2),
           );
         }
       },
@@ -107,7 +120,8 @@ class MessengerScreen extends StatefulWidget {
   final String contactName;
   final String chatId;
 
-  const MessengerScreen({super.key, required this.contactName, required this.chatId});
+  const MessengerScreen(
+      {super.key, required this.contactName, required this.chatId});
 
   @override
   MessengerScreenState createState() => MessengerScreenState();
@@ -126,9 +140,9 @@ class MessengerScreenState extends State<MessengerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     var profile = Provider.of<ProfileProvider>(context, listen: false).profile;
-    return Consumer<MessageProvider>(
-        builder: (context, messageProvider, child) {
+    return Consumer<MessageProvider>(builder: (context, messageProvider, child) {
       var messages = messageProvider.messages[widget.chatId] ?? [];
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
@@ -151,73 +165,157 @@ class MessengerScreenState extends State<MessengerScreen> {
 
       return Scaffold(
         appBar: AppBar(
-          title: Text('Chat with ${widget.contactName}'),
+          titleSpacing: 0,
+          title: Row(
+            children: [
+              CircleAvatar(
+                radius: 17,
+                backgroundColor: AppColors.accentTint,
+                child: Icon(PhosphorIcons.user(),
+                    color: AppColors.accentLink, size: 16),
+              ),
+              const SizedBox(width: 11),
+              Text(widget.contactName, style: textTheme.titleMedium),
+            ],
+          ),
         ),
         body: Column(
           children: <Widget>[
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
-                  return Row(
-                    mainAxisAlignment: messages[index].sender == profile.id
-                        ? MainAxisAlignment.start
-                        : MainAxisAlignment.end,
-                    children: [
-                      Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.white),
-                              borderRadius: BorderRadius.circular(8.0),
-                              color: messages[index].sender == profile.id
-                                  ? Colors.blue[100]
-                                  : Colors.green[100],
-                            ),
-                            width: 200.0,
-                            child: ListTile(
-                              title: Text(messages[index].content),
-                              titleAlignment: ListTileTitleAlignment.top,
-                              subtitle: Text(
-                                  'Sent: ${messages[index].timeStamp}${messages[index].sender == profile.id ? (messages[index].isRead ? '\r\n\r\nSeen' : '\r\n\r\nSent') : ''}',
-                                  style: const TextStyle(
-                                      color: Colors.grey, fontSize: 12.0)),
-                            ),
-                          ),
-                          const SizedBox(height: 10.0),
-                        ],
+                  final message = messages[index];
+                  // sender == profile.id means *this device's user* sent it,
+                  // so it belongs on the right -- the opposite of the old
+                  // ternary, which put your own messages on the left.
+                  final isMine = message.sender == profile.id;
+                  return Align(
+                    alignment:
+                        isMine ? Alignment.centerRight : Alignment.centerLeft,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.74,
                       ),
-                    ],
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Column(
+                          crossAxisAlignment: isMine
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 13, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: isMine
+                                    ? AppColors.accentTint
+                                    : AppColors.surface,
+                                border: Border.all(
+                                  color: isMine
+                                      ? const Color(0xFF423A6A)
+                                      : AppColors.border,
+                                ),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: const Radius.circular(14),
+                                  topRight: const Radius.circular(14),
+                                  bottomLeft:
+                                      Radius.circular(isMine ? 14 : 4),
+                                  bottomRight:
+                                      Radius.circular(isMine ? 4 : 14),
+                                ),
+                              ),
+                              child: Text(message.content,
+                                  style: textTheme.bodyLarge?.copyWith(height: 1.35)),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(DateFormat('HH:mm').format(message.timeStamp),
+                                    style: textTheme.bodySmall),
+                                if (isMine) ...[
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    message.isRead
+                                        ? PhosphorIcons.checks()
+                                        : PhosphorIcons.check(),
+                                    size: 13,
+                                    color: message.isRead
+                                        ? AppColors.accent
+                                        : AppColors.textTertiary,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   );
                 },
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      decoration: const InputDecoration(
-                        hintText: 'Type a message',
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: AppColors.divider)),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        decoration: InputDecoration(
+                          hintText: 'Message',
+                          isDense: true,
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(99),
+                            borderSide: const BorderSide(color: AppColors.border),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(99),
+                            borderSide: const BorderSide(color: AppColors.border),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(99),
+                            borderSide: const BorderSide(color: AppColors.accent),
+                          ),
+                        ),
+                        onTap: () {
+                          if (_scrollController.hasClients) {
+                            _scrollController
+                                .jumpTo(_scrollController.position.maxScrollExtent);
+                          }
+                          Provider.of<MessageProvider>(context, listen: false)
+                              .readMessages(widget.chatId);
+                        },
                       ),
-                      onTap: () {
-                        if (_scrollController.hasClients) {
-                          _scrollController.jumpTo(
-                              _scrollController.position.maxScrollExtent);
-                        }
-                        Provider.of<MessageProvider>(context, listen: false)
-                            .readMessages(widget.chatId);
-                      },
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: sendMessage,
-                  ),
-                ],
+                    const SizedBox(width: 10),
+                    InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: sendMessage,
+                      child: Container(
+                        width: 42,
+                        height: 42,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.fromBorderSide(
+                              BorderSide(color: AppColors.accent)),
+                        ),
+                        child: Icon(PhosphorIcons.paperPlaneTilt(PhosphorIconsStyle.fill),
+                            size: 17, color: AppColors.accentText),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

@@ -19,8 +19,7 @@ class AuthService {
     'https://www.googleapis.com/auth/userinfo.profile',
   ];
 
-  AuthService({required SecureStorage secureStorage})
-      : _secureStorage = secureStorage;
+  AuthService({required this._secureStorage});
 
   Future<bool> login(String email, String password) async {
     await _secureStorage.deleteToken();

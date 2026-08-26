@@ -7,7 +7,7 @@ import 'package:ebooking/services/auth_service.dart';
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
   bool _isLoggedIn = false;
-  AuthProvider({required AuthService authService}) : _authService = authService;
+  AuthProvider({required this._authService});
 
   bool get isLoggedIn => _isLoggedIn;
 

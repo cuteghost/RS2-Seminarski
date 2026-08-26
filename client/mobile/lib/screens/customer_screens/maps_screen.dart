@@ -1,3 +1,4 @@
+import 'package:ebooking/config/app_theme.dart';
 import 'package:ebooking/models/accomodation_model.dart';
 import 'package:ebooking/providers/accommodation_provider.dart';
 import 'package:ebooking/widgets/custom_bottom_navigation_bar.dart';
@@ -6,6 +7,25 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
+
+// Muted dark basemap so the map doesn't clash with the rest of the app.
+const String _darkMapStyle = '''
+[
+  {"elementType":"geometry","stylers":[{"color":"#212121"}]},
+  {"elementType":"labels.icon","stylers":[{"visibility":"off"}]},
+  {"elementType":"labels.text.fill","stylers":[{"color":"#9397ab"}]},
+  {"elementType":"labels.text.stroke","stylers":[{"color":"#161826"}]},
+  {"featureType":"administrative","elementType":"geometry","stylers":[{"color":"#3f424d"}]},
+  {"featureType":"poi","stylers":[{"visibility":"off"}]},
+  {"featureType":"road","elementType":"geometry","stylers":[{"color":"#232532"}]},
+  {"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#161826"}]},
+  {"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#3f424d"}]},
+  {"featureType":"transit","stylers":[{"visibility":"off"}]},
+  {"featureType":"water","elementType":"geometry","stylers":[{"color":"#161826"}]},
+  {"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#75798c"}]}
+]
+''';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -15,8 +35,8 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
-  late GoogleMapController mapController;
-  late Position userLocation; // Store user's current location
+  Position? _userLocation;
+  bool _locationDenied = false;
   Future? _initMapFuture;
   List<AccommodationGET> _nearbyAccommodations = [];
 
@@ -24,51 +44,36 @@ class MapPageState extends State<MapPage> {
   void initState() {
     super.initState();
     _initMapFuture = initMap().then((_) {
+      if (_userLocation == null) return;
       _getNearbyAccommodations().then((value) {
-        setState(() {
-          _nearbyAccommodations = value;
-        });
+        if (!mounted) return;
+        setState(() => _nearbyAccommodations = value);
       });
     });
   }
 
   Future<List<AccommodationGET>> _getNearbyAccommodations() async {
-    var nearby =
-        await Provider.of<AccommodationProvider>(context, listen: false)
-            .fetchNearbyAccommodations(
-                userLocation.latitude, userLocation.longitude);
-    return nearby;
+    return Provider.of<AccommodationProvider>(context, listen: false)
+        .fetchNearbyAccommodations(
+            _userLocation!.latitude, _userLocation!.longitude);
   }
 
   Future<void> initMap() async {
-    await _requestLocationPermission();
-    Position? location = await _getUserLocation();
-
-    if (location != null) {
-      setState(() {
-        userLocation = location;
-      });
-    }
-  }
-
-  Future<void> _requestLocationPermission() async {
-    if (await Permission.location.request().isGranted) {
-      // Permission has been granted
-      // Now you can proceed to get the location
-    } else {
-    }
+    await Permission.location.request();
+    final location = await _getUserLocation();
+    if (!mounted) return;
+    setState(() {
+      _userLocation = location;
+      _locationDenied = location == null;
+    });
   }
 
   Future<Position?> _getUserLocation() async {
     try {
-      Position userLocation = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-        ),
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
       );
-      return userLocation;
     } catch (e) {
-      // Handle the case where location services are disabled or an error occurs
       return null;
     }
   }
@@ -78,71 +83,74 @@ class MapPageState extends State<MapPage> {
     return FutureBuilder(
       future: _initMapFuture,
       builder: (context, snapshot) {
+        Widget body;
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
-              appBar: AppBar(
-                title: Text('Map'),
+          body = const Center(child: CircularProgressIndicator());
+        } else if (_locationDenied || _userLocation == null) {
+          // Fixes a crash: the old version force-used `userLocation` here
+          // even when permission was denied or location services were off,
+          // which threw a LateInitializationError. Now it shows a message
+          // instead of taking down the screen.
+          final textTheme = Theme.of(context).textTheme;
+          body = Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(PhosphorIcons.mapPinLine(),
+                      size: 32, color: AppColors.textTertiary),
+                  const SizedBox(height: 14),
+                  Text('Location unavailable', style: textTheme.titleMedium),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Enable location access for this app in your device settings to see the map.',
+                    style: textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-              bottomNavigationBar: CustomBottomNavigationBar());
+            ),
+          );
         } else {
-          return Scaffold(
-              appBar: AppBar(
-                title: Text('Map'),
-              ),
-              body: GoogleMap(
-                onMapCreated: (controller) {
-                  setState(() {
-                    mapController = controller;
-                  });
-                },
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(
-                      userLocation.latitude,
-                      userLocation
-                          .longitude), // Default to San Francisco's coordinates
-                  zoom: 15.0,
-                ),
-                // Add markers for user's current location and nearby properties
-                markers: _buildMarkers(),
-              ),
-              bottomNavigationBar: CustomBottomNavigationBar());
+          body = GoogleMap(
+            style: _darkMapStyle,
+            initialCameraPosition: CameraPosition(
+              target: LatLng(_userLocation!.latitude, _userLocation!.longitude),
+              zoom: 15.0,
+            ),
+            markers: _buildMarkers(),
+          );
         }
+
+        return Scaffold(
+          appBar: AppBar(title: const Text('Map')),
+          body: body,
+          bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 0),
+        );
       },
     );
   }
 
   Set<Marker> _buildMarkers() {
-    // Add markers for user's current location and nearby properties
-    Set<Marker> markers = {};
-
-    // Marker for user's current location
-    markers.add(
+    final markers = <Marker>{
       Marker(
-        markerId: MarkerId('user_location'),
-        position: LatLng(
-          userLocation.latitude,
-          userLocation.longitude,
-        ),
-        infoWindow: InfoWindow(title: 'Your Location'),
+        markerId: const MarkerId('user_location'),
+        position: LatLng(_userLocation!.latitude, _userLocation!.longitude),
+        infoWindow: const InfoWindow(title: 'Your location'),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        flat: true,
       ),
-    );
+    };
 
-    // Add markers for nearby properties
-    // Replace these coordinates with the actual coordinates of nearby properties
     for (var accommodation in _nearbyAccommodations) {
       markers.add(
         Marker(
           markerId: MarkerId(accommodation.name),
-          position: LatLng(accommodation.location.latitude,
-              accommodation.location.longitude),
+          position: LatLng(
+              accommodation.location.latitude, accommodation.location.longitude),
           infoWindow: InfoWindow(
               title: accommodation.name,
-              snippet: 'Price: \$${accommodation.pricePerNight}'),
+              snippet: '\$${accommodation.pricePerNight.toStringAsFixed(0)} / night'),
         ),
       );
     }

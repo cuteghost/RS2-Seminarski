@@ -13,8 +13,7 @@ class LocationProvider with ChangeNotifier {
 
   final LocationService _locationService;
 
-  LocationProvider({required LocationService locationService})
-      : _locationService = locationService;
+  LocationProvider({required this._locationService});
 
   Future<void> fetchCountries() async {
     _countries = await _locationService.getCountries();

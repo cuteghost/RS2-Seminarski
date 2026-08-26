@@ -9,8 +9,7 @@ import 'package:ebooking/services/auth_service.dart';
 class LocationService {
   final SecureStorage _secureStorage;
 
-  LocationService({required SecureStorage secureStorage})
-      : _secureStorage = secureStorage;
+  LocationService({required this._secureStorage});
 
   Future<List<Country>> getCountries() async {
     final token = await _secureStorage.getToken();

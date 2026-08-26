@@ -1,258 +1,245 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ebooking_desktop/models/location_model.dart';
 
-class AccommodationGET {
-  String id;
-  String name;
-  bool status;
-  int typeOfAccommodation;
-  double pricePerNight;
-  String description;
-  double reviewScore;
-  Location location;
-  AccommodationDetails accommodationDetails;
-  String reviews;
-  AccommodationImages images;
+/// Tipovi smještaja — ogledalo backend enum-a `Models.Domain.TypesOfAccommodation`.
+/// Redoslijed MORA odgovarati backendu jer se enum serijalizuje kao int.
+///
+/// Upute 3.4: "Magic numbers (npr. statusId = 1, 2, 3) treba zamijeniti
+/// enum-ima ili konstantama" — zato `TypesOfAccommodation.fromIndex` umjesto
+/// golog int-a razbacanog po UI-ju.
+enum TypesOfAccommodation {
+  house('Kuća'),
+  hotel('Hotel'),
+  resort('Resort'),
+  apartment('Apartman'),
+  villa('Vila'),
+  hostel('Hostel'),
+  cottage('Vikendica'),
+  penthouse('Penthouse');
 
-  AccommodationGET({
+  final String label;
+  const TypesOfAccommodation(this.label);
+
+  static TypesOfAccommodation fromIndex(int? index) {
+    if (index == null || index < 0 || index >= values.length) {
+      return TypesOfAccommodation.house;
+    }
+    return values[index];
+  }
+}
+
+/// Slike smještaja.
+///
+/// BUGFIX / anti-pattern: raniji `AccommodationImages.fromJson` je za SVAKU
+/// sliku pravio temp direktorij i pisao `.jpg` na disk — I/O usred parsiranja
+/// JSON-a, na svaki fetch, bez ikakvog čišćenja. Sada slike ostaju u memoriji
+/// kao `Uint8List` i prikazuju se preko `MemoryImage`. Nema disk zapisa,
+/// nema temp smeća, dekodiranje se radi jednom (Upute Dodatak A.2).
+class AccommodationImages {
+  final List<Uint8List> images;
+
+  const AccommodationImages({required this.images});
+
+  bool get isEmpty => images.isEmpty;
+  Uint8List? get first => images.isEmpty ? null : images.first;
+
+  factory AccommodationImages.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return const AccommodationImages(images: []);
+
+    final decoded = <Uint8List>[];
+    // Ključevi su image1..imageN; `id` preskačemo. Sortiramo da redoslijed
+    // slika bude stabilan između poziva.
+    final keys = json.keys.where((k) => k.toLowerCase() != 'id').toList()
+      ..sort();
+
+    for (final key in keys) {
+      final value = json[key];
+      if (value is! String || value.isEmpty) continue;
+      try {
+        decoded.add(base64Decode(value));
+      } on FormatException {
+        // Neispravan base64 sa servera ne smije srušiti cijelu listu.
+        continue;
+      }
+    }
+    return AccommodationImages(images: decoded);
+  }
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    for (var i = 0; i < images.length; i++) {
+      map['image${i + 1}'] = base64Encode(images[i]);
+    }
+    return map;
+  }
+}
+
+class AccommodationDetails {
+  final int numberOfBeds;
+  final bool bathub;
+  final bool balcony;
+  final bool privateBathroom;
+  final bool ac;
+  final bool terrace;
+  final bool kitchen;
+  final bool privatePool;
+  final bool coffeeMachine;
+  final bool view;
+  final bool seaView;
+  final bool washingMachine;
+  final bool spaTub;
+  final bool soundProof;
+  final bool breakfast;
+
+  const AccommodationDetails({
+    this.numberOfBeds = 0,
+    this.bathub = false,
+    this.balcony = false,
+    this.privateBathroom = false,
+    this.ac = false,
+    this.terrace = false,
+    this.kitchen = false,
+    this.privatePool = false,
+    this.coffeeMachine = false,
+    this.view = false,
+    this.seaView = false,
+    this.washingMachine = false,
+    this.spaTub = false,
+    this.soundProof = false,
+    this.breakfast = false,
+  });
+
+  /// BUGFIX: ranije je svako polje čitano sa `as bool` bez null-provjere, pa
+  /// je jedan `null` u odgovoru rušio cijeli parsing liste smještaja.
+  factory AccommodationDetails.fromJson(Map<String, dynamic>? json) {
+    bool flag(String key) => json?[key] == true;
+    return AccommodationDetails(
+      numberOfBeds: (json?['numberOfBeds'] as num?)?.toInt() ?? 0,
+      bathub: flag('bathub'),
+      balcony: flag('balcony'),
+      privateBathroom: flag('privateBathroom'),
+      ac: flag('ac'),
+      terrace: flag('terrace'),
+      kitchen: flag('kitchen'),
+      privatePool: flag('privatePool'),
+      coffeeMachine: flag('coffeeMachine'),
+      view: flag('view'),
+      seaView: flag('seaView'),
+      washingMachine: flag('washingMachine'),
+      spaTub: flag('spaTub'),
+      soundProof: flag('soundProof'),
+      breakfast: flag('breakfast'),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'numberOfBeds': numberOfBeds,
+        'bathub': bathub,
+        'balcony': balcony,
+        'privateBathroom': privateBathroom,
+        'ac': ac,
+        'terrace': terrace,
+        'kitchen': kitchen,
+        'privatePool': privatePool,
+        'coffeeMachine': coffeeMachine,
+        'view': view,
+        'seaView': seaView,
+        'washingMachine': washingMachine,
+        'spaTub': spaTub,
+        'soundProof': soundProof,
+        'breakfast': breakfast,
+      };
+
+  /// Lista uključenih sadržaja, spremna za prikaz kao tagovi.
+  List<String> get amenityLabels => <String, bool>{
+        'Klima': ac,
+        'Balkon': balcony,
+        'Privatno kupatilo': privateBathroom,
+        'Terasa': terrace,
+        'Kuhinja': kitchen,
+        'Privatni bazen': privatePool,
+        'Aparat za kafu': coffeeMachine,
+        'Pogled': view,
+        'Pogled na more': seaView,
+        'Veš mašina': washingMachine,
+        'Spa kada': spaTub,
+        'Kada': bathub,
+        'Zvučna izolacija': soundProof,
+        'Doručak': breakfast,
+      }.entries.where((e) => e.value).map((e) => e.key).toList();
+}
+
+/// Odgovara `Models.DTO.AccommodationDTO.AccommodationGET`.
+class AccommodationGET {
+  final String id;
+  final String name;
+
+  /// Backend polje je `bool?` — `null` tretiramo kao neaktivno.
+  /// BUGFIX: ranije `json['status'] as bool` -> crash na `null`.
+  final bool status;
+  final TypesOfAccommodation typeOfAccommodation;
+  final double pricePerNight;
+  final String description;
+  final double reviewScore;
+  final String ownerId;
+  final Location location;
+  final AccommodationDetails accommodationDetails;
+  final String reviews;
+  final AccommodationImages images;
+
+  const AccommodationGET({
     required this.id,
-    required this.status,
-    required this.reviews,
     required this.name,
+    required this.status,
     required this.typeOfAccommodation,
     required this.pricePerNight,
     required this.description,
     required this.reviewScore,
+    required this.ownerId,
     required this.location,
     required this.accommodationDetails,
+    required this.reviews,
     required this.images,
   });
 
   factory AccommodationGET.fromJson(Map<String, dynamic> json) {
     return AccommodationGET(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      status: json['status'] as bool,
-      typeOfAccommodation: json['typeOfAccommodation'] as int,
-      pricePerNight: (json['pricePerNight'] as num).toDouble(),
-      description: json['description'] as String,
-      reviewScore: (json['reviewScore'] as num).toDouble(),
-      location: Location.fromJson(json['location'] as Map<String, dynamic>),
-      accommodationDetails: AccommodationDetails(
-        numberOfBeds: json['accommodationDetails']['numberOfBeds'] as int,
-        bathub: json['accommodationDetails']['bathub'] as bool,
-        balcony: json['accommodationDetails']['balcony'] as bool,
-        privateBathroom: json['accommodationDetails']['privateBathroom'] as bool,
-        ac: json['accommodationDetails']['ac'] as bool,
-        terrace: json['accommodationDetails']['terrace'] as bool,
-        kitchen: json['accommodationDetails']['kitchen'] as bool,
-        privatePool: json['accommodationDetails']['privatePool'] as bool,
-        coffeeMachine: json['accommodationDetails']['coffeeMachine'] as bool,
-        view: json['accommodationDetails']['view'] as bool,
-        seaView: json['accommodationDetails']['seaView'] as bool,
-        washingMachine: json['accommodationDetails']['washingMachine'] as bool,
-        spaTub: json['accommodationDetails']['spaTub'] as bool,
-        soundProof: json['accommodationDetails']['soundProof'] as bool,
-        breakfast: json['accommodationDetails']['breakfast'] as bool,
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      status: json['status'] == true,
+      typeOfAccommodation: TypesOfAccommodation.fromIndex(
+        (json['typeOfAccommodation'] as num?)?.toInt(),
       ),
-      reviews: json['reviews'] != null ? json['reviews'] as String : '',
-      images: json['accommodationImages'] != null ? AccommodationImages.fromJson(json['accommodationImages'] as Map<String, dynamic>) : AccommodationImages(images: []),
+      pricePerNight: (json['pricePerNight'] as num?)?.toDouble() ?? 0,
+      description: json['description']?.toString() ?? '',
+      reviewScore: (json['reviewScore'] as num?)?.toDouble() ?? 0,
+      ownerId: json['ownerId']?.toString() ?? '',
+      location: json['location'] is Map<String, dynamic>
+          ? Location.fromJson(json['location'] as Map<String, dynamic>)
+          : const Location(latitude: 0, longitude: 0, address: ''),
+      accommodationDetails: AccommodationDetails.fromJson(
+        json['accommodationDetails'] as Map<String, dynamic>?,
+      ),
+      reviews: json['reviews']?.toString() ?? '',
+      images: AccommodationImages.fromJson(
+        json['accommodationImages'] as Map<String, dynamic>?,
+      ),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'status': status,
-      'name': name,
-      'typeOfAccommodation': typeOfAccommodation,
-      'pricePerNight': pricePerNight,
-      'description': description,
-      'reviewScore': reviewScore,
-      'location': location.toJson(),
-      'accommodationDetails': accommodationDetails.toJson(),
-      'reviews': reviews,
-      'accommodationImages': images.toJson(),
-    };
-  }
-}
-
-class AccommodationDetails {
-  int numberOfBeds;
-  bool bathub = false;
-  bool balcony = false;
-  bool privateBathroom = false;
-  bool ac = false;
-  bool terrace = false;
-  bool kitchen = false;
-  bool privatePool = false;
-  bool coffeeMachine = false;
-  bool view = false;
-  bool seaView = false;
-  bool washingMachine = false;
-  bool spaTub = false;
-  bool soundProof = false;
-  bool breakfast = false;
-
-  AccommodationDetails({
-    required this.numberOfBeds,
-    required this.bathub,
-    required this.balcony,
-    required this.privateBathroom,
-    required this.ac,
-    required this.terrace,
-    required this.kitchen,
-    required this.privatePool,
-    required this.coffeeMachine,
-    required this.view,
-    required this.seaView,
-    required this.washingMachine,
-    required this.spaTub,
-    required this.soundProof,
-    required this.breakfast,
-  });
-
-   Map<String, dynamic> toJson() {
-    return {
-      'numberOfBeds': numberOfBeds,
-      'bathub': bathub,
-      'balcony': balcony,
-      'privateBathroom': privateBathroom,
-      'ac': ac,
-      'terrace': terrace,
-      'kitchen': kitchen,
-      'privatePool': privatePool,
-      'coffeeMachine': coffeeMachine,
-      'view': view,
-      'seaView': seaView,
-      'washingMachine': washingMachine,
-      'spaTub': spaTub,
-      'soundProof': soundProof,
-      'breakfast': breakfast,
-    };
-  }
-}
-
-class AccommodationImages {
-  List<File?> images;
-
-  AccommodationImages({required this.images});
-
-  factory AccommodationImages.fromJson(Map<String, dynamic> json) {
-    return AccommodationImages(
-      images: json.keys
-        .where((key) => key != 'id' && json[key] != null && json[key] as String != '')
-        .map((key) => base64ToImage(json[key] as String, key))
-        .toList(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    List<String> imagesBase64 = [];
-    for (var element in images) {
-      imagesBase64.add(imageToBase64(element!));
-    }
-    Map<String, dynamic> imagesMap = {};
-    for (int i = 0; i < imagesBase64.length; i++) {
-      imagesMap['image${i + 1}'] = imagesBase64[i];
-    }
-    return imagesMap;
-  }
-
-  static String imageToBase64(File image) {
-    List<int> imageBytes = image.readAsBytesSync();
-    String base64image = base64Encode(imageBytes);
-    return base64image;
-  }
-
-  static File base64ToImage(String base64image, String key) {
-    List<int> imageBytes = base64Decode(base64image);
-    Directory tempDir = Directory.systemTemp.createTempSync('accommodationImages');
-    File imageFile = File('${tempDir.path}/accommodationImage$key.jpg');
-    imageFile.writeAsBytesSync(imageBytes);
-    return imageFile;
-  }
-}
-
-class AccommodationPATCH {
-  String id;
-  String name;
-  bool status;
-  int typeOfAccommodation;
-  double pricePerNight;
-  String description;
-  AccommodationDetails accommodationDetails;
-  AccommodationImages images;
-
-  AccommodationPATCH({
-    required this.id,
-    required this.status,
-    required this.name,
-    required this.typeOfAccommodation,
-    required this.pricePerNight,
-    required this.description,
-    required this.accommodationDetails,
-    required this.images,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'status': status,
-      'name': name,
-      'typeOfAccommodation': typeOfAccommodation,
-      'pricePerNight': pricePerNight,
-      'description': description,
-      'accommodationDetails': accommodationDetails.toJson(),
-      'accommodationImages': images.toJson(),
-    };
-  }
-}
-
-class AccommodationPOST {
-  String name;
-  bool status;
-  int typeOfAccommodation;
-  double pricePerNight;
-  String description;
-  Location location;
-  AccommodationDetails accommodationDetails;
-  AccommodationImages images;
-
-  AccommodationPOST({
-    required this.status,
-    required this.name,
-    required this.typeOfAccommodation,
-    required this.pricePerNight,
-    required this.description,
-    required this.location,
-    required this.accommodationDetails,
-    required this.images,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'status': status,
-      'name': name,
-      'typeOfAccommodation': typeOfAccommodation,
-      'pricePerNight': pricePerNight,
-      'description': description,
-      'location': location.toJson(),
-      'accommodationDetails': accommodationDetails.toJson(),
-      'accommodationImages': images.toJson(),
-    };
-  }
-}
-
-enum TypesOfAccommodation {
-  house,
-  hotel,
-  resort,
-  apartment,
-  villa,
-  hostel,
-  cottage,
-  penthouse
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'status': status,
+        'name': name,
+        'typeOfAccommodation': typeOfAccommodation.index,
+        'pricePerNight': pricePerNight,
+        'description': description,
+        'reviewScore': reviewScore,
+        'location': location.toJson(),
+        'accommodationDetails': accommodationDetails.toJson(),
+        'reviews': reviews,
+        'accommodationImages': images.toJson(),
+      };
 }

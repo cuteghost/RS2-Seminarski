@@ -8,8 +8,7 @@ import 'dart:convert';
 class ProfileService {
   final SecureStorage _secureStorage;
 
-  ProfileService({required SecureStorage secureStorage})
-      : _secureStorage = secureStorage;
+  ProfileService({required this._secureStorage});
 
   Future<Profile> fetchProfile() async {
     String? token = await _secureStorage.getToken();

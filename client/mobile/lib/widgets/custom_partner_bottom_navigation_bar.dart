@@ -1,110 +1,96 @@
-// bottom_navigation_bar.dart
-
+import 'package:ebooking/config/app_theme.dart';
 import 'package:ebooking/providers/message_provider.dart';
 import 'package:ebooking/providers/profile_provider.dart';
 import 'package:ebooking/screens/customer_screens/history_screen.dart';
-import 'package:ebooking/screens/customer_screens/maps_screen.dart';
 import 'package:ebooking/screens/messenger_screen.dart';
 import 'package:ebooking/screens/partner_screens/my_accommodations_screens.dart';
 import 'package:ebooking/screens/partner_screens/partner_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking/utils/navigation_utils.dart';
-import 'package:ebooking/screens/partner_screens/add_accommodation_screen.dart';
-import 'package:ebooking/widgets/custom_icon_button.dart';
-import 'package:ebooking/widgets/count_badge.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:provider/provider.dart';
 
-class CustomPartnerBottomNavigationBar extends StatefulWidget {
-  const CustomPartnerBottomNavigationBar({super.key});
+/// The partner bottom tab bar -- Listings / Bookings / Inbox / Profile.
+///
+/// "Add property" and "Map" moved out of the bar (redesign scope note under
+/// Partner Properties: "Add belongs on the screen it creates from, not in
+/// navigation"). Add lives as a button on [MyAccommodationsScreen]; Map is
+/// still reachable from there too, same as the customer Explore screen.
+class CustomPartnerBottomNavigationBar extends StatelessWidget {
+  final int currentIndex;
 
-  @override
-  CustomPartnerBottomNavigationBarState createState() =>
-      CustomPartnerBottomNavigationBarState();
-}
+  const CustomPartnerBottomNavigationBar({super.key, required this.currentIndex});
 
-class CustomPartnerBottomNavigationBarState
-    extends State<CustomPartnerBottomNavigationBar> {
   @override
   Widget build(BuildContext context) {
-    var profile = Provider.of<ProfileProvider>(context, listen: false).profile;
+    final profile = Provider.of<ProfileProvider>(context, listen: false).profile;
+
     return Consumer<MessageProvider>(
-        builder: (context, messageProvider, child) {
-      int counter = 0;
-      for (var c in messageProvider.chats) {
-        for (var m in c.messages) {
-          if (m.isRead == false && m.sender != profile.id) {
-            counter++;
+      builder: (context, messageProvider, child) {
+        int unread = 0;
+        for (var c in messageProvider.chats) {
+          for (var m in c.messages) {
+            if (m.isRead == false && m.sender != profile.id) {
+              unread++;
+            }
           }
         }
-      }
-      return BottomAppBar(
-          color: Colors.blue,
-          padding: EdgeInsets.zero,
-          notchMargin: 0.0,
-          height: 48,
-          child: SizedBox(
-              height: 20,
-              child: IconTheme(
-                data: IconThemeData(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  size: 25,
-                  opticalSize: 20,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    const SizedBox(width: 20),
-                    CustomIconButton(
-                        icon: counter != 0
-                            ? CountBadge(
-                                icon: const Icon(Icons.message),
-                                itemCount: counter,
-                                badgeColor: Colors.red,
-                                itemColor: Colors.white,
-                                maxCount: 99,
-                                hideZero: true)
-                            : const Icon(Icons.message),
-                        label: 'Messages',
-                        onPressed: () {
-                          navigateToPage(context, const ContactListScreen());
-                        }),
-                    CustomIconButton(
-                        icon: const Icon(Icons.home),
-                        label: 'Properties',
-                        onPressed: () {
-                          navigateToPage(
-                              context, const MyAccommodationsScreen());
-                        }),
-                    CustomIconButton(
-                        icon: const Icon(Icons.add),
-                        label: 'Add Property',
-                        onPressed: () {
-                          navigateToPage(
-                              context, const AddAccommodationScreen());
-                        }),
-                    CustomIconButton(
-                        icon: const Icon(Icons.person),
-                        label: 'Profile',
-                        onPressed: () {
-                          navigateToPage(context, const PartnerProfilePage());
-                        }),
-                    CustomIconButton(
-                        icon: const Icon(Icons.work_history),
-                        label: 'Reservations',
-                        onPressed: () {
-                          navigateToPage(
-                              context, const ReservationHistoryPage());
-                        }),
-                    CustomIconButton(
-                        icon: const Icon(Icons.map),
-                        label: 'Map',
-                        onPressed: () {
-                          navigateToPage(context, const MapPage());
-                        }),
-                    const SizedBox(width: 20),
-                  ],
-                ),
-              )));
-    });
+
+        return NavigationBar(
+          selectedIndex: currentIndex,
+          onDestinationSelected: (index) {
+            if (index == currentIndex) return;
+            switch (index) {
+              case 0:
+                navigateToPage(context, const MyAccommodationsScreen());
+                break;
+              case 1:
+                navigateToPage(context, const ReservationHistoryPage());
+                break;
+              case 2:
+                navigateToPage(context, const ContactListScreen());
+                break;
+              case 3:
+                navigateToPage(context, const PartnerProfilePage());
+                break;
+            }
+          },
+          destinations: [
+            NavigationDestination(
+              icon: Icon(PhosphorIcons.houseLine()),
+              selectedIcon: Icon(PhosphorIcons.houseLine(PhosphorIconsStyle.fill),
+                  color: AppColors.accent),
+              label: 'Listings',
+            ),
+            NavigationDestination(
+              icon: Icon(PhosphorIcons.calendarCheck()),
+              selectedIcon: Icon(
+                  PhosphorIcons.calendarCheck(PhosphorIconsStyle.fill),
+                  color: AppColors.accent),
+              label: 'Bookings',
+            ),
+            NavigationDestination(
+              icon: unread > 0
+                  ? Badge(
+                      label: Text('$unread'),
+                      backgroundColor: AppColors.accent,
+                      textColor: AppColors.bg,
+                      child: Icon(PhosphorIcons.chatCircle()),
+                    )
+                  : Icon(PhosphorIcons.chatCircle()),
+              selectedIcon: Icon(PhosphorIcons.chatCircle(PhosphorIconsStyle.fill),
+                  color: AppColors.accent),
+              label: 'Inbox',
+            ),
+            NavigationDestination(
+              icon: Icon(PhosphorIcons.user()),
+              selectedIcon: Icon(PhosphorIcons.user(PhosphorIconsStyle.fill),
+                  color: AppColors.accent),
+              label: 'Profile',
+            ),
+          ],
+        );
+      },
+    );
   }
 }

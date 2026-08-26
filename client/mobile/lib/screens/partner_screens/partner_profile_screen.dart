@@ -1,15 +1,17 @@
+import 'package:ebooking/config/app_theme.dart';
 import 'package:ebooking/models/country_model.dart';
 import 'package:ebooking/models/partner_model.dart';
 import 'package:ebooking/models/profile_model.dart';
 import 'package:ebooking/providers/auth_provider.dart';
 import 'package:ebooking/providers/location_provider.dart';
 import 'package:ebooking/providers/profile_provider.dart';
-import 'package:ebooking/screens/partner_screens/partner_register_screen.dart';
+import 'package:ebooking/widgets/custom_partner_bottom_navigation_bar.dart';
 import 'package:ebooking/widgets/edit_email_modal.dart';
 import 'package:ebooking/widgets/edit_password_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ebooking/screens/login_screen.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 
 class PartnerProfilePage extends StatefulWidget {
   const PartnerProfilePage({super.key});
@@ -19,53 +21,70 @@ class PartnerProfilePage extends StatefulWidget {
 }
 
 class PartnerProfilePageState extends State<PartnerProfilePage> {
-  ValueNotifier<bool> hasChanges = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> hasChanges = ValueNotifier<bool>(false);
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: const Text(
+            'This permanently deletes your account, your listings and everything in it. This cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Delete', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (!context.mounted) return;
+    Provider.of<AuthProvider>(context, listen: false).deleteAccount();
+    if (!context.mounted) return;
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+  }
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
     final locationProvider = Provider.of<LocationProvider>(context, listen: false);
+
     return FutureBuilder<List<dynamic>>(
       future: () async {
         var profile = await profileProvider.getProfile();
-        var countries = await locationProvider.fetchCountries();
+        await locationProvider.fetchCountries();
         var partner = await profileProvider.getPartner();
         var country = await locationProvider.getCountry(partner.countryId);
-        return [profile, countries, partner, country];
+        return [profile, partner, country];
       }(),
       builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
-
         if (snapshot.hasError) {
-          return Center(
-            child: Text('${snapshot.error}'),
-          );
+          return Scaffold(body: Center(child: Text('${snapshot.error}')));
         }
 
         final profile = snapshot.data?[0] as Profile?;
-        final partnerProfile = snapshot.data?[2] as Partner?;
-        var initialCountry = snapshot.data?[3] as Country?;
+        final partnerProfile = snapshot.data?[1] as Partner?;
+        final initialCountry = snapshot.data?[2] as Country?;
         if (profile == null || partnerProfile == null) {
-          return const Center(
-            child: Text('No profile or partner profile found!'),
-          );
+          return const Scaffold(body: Center(child: Text('No profile or partner profile found!')));
         }
+
+        final selectedCountry = ValueNotifier<Country?>(initialCountry);
+        final selectedGender = ValueNotifier<String?>(profile.gender);
 
         void editEmail() {
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            builder: (context) => SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: EditEmailModal(currentEmail: profile.emailAddress),
-              ),
+            builder: (context) => Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: EditEmailModal(currentEmail: profile.emailAddress),
             ),
           );
         }
@@ -74,476 +93,319 @@ class PartnerProfilePageState extends State<PartnerProfilePage> {
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            builder: (context) => SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: const EditPasswordModal(),
-              ),
+            builder: (context) => Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: const EditPasswordModal(),
             ),
           );
         }
 
-        Future<void> selectDate(BuildContext context) async {
-          final DateTime? picked = await showDatePicker(
+        Future<void> selectDate() async {
+          final picked = await showDatePicker(
             context: context,
-            initialDate: DateTime.now(),
+            initialDate: DateTime.tryParse(profile.dob) ?? DateTime.now(),
             firstDate: DateTime(1900),
             lastDate: DateTime.now(),
           );
-          if (picked != null &&
-              picked.toIso8601String().split('T')[0] != profile.dob) {
+          if (picked != null && picked.toIso8601String().split('T')[0] != profile.dob) {
             hasChanges.value = true;
             profile.dob = picked.toIso8601String().split('T')[0];
           }
         }
 
-        ValueNotifier<Country?> selectedCountry =
-            ValueNotifier<Country?>(initialCountry);
-        ValueNotifier<String?> selectedGender =
-            ValueNotifier<String?>(profile.gender);
-
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Your Details'),
+            title: const Text('Your details'),
             actions: [
               IconButton(
-                icon: const Icon(Icons.logout),
+                icon: Icon(PhosphorIcons.signOut()),
                 onPressed: () {
                   Provider.of<AuthProvider>(context, listen: false).logout();
-                  // Navigate to the LoginScreen
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => LoginPage()));
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
                 },
               ),
             ],
           ),
           body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.grey[200],
+                Center(
+                  child: CircleAvatar(
+                    radius: 44,
+                    backgroundImage: FileImage(profile.profilePicture),
                   ),
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      CircleAvatar(
-                        radius: 50.0,
-                        backgroundImage: FileImage(profile.profilePicture),
-                      ),
-                      const SizedBox(height: 16.0),
-                      // Public Details Header
-                      const Text(
-                        'Public Details',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                            labelText: 'Display Name',
-                            labelStyle: TextStyle(fontWeight: FontWeight.bold)),
-                        onChanged: (value) {
-                          hasChanges.value = true;
-                          profile.displayName = value;
-                        },
-                        initialValue: profile.displayName,
-                      ),
-                      const SizedBox(height: 8.0),
-                      InkWell(
-                        onTap: () => selectDate(context),
+                ),
+                const SizedBox(height: 24),
+
+                _SectionCard(
+                  title: 'Public details',
+                  children: [
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: 'Display name'),
+                      onChanged: (value) {
+                        hasChanges.value = true;
+                        profile.displayName = value;
+                      },
+                      initialValue: profile.displayName,
+                    ),
+                    const SizedBox(height: 12),
+                    InkWell(
+                      onTap: selectDate,
+                      child: InputDecorator(
+                        decoration: const InputDecoration(labelText: 'Date of birth'),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Date of Birth: ${profile.dob}'),
-                            const Spacer(),
-                            const Icon(Icons.calendar_today),
+                            Text(profile.dob),
+                            Icon(PhosphorIcons.calendarBlank(), size: 18, color: AppColors.textSecondary),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 8.0),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 16),
 
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.grey[200],
-                  ),
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Personal Details',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                            labelText: 'First Name',
-                            labelStyle: TextStyle(fontWeight: FontWeight.bold)),
-                        onChanged: (value) {
-                          hasChanges.value = true;
-                          profile.firstName = value;
-                        },
-                        initialValue: profile.firstName,
-                      ),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                            labelText: 'Last Name',
-                            labelStyle: TextStyle(fontWeight: FontWeight.bold)),
-                        onChanged: (value) {
-                          hasChanges.value = true;
-                          profile.lastName = value;
-                        },
-                        initialValue: profile.lastName,
-                      ),
-                      const Text('Gender',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Center(
-                          child: ValueListenableBuilder<String?>(
-                              valueListenable: selectedGender,
-                              builder: (context, value, child) {
-                                return DropdownButton<String>(
-                                  value: value,
-                                  items: const [
-                                    DropdownMenuItem(
-                                        value: 'Female', child: Text('Female')),
-                                    DropdownMenuItem(
-                                        value: 'Male', child: Text('Male')),
-                                  ],
-                                  onChanged: (String? newValue) {
-                                    if (value != null) {
-                                      hasChanges.value = true;
-                                      profile.gender = newValue!;
-                                      selectedGender.value = newValue;
-                                    }
-                                  },
-                                  hint: Text(profile.gender),
-                                );
-                              })),
-                      const SizedBox(height: 16.0),
-                      SafeArea(
-                        child: ValueListenableBuilder<bool>(
-                          valueListenable: hasChanges,
-                          builder: (context, value, child) {
-                            return ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue, // Button color
-                                shadowColor: Colors.white, // Text color
-                                minimumSize:
-                                    Size(double.infinity, 50), // Button size
-                              ),
-                              onPressed: value
-                                  ? () async {
-                                      bool success =
-                                          await Provider.of<ProfileProvider>(
-                                                  context,
-                                                  listen: false)
-                                              .updateProfile(profile: profile);
-                                      if (success) {
-                                        hasChanges.value = false;
-                                      }
-                                    }
-                                  : null,
-                              child: const Text('SAVE CHANGES'),
-                            );
+                _SectionCard(
+                  title: 'Personal details',
+                  children: [
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: 'First name'),
+                      onChanged: (value) {
+                        hasChanges.value = true;
+                        profile.firstName = value;
+                      },
+                      initialValue: profile.firstName,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: 'Last name'),
+                      onChanged: (value) {
+                        hasChanges.value = true;
+                        profile.lastName = value;
+                      },
+                      initialValue: profile.lastName,
+                    ),
+                    const SizedBox(height: 12),
+                    ValueListenableBuilder<String?>(
+                      valueListenable: selectedGender,
+                      builder: (context, value, child) {
+                        return DropdownButtonFormField<String>(
+                          initialValue: value,
+                          decoration: const InputDecoration(labelText: 'Gender'),
+                          items: const [
+                            DropdownMenuItem(value: 'Female', child: Text('Female')),
+                            DropdownMenuItem(value: 'Male', child: Text('Male')),
+                          ],
+                          onChanged: (String? newValue) {
+                            if (newValue == null) return;
+                            hasChanges.value = true;
+                            profile.gender = newValue;
+                            selectedGender.value = newValue;
                           },
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                    ],
-                  ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: hasChanges,
+                      builder: (context, value, child) {
+                        return OutlinedButton(
+                          onPressed: value
+                              ? () async {
+                                  final success = await Provider.of<ProfileProvider>(context, listen: false)
+                                      .updateProfile(profile: profile);
+                                  if (success) hasChanges.value = false;
+                                }
+                              : null,
+                          child: const Text('Save changes'),
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 16),
 
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.grey[200],
-                  ),
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Partner Details',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                            labelText: 'Tax Name',
-                            labelStyle: TextStyle(fontWeight: FontWeight.bold)),
-                        onChanged: (value) {
-                          hasChanges.value = true;
-                          partnerProfile.taxName = value;
-                        },
-                        initialValue: partnerProfile.taxName,
-                      ),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                            labelText: 'Tax ID',
-                            labelStyle: TextStyle(fontWeight: FontWeight.bold)),
-                        onChanged: (value) {
-                          hasChanges.value = true;
-                          partnerProfile.taxId = value as int;
-                        },
-                        initialValue: partnerProfile.taxId.toString(),
-                      ),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                            labelText: 'Phone Number',
-                            labelStyle: TextStyle(fontWeight: FontWeight.bold)),
-                        onChanged: (value) {
-                          hasChanges.value = true;
-                          partnerProfile.phoneNumber = value as int;
-                        },
-                        initialValue: partnerProfile.taxId.toString(),
-                      ),
-                      const Text('Country',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Center(
-                          child: ValueListenableBuilder<Country?>(
-                              valueListenable: selectedCountry,
-                              builder: (context, value, child) {
-                                return DropdownButtonFormField<Country>(
-                                  initialValue: Provider.of<LocationProvider>(context,
-                                              listen: true)
-                                          .countries
-                                          .contains(value)
-                                      ? value
-                                      : null,
-                                  hint: value != null
-                                      ? Text(value!.name)
-                                      : const Text("Select Country"),
-                                  onChanged: (Country? newValue) {
-                                    if (newValue != null) {
-                                      partnerProfile.countryId = newValue.id;
-                                    }
-                                  },
-                                  items: (Provider.of<LocationProvider>(context,
-                                              listen: true)
-                                          .countries)
-                                      .map<DropdownMenuItem<Country>>(
-                                          (Country country) {
-                                    return DropdownMenuItem<Country>(
-                                        value: country,
-                                        child: Text(country.name));
-                                  }).toList(),
-                                );
-                              })),
-                      const SizedBox(height: 16.0),
-                      SafeArea(
-                        child: ValueListenableBuilder<bool>(
-                          valueListenable: hasChanges,
-                          builder: (context, value, child) {
-                            return ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue, // Button color
-                                shadowColor: Colors.white, // Text color
-                                minimumSize:
-                                    Size(double.infinity, 50), // Button size
-                              ),
-                              onPressed: value
-                                  ? () async {
-                                      final provider = Provider.of<ProfileProvider>(
-                                          context, listen: false);
-                                      bool success = await provider
-                                          .updatePartner(partner: partnerProfile);
-                                      if (success) {
-                                        hasChanges.value = false;
-                                      }
-                                    }
-                                  : null,
-                              child: const Text('SAVE CHANGES'),
-                            );
+                _SectionCard(
+                  title: 'Partner details',
+                  children: [
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: 'Tax name'),
+                      onChanged: (value) {
+                        hasChanges.value = true;
+                        partnerProfile.taxName = value;
+                      },
+                      initialValue: partnerProfile.taxName,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: 'Tax ID'),
+                      keyboardType: TextInputType.number,
+                      // Fixes a crash: `value as int` on a TextFormField's
+                      // onChanged (which always hands back a String) threw a
+                      // TypeError on the very first keystroke.
+                      onChanged: (value) {
+                        final parsed = int.tryParse(value);
+                        if (parsed == null) return;
+                        hasChanges.value = true;
+                        partnerProfile.taxId = parsed;
+                      },
+                      initialValue: partnerProfile.taxId.toString(),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: 'Phone number'),
+                      keyboardType: TextInputType.phone,
+                      onChanged: (value) {
+                        final parsed = int.tryParse(value);
+                        if (parsed == null) return;
+                        hasChanges.value = true;
+                        partnerProfile.phoneNumber = parsed;
+                      },
+                      // Fixes a bug: this field displayed partnerProfile.taxId
+                      // instead of .phoneNumber.
+                      initialValue: partnerProfile.phoneNumber.toString(),
+                    ),
+                    const SizedBox(height: 12),
+                    ValueListenableBuilder<Country?>(
+                      valueListenable: selectedCountry,
+                      builder: (context, value, child) {
+                        final countries = Provider.of<LocationProvider>(context, listen: true).countries;
+                        return DropdownButtonFormField<Country>(
+                          initialValue: countries.any((c) => c.id == value?.id) ? value : null,
+                          decoration: const InputDecoration(labelText: 'Country'),
+                          hint: const Text('Select country'),
+                          // Fixes a bug: this never updated selectedCountry
+                          // or hasChanges, so the dropdown looked unresponsive
+                          // and Save stayed disabled after picking a country.
+                          onChanged: (Country? newValue) {
+                            if (newValue == null) return;
+                            hasChanges.value = true;
+                            partnerProfile.countryId = newValue.id;
+                            selectedCountry.value = newValue;
                           },
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                    ],
-                  ),
+                          items: countries
+                              .map<DropdownMenuItem<Country>>(
+                                  (c) => DropdownMenuItem(value: c, child: Text(c.name)))
+                              .toList(),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: hasChanges,
+                      builder: (context, value, child) {
+                        return OutlinedButton(
+                          onPressed: value
+                              ? () async {
+                                  final success = await Provider.of<ProfileProvider>(context, listen: false)
+                                      .updatePartner(partner: partnerProfile);
+                                  if (success) hasChanges.value = false;
+                                }
+                              : null,
+                          child: const Text('Save changes'),
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 16),
 
-                // Container 3: Email Address
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.grey[200],
-                  ),
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Account Settings',
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-                      // Email Address Display
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.check,
-                            color: Colors.green,
-                            size: 24.0,
-                          ),
-                          const SizedBox(width: 8.0),
-                          Text(profile.emailAddress),
-                        ],
-                      ),
-                      const SizedBox(height: 8.0),
-                      // Edit Email Button
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: editEmail,
-                          child: const Text('EDIT YOUR EMAIL ADDRESS'),
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                      const Row(
-                        children: [
-                          Icon(
-                            Icons.security,
-                            color: Colors.red,
-                            size: 24.0,
-                          ),
-                          SizedBox(width: 8.0),
-                          Text('**********'),
-                        ],
-                      ),
-                      const SizedBox(height: 8.0),
-                      // Edit Email Button
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: editPassword,
-                          child: const Text('EDIT YOUR PASSWORD'),
-                        ),
+                _SectionCard(
+                  title: 'Account',
+                  children: [
+                    _AccountRow(
+                      icon: PhosphorIcons.envelopeSimple(),
+                      label: profile.emailAddress,
+                      actionLabel: 'Edit',
+                      onTap: editEmail,
+                    ),
+                    const SizedBox(height: 10),
+                    _AccountRow(
+                      icon: PhosphorIcons.lockSimple(),
+                      label: '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022',
+                      actionLabel: 'Edit',
+                      onTap: editPassword,
+                    ),
+                    if (profile.socialLink.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      _AccountRow(
+                        icon: profile.socialLink.contains('Facebook')
+                            ? PhosphorIcons.facebookLogo()
+                            : PhosphorIcons.googleLogo(),
+                        label: profile.socialLink.contains('Facebook') ? 'Facebook linked' : 'Google linked',
                       ),
                     ],
+                  ],
+                ),
+                const SizedBox(height: 24),
+                GestureDetector(
+                  onTap: () => _confirmDelete(context),
+                  child: Center(
+                    child: Text('Delete account',
+                        style: textTheme.bodySmall?.copyWith(color: AppColors.error)),
                   ),
                 ),
-                const SizedBox(height: 16.0),
-
-                // Container 4: Social Linking if profile.socialLink is not empty create the container
-                if (profile.socialLink.isNotEmpty)
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.0),
-                      color: Colors.grey[200],
-                    ),
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Social Linking',
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8.0),
-                        // Social Icon and Label
-                        if (profile.socialLink.contains('Facebook'))
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.facebook,
-                                    size: 24.0,
-                                  ),
-                                  const SizedBox(width: 8.0),
-                                  const Text('Facebook'),
-                                ],
-                              ),
-                            ],
-                          )
-                        else if (profile.socialLink.contains('Google'))
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.g_mobiledata,
-                                    size: 24.0,
-                                  ),
-                                  const SizedBox(width: 8.0),
-                                  const Text('Google'),
-                                ],
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-
-                const SizedBox(height: 16.0),
-                SafeArea(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[400], // Button color
-                      shadowColor: Colors.white, // Text colorr
-                      minimumSize:
-                          const Size(double.infinity, 50), // Button size
-                    ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  PartnerRegisterScreen(userId: profile.id)));
-                    },
-                    child: const Text('BECOME A PARTNER'),
-                  ),
-                ),
-                const SizedBox(height: 40.0),
-                SafeArea(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red, // Button color
-                      shadowColor: Colors.white, // Text color
-                      minimumSize:
-                          const Size(double.infinity, 50), // Button size
-                    ),
-                    onPressed: () {
-                      Provider.of<AuthProvider>(context, listen: false)
-                          .deleteAccount();
-                      Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (context) => LoginPage()));
-                    },
-                    child: const Text('DELETE ACCOUNT'),
-                  ),
-                ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
+          bottomNavigationBar: const CustomPartnerBottomNavigationBar(currentIndex: 3),
         );
       },
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+
+  const _SectionCard({required this.title, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(AppColors.radiusMd),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(title, style: textTheme.titleMedium),
+          const SizedBox(height: 14),
+          ...children,
+        ],
+      ),
+    );
+  }
+}
+
+class _AccountRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String? actionLabel;
+  final VoidCallback? onTap;
+
+  const _AccountRow({required this.icon, required this.label, this.actionLabel, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppColors.accent),
+        const SizedBox(width: 10),
+        Expanded(child: Text(label, style: textTheme.bodyMedium)),
+        if (actionLabel != null)
+          TextButton(onPressed: onTap, child: Text(actionLabel!)),
+      ],
     );
   }
 }
