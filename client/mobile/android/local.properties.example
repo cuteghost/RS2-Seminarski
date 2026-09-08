@@ -1,8 +1,20 @@
 sdk.dir=C:\\Android
 flutter.sdk=C:\\flutter
 
-# API Keys - Copy this file to local.properties and fill in actual values
-# IMPORTANT: Never commit local.properties with real credentials
+# API keys and signing credentials.
+# Copy this file to local.properties and fill in the actual values.
+# IMPORTANT: never commit local.properties with real credentials.
+
+# Facebook App ID and Client Token (developers.facebook.com -> App -> Settings -> Basic / Advanced)
 facebook.app.id=
 facebook.client.token=
+
+# Google Maps SDK / Geocoding key (Google Cloud Console -> APIs & Services -> Credentials)
 google.api.key=
+
+# Signing key for the release APK (android/app/mykey.jks).
+# The store password and the key password are the same value.
+# Google and Facebook sign-in are registered against the SHA-1 of this keystore,
+# so the release build must be signed with it.
+keystore.key.alias=
+keystore.password=
