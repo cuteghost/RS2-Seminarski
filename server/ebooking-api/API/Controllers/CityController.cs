@@ -1,54 +1,73 @@
-﻿using AutoMapper;
-using Repository.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models.Domain;
+using Models.Constants;
 using Models.DTO.CityDTO;
+using Services.CityService;
 
 namespace Controllers;
 
 [ApiController]
+[Authorize]
 [Route("/api/[controller]")]
 public class CityController : Controller
 {
-    private readonly IMapper _mapper;
-    private readonly IGenericRepository<City> _cityRepo;
-    public CityController(IGenericRepository<City> cityRepo, IMapper mapper)
+    private readonly ICityService _cityService;
+
+    public CityController(ICityService cityService)
     {
-        _cityRepo = cityRepo;
-        _mapper = mapper;
+        _cityService = cityService;
     }
+
+    [Authorize(Roles = Roles.Administrator)]
     [HttpPost]
     [Route("Add")]
     public async Task<IActionResult> Add([FromBody] CityPOST cityDto)
     {
-        var city = _mapper.Map<City>(cityDto);
-        await _cityRepo.Add(city);
-
-        return Content("Ok");
+        var result = await _cityService.CreateCity(cityDto);
+        return Ok(result);
     }
+
     [HttpGet]
     [Route("GetCities")]
-    public async Task<IActionResult> GetCities()
+    public async Task<IActionResult> GetCities([FromQuery] int page = 1, [FromQuery] int pageSize = Pagination.DefaultPageSize)
     {
-        var rawCities = await _cityRepo.GetAll(false, c => c.Country);
-        var cities = _mapper.Map<List<CityGET>>(rawCities);
-        return Json(cities);
+        var result = await _cityService.GetCities(page, pageSize);
+        return Ok(result);
     }
+
     [HttpGet]
     [Route("GetCityByCountry/{countryId}")]
-    public async Task<IActionResult> GetCityByCountry([FromRoute] Guid countryId)
+    public async Task<IActionResult> GetCityByCountry([FromRoute] Guid countryId,
+                                                      [FromQuery] int page = 1,
+                                                      [FromQuery] int pageSize = Pagination.DefaultPageSize)
     {
-        try
-        {
-            var rawCities = await _cityRepo.GetAll(predicate: c => c.Country.Id == countryId);
-            var cities = _mapper.Map<List<CityGET>>(rawCities);
-            return Json(cities);
+        var result = await _cityService.GetCitiesByCountry(countryId, page, pageSize);
+        return Ok(result);
+    }
 
-        }
-        catch (Exception)
-        {
+    [HttpGet]
+    [Route("Get/{id}")]
+    public async Task<IActionResult> GetCity([FromRoute] Guid id)
+    {
+        var result = await _cityService.GetCity(id);
+        return Ok(result);
+    }
 
-            throw;
-        }
+    [Authorize(Roles = Roles.Administrator)]
+    [HttpPatch]
+    [Route("Update")]
+    public async Task<IActionResult> UpdateCity([FromBody] CityPATCH cityDto)
+    {
+        var result = await _cityService.UpdateCity(cityDto);
+        return Ok(result);
+    }
+
+    [Authorize(Roles = Roles.Administrator)]
+    [HttpDelete]
+    [Route("Delete/{id}")]
+    public async Task<IActionResult> DeleteCity([FromRoute] Guid id)
+    {
+        var result = await _cityService.DeleteCity(id);
+        return Ok(result);
     }
 }

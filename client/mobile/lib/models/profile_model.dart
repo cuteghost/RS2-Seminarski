@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 class Profile {
@@ -9,9 +8,11 @@ class Profile {
   String lastName;
   String dob;
   String emailAddress;
-  File profilePicture;
+  Uint8List profilePicture;
   String gender;
   String socialLink;
+  String? socialProvider;
+  bool isSocialAccount;
   String customerId;
   Profile({
     required this.id,
@@ -23,14 +24,16 @@ class Profile {
     required this.profilePicture,
     required this.gender,
     required this.socialLink,
+    required this.socialProvider,
+    required this.isSocialAccount,
     required this.customerId,
   });
 
-  static Future<Profile> fromJson(jsonDecode) async {
-    Uint8List profilePictureBytes = base64Decode(jsonDecode['userImage']);
-    Directory tempDir = await Directory.systemTemp.createTemp('profilePicture');
-    File profilePictureFile = File('${tempDir.path}/profilePicture.jpg');
-    await profilePictureFile.writeAsBytes(profilePictureBytes);
+  factory Profile.fromJson(Map<String, dynamic> jsonDecode) {
+    final String rawImage = jsonDecode['userImage'] as String? ?? '';
+    Uint8List profilePictureBytes = rawImage.isEmpty
+        ? Uint8List(0)
+        : base64Decode(rawImage);
 
     String genderFromJson = "";
     if (jsonDecode['userGender'] == 0) {
@@ -40,23 +43,24 @@ class Profile {
     }
     String dateOfBirth = jsonDecode['userBirthDate'];
     String parsedDateOfBirth = dateOfBirth.substring(0, 10);
-    return Future.value(Profile(
+    return Profile(
       id: jsonDecode['userId'],
       displayName: jsonDecode['userDisplayName'],
       firstName: jsonDecode['userFirstName'],
       lastName: jsonDecode['userLastName'],
       emailAddress: jsonDecode['userEmail'],
       dob: parsedDateOfBirth,
-      profilePicture: profilePictureFile,
+      profilePicture: profilePictureBytes,
       gender: genderFromJson,
       socialLink: jsonDecode['userSocialLink'],
+      socialProvider: jsonDecode['userSocialProvider'] as String?,
+      isSocialAccount: jsonDecode['userIsSocialAccount'] as bool? ?? false,
       customerId: jsonDecode['id'],
-    ));
+    );
   }
 
   Map<String, dynamic> toJson() {
-    List<int> imageBytes = profilePicture.readAsBytesSync();
-    String base64image = base64Encode(imageBytes);
+    String base64image = base64Encode(profilePicture);
     int genderToPass;
     if (gender == "Male") {
       genderToPass = 0;

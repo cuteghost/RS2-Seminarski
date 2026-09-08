@@ -1,40 +1,65 @@
-﻿using AutoMapper;
-using Repository.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models.Domain;
+using Models.Constants;
 using Models.DTO.LocationDTO;
-using System.Security.AccessControl;
+using Services.LocationCatalogService;
 
 namespace Controllers;
 
 [ApiController]
+[Authorize]
 [Route("/api/[controller]")]
 public class LocationController : Controller
 {
-    private readonly IGenericRepository<Location> _locationRepo;
-    private readonly IMapper _mapper;
+    private readonly ILocationCatalogService _locationService;
 
-    public LocationController(IGenericRepository<Location> locationRepo, IMapper mapper)
+    public LocationController(ILocationCatalogService locationService)
     {
-        _locationRepo = locationRepo;
-        _mapper = mapper;
+        _locationService = locationService;
     }
+
     [HttpPost]
     [Route("Add")]
-    public IActionResult Add([FromBody] LocationPOST locationDto)
+    public async Task<IActionResult> Add([FromBody] LocationPOST locationDto)
     {
-        var location = _mapper.Map<Location>(locationDto);
-        _locationRepo.Add(location);
-        return Content(location.Id.ToString());
+        var result = await _locationService.CreateLocation(locationDto);
+        return Ok(result);
     }
+
     [HttpGet]
     [Route("GetLocations")]
-    public IActionResult GetLocations()
+    public async Task<IActionResult> GetLocations([FromQuery] int page = 1, [FromQuery] int pageSize = Pagination.DefaultPageSize)
     {
-        var rawLocations = _locationRepo.GetAll(false, l => l.City, l => l.City.Country);
-        var locations = _mapper.Map<List<LocationGET>>(rawLocations);
-
-        return Json(locations);
+        var result = await _locationService.GetLocations(page, pageSize);
+        return Ok(result);
     }
 
+    [HttpGet]
+    [Route("Get/{id}")]
+    public async Task<IActionResult> GetLocation([FromRoute] Guid id)
+    {
+        var result = await _locationService.GetLocation(id);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Provjera ko smije mijenjati lokaciju je u servisu: administrator uvijek, partner samo
+    /// ako na toj lokaciji ima svoj smještaj. Zato ovdje nema <c>[Authorize(Roles = ...)]</c>.
+    /// </summary>
+    [HttpPatch]
+    [Route("Update")]
+    public async Task<IActionResult> UpdateLocation([FromBody] LocationPATCH locationDto)
+    {
+        var result = await _locationService.UpdateLocation(locationDto);
+        return Ok(result);
+    }
+
+    [Authorize(Roles = Roles.Administrator)]
+    [HttpDelete]
+    [Route("Delete/{id}")]
+    public async Task<IActionResult> DeleteLocation([FromRoute] Guid id)
+    {
+        var result = await _locationService.DeleteLocation(id);
+        return Ok(result);
+    }
 }

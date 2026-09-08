@@ -1,48 +1,55 @@
-﻿using AutoMapper;
+﻿using Database.Services.AccountService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models.Domain;
+using Models.DTO.AuthDTO;
 using Models.DTO.UserDTO;
-using Models.Models.DTO.UserDTO;
 using Repository.Interfaces;
-using Authentication.Services.TokenHandlerService;
+using Services.CurrentUserService;
 
 namespace Controllers.UserControllers;
 
 [ApiController]
+[Authorize]
 [Route("/api/[controller]")]
 public class UserController : Controller
 {
     private readonly IUserRepository _userRepo;
-    public UserController(IUserRepository userRepo)
+    private readonly ICurrentUserService _currentUser;
+    private readonly IAccountService _accountService;
+
+    public UserController(IUserRepository userRepo, ICurrentUserService currentUser, IAccountService accountService)
     {
         _userRepo = userRepo;
+        _currentUser = currentUser;
+        _accountService = accountService;
     }
 
-    [Authorize]
     [HttpPatch]
     [Route("UpdateEmail")]
-    public async Task<IActionResult> UpdateEmail([FromBody] UserEmailPATCH updateEmailDTO, [FromHeader] string Authorization)
+    public async Task<IActionResult> UpdateEmail([FromBody] UserEmailPATCH updateEmailDTO)
     {
-        var email = updateEmailDTO.email;
-        var password = updateEmailDTO.password;
-        var result = await _userRepo.UpdateEmail(email, password, Authorization);
-        if (result != "No user" && result != "Wrong password supplied")
-            return Content(result);
-        else
-            return Unauthorized(result);
+        // Novi token je obavezan dio odgovora: stari nosi prethodnu email adresu u claimu.
+        var token = await _userRepo.UpdateEmail(updateEmailDTO.email, updateEmailDTO.password, _currentUser.UserId);
+
+        return Ok(new BaseResponse<TokenResponse>("Email address updated successfully.", new TokenResponse { Token = token }));
     }
 
-    [Authorize]
     [HttpPatch]
     [Route("UpdatePassword")]
-    public async Task<IActionResult> UpdatePassword([FromBody] UserPasswordPATCH updatePasswordDTO, [FromHeader] string Authorization)
+    public async Task<IActionResult> UpdatePassword([FromBody] UserPasswordPATCH updatePasswordDTO)
     {
-        var oldPassword = updatePasswordDTO.oldPassword;
-        var newPassword = updatePasswordDTO.newPassword;
-        var result = await _userRepo.UpdatePassword(oldPassword, newPassword, Authorization);
-        if (result != "No user" && result != "Wrong password supplied")
-            return Content(result);
-        else
-            return Unauthorized(result);
+        var token = await _userRepo.UpdatePassword(updatePasswordDTO.oldPassword, updatePasswordDTO.newPassword, _currentUser.UserId);
+
+        return Ok(new BaseResponse<TokenResponse>("Password updated successfully.", new TokenResponse { Token = token }));
+    }
+
+    [HttpDelete]
+    [Route("Delete")]
+    public async Task<IActionResult> DeleteAccount()
+    {
+        await _accountService.DeleteOwnAccount(_currentUser.UserId);
+
+        return Ok(new BaseResponse<object>("Account deleted successfully.", null));
     }
 }

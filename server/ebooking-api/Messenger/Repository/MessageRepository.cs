@@ -1,6 +1,7 @@
 ﻿using Database;
 using Messenger.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Models.Domain;
 
 namespace Messenger.Repository;
@@ -8,10 +9,12 @@ namespace Messenger.Repository;
 public class MessageRepository : IMessageRepository
 {
     private readonly ApplicationDbContext _context;
+    private readonly ILogger<MessageRepository> _logger;
 
-    public MessageRepository(ApplicationDbContext context)
+    public MessageRepository(ApplicationDbContext context, ILogger<MessageRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public IEnumerable<Message> GetAll() => _context.Messages.ToList();
@@ -21,7 +24,7 @@ public class MessageRepository : IMessageRepository
     public void Add(Message message)
     {
         message.Id = Guid.NewGuid();
-        message.Timestamp = DateTime.Now;
+        message.Timestamp = DateTime.UtcNow;
         _context.Messages.Add(message);
         _context.SaveChanges();
     }
@@ -42,9 +45,10 @@ public class MessageRepository : IMessageRepository
             await _context.SaveChangesAsync();
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
+            _logger.LogError(ex, "Kreiranje razgovora izmedju {User1Id} i {User2Id} nije uspjelo.",
+                chat.User1Id, chat.User2Id);
             return false;
         }
     }
@@ -67,9 +71,10 @@ public class MessageRepository : IMessageRepository
                 }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
+            _logger.LogError(ex, "Ucitavanje razgovora korisnika {UserId} nije uspjelo; vraca se {Count} razgovora.",
+                userId, toReturn.Count);
         }
         return toReturn;
     }
@@ -88,5 +93,46 @@ public class MessageRepository : IMessageRepository
 
         await _context.SaveChangesAsync();
         return messages;
+    }
+
+    public async Task<bool> IsParticipantAsync(string chatId, Guid userId)
+    {
+        if (!Guid.TryParse(chatId, out var id))
+            return false;
+
+        return await _context.Chats
+            .AsNoTracking()
+            .AnyAsync(c => c.Id == id && (c.User1Id == userId || c.User2Id == userId));
+    }
+
+    public async Task<Chat?> GetOrCreateChatAsync(Guid callerId, Guid otherUserId)
+    {
+        var existing = await _context.Chats
+            .Include(c => c.User1)
+            .Include(c => c.User2)
+            .FirstOrDefaultAsync(c =>
+                (c.User1Id == callerId && c.User2Id == otherUserId) ||
+                (c.User1Id == otherUserId && c.User2Id == callerId));
+
+        if (existing != null)
+            return existing;
+
+        var otherUserExists = await _context.Users.AnyAsync(u => u.Id == otherUserId && !u.IsDeleted);
+        if (!otherUserExists)
+            return null;
+
+        var chat = new Chat
+        {
+            Id = Guid.NewGuid(),
+            User1Id = callerId,
+            User2Id = otherUserId,
+        };
+        _context.Chats.Add(chat);
+        await _context.SaveChangesAsync();
+
+        chat.User1 = await _context.Users.FirstAsync(u => u.Id == callerId);
+        chat.User2 = await _context.Users.FirstAsync(u => u.Id == otherUserId);
+
+        return chat;
     }
 }

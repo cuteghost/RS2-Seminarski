@@ -5,15 +5,15 @@ class Country {
   Country({required this.id, required this.name});
 
   factory Country.fromJson(Map<String, dynamic> json) {
-    return Country(
-      id: json['id'] as String,
-      name: json['name'] as String,
-    );
+    return Country(id: json['id'] as String, name: json['name'] as String);
   }
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-    };
+    return {'id': id, 'name': name};
   }
+
+  @override
+  bool operator ==(Object other) => other is Country && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

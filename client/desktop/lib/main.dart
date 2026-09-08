@@ -1,113 +1,166 @@
-import 'dart:io';
-
-import 'package:ebooking_desktop/providers/admin_provider.dart';
-import 'package:ebooking_desktop/services/admin_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ebooking_desktop/pages/dashboard.dart';
+
+import 'package:ebooking_desktop/config/app_theme.dart';
+import 'package:ebooking_desktop/pages/login.dart';
+import 'package:ebooking_desktop/providers/admin_provider.dart';
 import 'package:ebooking_desktop/providers/auth_provider.dart';
+import 'package:ebooking_desktop/providers/location_provider.dart';
 import 'package:ebooking_desktop/providers/message_provider.dart';
 import 'package:ebooking_desktop/providers/profile_provider.dart';
+import 'package:ebooking_desktop/providers/reference_data_provider.dart';
+import 'package:ebooking_desktop/services/admin_service.dart';
 import 'package:ebooking_desktop/services/auth_service.dart';
+import 'package:ebooking_desktop/services/location_service.dart';
 import 'package:ebooking_desktop/services/profile_service.dart';
+import 'package:ebooking_desktop/services/reference_data_service.dart';
 import 'package:ebooking_desktop/services/signalr_service.dart';
-import 'package:ebooking_desktop/pages/login.dart';
+import 'package:ebooking_desktop/widgets/app_shell.dart';
+import 'package:ebooking_desktop/widgets/nocturne.dart';
 
 void main() {
-  final SecureStorage secureStorage = SecureStorage();
-  HttpOverrides.global = X509Override();
-  
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (context) => AuthProvider(authService: AuthService(secureStorage: secureStorage))),
-      ChangeNotifierProvider(create: (context) => ProfileProvider(profileService: ProfileService(secureStorage: secureStorage))),
-      ChangeNotifierProvider(create: (context) => MessageProvider(signalRService: SignalRService(secureStorage: secureStorage))),
-      ChangeNotifierProvider(create: (context) => AdminProvider(adminService: AdminService(secureStorage: secureStorage))),
-    ],
-    child: MyApp(),
-  ));
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Jedan `SecureStorage` za sve servise — dijele isti token.
+  final secureStorage = SecureStorage();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(
+            authService: AuthService(secureStorage: secureStorage),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ProfileProvider(
+            profileService: ProfileService(secureStorage: secureStorage),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => MessageProvider(
+            signalRService: SignalRService(secureStorage: secureStorage),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AdminProvider(
+            adminService: AdminService(secureStorage: secureStorage),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => LocationProvider(
+            locationService: LocationService(secureStorage: secureStorage),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ReferenceDataProvider(
+            referenceDataService:
+                ReferenceDataService(secureStorage: secureStorage),
+          ),
+        ),
+      ],
+      child: const EBookingAdminApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  MyApp();
+class EBookingAdminApp extends StatelessWidget {
+  const EBookingAdminApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: FutureBuilder(
-        future: Future.wait([
-          Provider.of<AuthProvider>(context, listen: false).checkLoggedInStatus(),
-          Provider.of<AuthProvider>(context, listen: false).roleCheck(),
-        ]),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }
-          if (snapshot.hasError) {
-            print (snapshot.error);
-            
-            return const Scaffold(
-              body: Center(
-                child: Text('An error occurred'),
-              ),
-            );
-          } 
-          else {
-            final isLoggedIn = snapshot.data![0] as bool;
-            final role = snapshot.data![1] as String;
-            
-            if (isLoggedIn && role == 'Administrator') {
-              return FutureBuilder(
-                future: Future.wait([Provider.of<MessageProvider>(context, listen: false).startSignalR().then(
-                        (_) => Provider.of<MessageProvider>(context, listen: false).getChats().then((_) async => {
-                          for(var c in Provider.of<MessageProvider>(context, listen: false).chats) {
-                            await Provider.of<MessageProvider>(context, listen: false).getMessages(c.Id),
-                            await Provider.of<MessageProvider>(context, listen: false).addToChat(c.Id),
-                          },
-                          await Provider.of<ProfileProvider>(context, listen: false).getProfile(),
-                          await Provider.of<AdminProvider>(context, listen: false).getAccommodations(),
-                          await Provider.of<AdminProvider>(context, listen: false).getProfiles(),
-                          await Provider.of<AdminProvider>(context, listen: false).getReservations(),
-                        }),
-                )]), 
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Scaffold(
-                      body: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  } else if (snapshot.hasError) {
-                    print(snapshot.error);
-                    return const Scaffold(
-                      body: Center(
-                        child: Text('An error occurred'),
-                      ),
-                    );
-                  } else {
-                    return DashboardApp();
-                  }
-                },
-              );
-            } else {
-              return LoginPage();
-            }
-          }
-        },
-      ), 
+      title: 'eBooking — Administration',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.dark,
+      home: const _Bootstrap(),
     );
   }
 }
 
-class X509Override extends HttpOverrides {
+/// Odlučuje da li se prikazuje prijava ili glavni okvir.
+///
+/// Stari main.dart je imao dva ugniježđena FutureBuilder-a, gdje je unutrašnji pokretao lanac
+/// od pet uzastopnih mrežnih poziva direktno u future: argumentu. Tri problema:
+///
+///  1. future: se evaluira pri SVAKOM build()-u, pa je svaki rebuild (npr. promjena veličine
+///     prozora) ponovo pokretao cijeli lanac mrežnih poziva.
+///  2. snapshot.data![0] as bool bi bacio na null da je Future.wait ikad vratio grešku.
+///  3. Ista bootstrap logika je bila duplirana u login.dart.
+///
+/// Sada: StatefulWidget koji lanac pokreće JEDNOM u initState.
+class _Bootstrap extends StatefulWidget {
+  const _Bootstrap();
+
   @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
+  State<_Bootstrap> createState() => _BootstrapState();
+}
+
+class _BootstrapState extends State<_Bootstrap> {
+  late Future<bool> _startup;
+
+  @override
+  void initState() {
+    super.initState();
+    _startup = _restoreSession();
+  }
+
+  /// Vraća `true` ako je sesija validna i pripada administratoru.
+  Future<bool> _restoreSession() async {
+    final auth = context.read<AuthProvider>();
+
+    final loggedIn = await auth.checkLoggedInStatus();
+    if (!loggedIn) return false;
+
+    final role = await auth.roleCheck();
+    if (role != 'Administrator') {
+      await auth.logout();
+      return false;
+    }
+
+    if (!mounted) return false;
+    final profile = context.read<ProfileProvider>();
+    final admin = context.read<AdminProvider>();
+    final locations = context.read<LocationProvider>();
+    final reference = context.read<ReferenceDataProvider>();
+    final messages = context.read<MessageProvider>();
+
+    // Podaci se povlače paralelno. `AdminProvider.loadAll` i
+    // `LocationProvider.loadAll` interno hvataju greške i izlažu ih kroz
+    // `error` polje, pa jedan pali servis ne obara cijeli start.
+    await Future.wait([
+      profile.getProfile(),
+      admin.loadAll(),
+      locations.loadAll(),
+      reference.loadAll(),
+    ]);
+
+    // Messenger namjerno nije u `Future.wait` — ako Messenger mikroservis
+    // nije podignut, aplikacija se i dalje mora otvoriti.
+    messages.bootstrap();
+
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _startup,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: NLoading(label: 'Starting application…')),
+          );
+        }
+
+        // Greška pri obnovi sesije nije razlog za "An error occurred" ekran
+        // bez izlaza — korisnika vodimo na prijavu.
+        if (snapshot.hasError || snapshot.data != true) {
+          return const LoginPage();
+        }
+
+        return const AppShell();
+      },
+    );
   }
 }

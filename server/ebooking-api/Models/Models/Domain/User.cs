@@ -42,6 +42,9 @@ public class User : ISoftDeleted
 
     public string SocialLink { get; set; } = string.Empty;
 
+    [MaxLength(20)]
+    public string? SocialProvider { get; set; }
+
     [Required]
     public DateTime Joined { get; set; }
 
@@ -52,6 +55,8 @@ public class User : ISoftDeleted
     public bool IsDeleted { get; set; } = false;
 
     public Role Role { get; set; } = 0;
+
+    public int TokenVersion { get; set; } = 0;
 }
 public enum Gender
 {

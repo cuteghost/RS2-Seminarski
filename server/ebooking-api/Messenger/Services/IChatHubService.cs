@@ -9,4 +9,5 @@ public interface IChatHub
     Task<List<ChatGET>> GetChats();
     Task SendMessage(MessagePOST messageDto);
     Task AddToChat(string chatId);
+    Task<ChatGET> OpenChat(Guid otherUserId);
 }

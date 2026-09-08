@@ -1,10 +1,9 @@
 ﻿using Database;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.SqlServer.Server;
-using Microsoft.VisualBasic;
+using Microsoft.Extensions.Logging;
+using Models.Constants;
 using Models.Domain;
 using Models.DTO.AuthDTO;
-using Models.Models.Domain;
 using Repository.Interfaces;
 using Authentication.Services.HashService;
 using System.Globalization;
@@ -14,140 +13,210 @@ namespace API.Repository.Classes;
 
 public class LoginRepository : ILoginRepository
 {
+    private const string SocialBirthDateFormat = "MM/dd/yyyy";
+
+    private static readonly HttpClient Client = new();
+
     private readonly ApplicationDbContext _dbContext;
     private readonly IHashService _hasher;
     private readonly ICustomerRepository _customerRepository;
-    public LoginRepository(ApplicationDbContext dbContext, IHashService hasher, ICustomerRepository customerRepository)
+    private readonly ILogger<LoginRepository> _logger;
+
+    public LoginRepository(ApplicationDbContext dbContext, IHashService hasher, ICustomerRepository customerRepository,
+                           ILogger<LoginRepository> logger)
     {
         _dbContext = dbContext;
         _hasher = hasher;
         _customerRepository = customerRepository;
-
+        _logger = logger;
     }
 
     public async Task<User> FacebookLogin(FacebookUserInfoResponse userInfo)
     {
-        var dbUser = await _dbContext.Users.AsNoTracking().Where(s => s.Email == userInfo.Email).FirstOrDefaultAsync();
-        // Check if user exists. If not, create a new user
+        if (string.IsNullOrWhiteSpace(userInfo.Email))
+            return null;
+
+        var dbUser = await _dbContext.Users.FirstOrDefaultAsync(s => s.Email == userInfo.Email);
+
+        var displayName = $"{userInfo.FirstName} {userInfo.LastName}".Trim();
+        var image = await DownloadImage(userInfo.Picture?.Data?.Url);
+        var birthDate = ParseSocialBirthDate(userInfo.birthday);
+
         if (dbUser == null)
         {
-            var image = userInfo.Picture.Data.Url.ToString();
-            HttpClient client = new HttpClient();
-            var response = await client.GetAsync(image);
-            byte[] imageBytes = await response.Content.ReadAsByteArrayAsync();
-            string dateFormat = "MM/dd/yyyy";
-
             var user = new User
             {
-                DisplayName = userInfo.FirstName + " " + userInfo.LastName,
+                DisplayName = string.IsNullOrWhiteSpace(displayName) ? userInfo.Email : displayName,
                 Email = userInfo.Email,
-                FirstName = userInfo.FirstName,
-                LastName = userInfo.LastName,
-                BirthDate = DateTime.ParseExact(userInfo.birthday, dateFormat, CultureInfo.InvariantCulture),
-                Password = _hasher.Hash(Guid.NewGuid().ToString()),
-                Image = imageBytes,
+                FirstName = userInfo.FirstName ?? string.Empty,
+                LastName = userInfo.LastName ?? string.Empty,
+                BirthDate = birthDate ?? default,
+                Password = Guid.NewGuid().ToString(),
+                Image = image,
                 IsDeleted = false,
-                SocialLink = "Facebook",
+                SocialLink = SocialProviders.Facebook,
+                SocialProvider = SocialProviders.Facebook,
             };
-            await _customerRepository.AddCustomer(user, new Customer());
+
+            if (!await _customerRepository.AddCustomer(user, new Customer()))
+                return null;
+
             return user;
         }
-        // User exists
-        else if (dbUser.IsDeleted == true)
-        {
-            var image = userInfo.Picture.Data.Url.ToString();
-            HttpClient client = new HttpClient();
-            var response = await client.GetAsync(image);
-            byte[] imageBytes = await response.Content.ReadAsByteArrayAsync();
-            string dateFormat = "MM/dd/yyyy";
 
-            dbUser.DisplayName = userInfo.FirstName + " " + userInfo.LastName;
-            dbUser.BirthDate = DateTime.ParseExact(userInfo.birthday, dateFormat, CultureInfo.InvariantCulture);
-            dbUser.Email = userInfo.Email;
-            dbUser.FirstName = userInfo.FirstName;
-            dbUser.LastName = userInfo.LastName;
-            dbUser.Password = _hasher.Hash(Guid.NewGuid().ToString());
-            dbUser.Image = imageBytes;
-            dbUser.IsDeleted = false;
-            dbUser.SocialLink = "Facebook";
+        if (dbUser.IsDeleted)
+            await Revive(dbUser, displayName, userInfo.FirstName, userInfo.LastName, birthDate, image, SocialProviders.Facebook);
 
-            var customer = _dbContext.Customers.Where(c => c.User.Id == dbUser.Id).FirstOrDefault();
-            customer.IsDeleted = false;
-            customer.User = dbUser;
-            await _dbContext.SaveChangesAsync();
-            return dbUser;
-        }
-        else
-            return dbUser;
+        return dbUser;
     }
 
-    public async Task<User> GoogleLogin(Payload payload, GoogleUserInfoResponse data)
+    public async Task<User> GoogleLogin(Payload payload, GoogleUserInfoResponse? userInfo)
     {
+        var dbUser = await _dbContext.Users.FirstOrDefaultAsync(s => s.Email == payload.Email);
 
-        var dbUser = await _dbContext.Users.AsNoTracking().Where(s => s.Email == payload.Email).FirstOrDefaultAsync();
-        string dateFormat = "MM/dd/yyyy";
-        DateTime date = DateTime.ParseExact((data.Birthdays[0].Date.Month < 10 ? "0" + data.Birthdays[0].Date.Month.ToString() : data.Birthdays[0].Date.Month.ToString()) + "/" +
-                                            (data.Birthdays[0].Date.Day < 10 ? "0" + data.Birthdays[0].Date.Day.ToString() : data.Birthdays[0].Date.Day.ToString()) + "/" +
-                                            data.Birthdays[0].Date.Year.ToString(), dateFormat, CultureInfo.InvariantCulture);
+        var image = await DownloadImage(payload.Picture);
+        var birthDate = ReadGoogleBirthDate(userInfo);
+        var gender = ReadGoogleGender(userInfo);
+
         if (dbUser == null)
         {
-            HttpClient client = new HttpClient();
-            var imageResponse = await client.GetAsync(payload.Picture);
-            var imageBytes = await imageResponse.Content.ReadAsByteArrayAsync();
-
             var userToBeCreated = new User
             {
-                DisplayName = payload.Name,
-                FirstName = payload.GivenName,
-                LastName = payload.FamilyName,
+                DisplayName = string.IsNullOrWhiteSpace(payload.Name) ? payload.Email : payload.Name,
+                FirstName = payload.GivenName ?? string.Empty,
+                LastName = payload.FamilyName ?? string.Empty,
                 Email = payload.Email,
-                Image = imageBytes,
-                Gender = data.Genders[0].Value == "male" ? Gender.Male : Gender.Female,
-                BirthDate = date,
-                SocialLink = "Google"
+                Image = image,
+                Gender = gender ?? Gender.Male,
+                BirthDate = birthDate ?? default,
+                Password = Guid.NewGuid().ToString(),
+                SocialLink = SocialProviders.Google,
+                SocialProvider = SocialProviders.Google,
             };
 
-            var customer = new Customer
-            {
-                User = userToBeCreated
-            };
-            await _customerRepository.AddCustomer(userToBeCreated, customer);
+            if (!await _customerRepository.AddCustomer(userToBeCreated, new Customer()))
+                return null;
+
             return userToBeCreated;
         }
-        else if (dbUser.IsDeleted == true)
+
+        if (dbUser.IsDeleted)
         {
-            HttpClient client = new HttpClient();
-            var imageResponse = await client.GetAsync(payload.Picture);
-            var imageBytes = await imageResponse.Content.ReadAsByteArrayAsync();
+            if (gender.HasValue)
+                dbUser.Gender = gender.Value;
 
-            dbUser.DisplayName = payload.Name;
-            dbUser.FirstName = payload.GivenName;
-            dbUser.LastName = payload.FamilyName;
-            dbUser.Email = payload.Email;
-            dbUser.Image = imageBytes;
-            dbUser.SocialLink = "Google";
-            dbUser.Gender = data.Genders[0].Value == "male" ? Gender.Male : Gender.Female;
-            dbUser.BirthDate = date;
-            dbUser.IsDeleted = false;
-
-            var customer = _dbContext.Customers.Where(c => c.User.Id == dbUser.Id).FirstOrDefault();
-            customer.IsDeleted = false;
-            customer.User = dbUser;
-            await _dbContext.SaveChangesAsync();
-            return dbUser;
+            await Revive(dbUser, payload.Name, payload.GivenName, payload.FamilyName, birthDate, image, SocialProviders.Google);
         }
-        else
-            return dbUser;
+
+        return dbUser;
     }
 
     public async Task<User> Login(LoginDTO user)
     {
-        user.Password = _hasher.Hash(user.Password);
-        var _user = await _dbContext.Users.AsNoTracking().Where(s => s.Email == user.Email && s.Password == user.Password).FirstOrDefaultAsync();
-        if (_user != null)
-            return _user;
+        var dbUser = await _dbContext.Users.AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Email == user.Email && !s.IsDeleted);
 
-        return null;
+        // Lozinka se više ne može porediti u SQL-u: PBKDF2 zapis nosi nasumičnu so pa isti
+        // tekst nikad ne daje isti heš. Provjera ide kroz IHashService.Verify.
+        if (dbUser == null || string.IsNullOrEmpty(user.Password) || !_hasher.Verify(user.Password, dbUser.Password))
+            return null;
+
+        return dbUser;
     }
 
+    private async Task Revive(User dbUser, string? displayName, string? firstName, string? lastName,
+                              DateTime? birthDate, byte[]? image, string provider)
+    {
+        if (!string.IsNullOrWhiteSpace(displayName))
+            dbUser.DisplayName = displayName.Trim();
+
+        if (!string.IsNullOrWhiteSpace(firstName))
+            dbUser.FirstName = firstName;
+
+        if (!string.IsNullOrWhiteSpace(lastName))
+            dbUser.LastName = lastName;
+
+        if (birthDate.HasValue)
+            dbUser.BirthDate = birthDate.Value;
+
+        if (image != null)
+            dbUser.Image = image;
+
+        dbUser.Password = _hasher.Hash(Guid.NewGuid().ToString());
+        dbUser.IsDeleted = false;
+        dbUser.SocialLink = provider;
+        dbUser.SocialProvider = provider;
+
+        var customer = await _dbContext.Customers.FirstOrDefaultAsync(c => c.User.Id == dbUser.Id);
+        if (customer != null)
+            customer.IsDeleted = false;
+
+        await _dbContext.SaveChangesAsync();
+    }
+
+    private async Task<byte[]?> DownloadImage(Uri? url)
+    {
+        if (url == null)
+            return null;
+
+        try
+        {
+            var response = await Client.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Slika profila sa {Url} nije preuzeta, status {Status}.", url, (int)response.StatusCode);
+                return null;
+            }
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Slika profila sa {Url} nije preuzeta.", url);
+            return null;
+        }
+    }
+
+    private Task<byte[]?> DownloadImage(string? url)
+    {
+        return Uri.TryCreate(url, UriKind.Absolute, out var parsed)
+            ? DownloadImage(parsed)
+            : Task.FromResult<byte[]?>(null);
+    }
+
+    private static DateTime? ParseSocialBirthDate(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return null;
+
+        return DateTime.TryParseExact(raw, SocialBirthDateFormat, CultureInfo.InvariantCulture,
+                                      DateTimeStyles.None, out var parsed)
+            ? parsed
+            : null;
+    }
+
+    private static DateTime? ReadGoogleBirthDate(GoogleUserInfoResponse? userInfo)
+    {
+        var date = userInfo?.Birthdays?.FirstOrDefault(b => b.Date != null)?.Date;
+        if (date == null || date.Year < 1 || date.Month < 1 || date.Day < 1)
+            return null;
+
+        try
+        {
+            return new DateTime(date.Year, date.Month, date.Day);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return null;
+        }
+    }
+
+    private static Gender? ReadGoogleGender(GoogleUserInfoResponse? userInfo)
+    {
+        var value = userInfo?.Genders?.FirstOrDefault()?.Value;
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        return string.Equals(value, "male", StringComparison.OrdinalIgnoreCase) ? Gender.Male : Gender.Female;
+    }
 }

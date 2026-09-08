@@ -1,5 +1,4 @@
-﻿using Models.Models.Domain;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Domain;
@@ -19,7 +18,10 @@ public partial class Accommodation : ISoftDeleted
     public bool Status { get; set; }
 
     [Required]
-    public TypesOfAccommodation TypeOfAccommodation { get; set; }
+    [ForeignKey("AccommodationType")]
+    public Guid AccommodationTypeId { get; set; }
+
+    public virtual AccommodationType? AccommodationType { get; set; }
 
     [Required]
     public double PricePerNight { get; set; }
@@ -45,6 +47,13 @@ public partial class Accommodation : ISoftDeleted
 
     public bool IsDeleted { get; set; }
     public virtual Partner? Owner { get; set; }
+
+    /// <summary>
+    /// Rezervacije ovog smještaja. Postoji da bi provjera dostupnosti mogla biti podupit u SQL-u
+    /// (<c>NOT EXISTS</c>) umjesto zasebnog upita po smještaju. Vezuje se na već postojeći
+    /// <c>Reservation.AccommodationId</c>, pa u bazi ne mijenja ništa.
+    /// </summary>
+    public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 }
 public enum TypesOfAccommodation
 {

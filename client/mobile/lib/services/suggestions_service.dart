@@ -1,18 +1,23 @@
-import 'dart:convert';
-import 'package:ebooking/models/accomodation_model.dart';
-import 'package:http/http.dart' as http;
-import 'package:ebooking/config/config.dart' as config;
+import 'package:ebooking/config/app_constants.dart';
+import 'package:ebooking/models/accommodation_model.dart';
+import 'package:ebooking/services/api_client.dart';
 
 class SuggestionsService {
-  Future<List<AccommodationGET>> fetchRecommendations(String customerId) async {
-    final response = await http.get(Uri.parse(
-        '${config.AppConfig.baseUrl}/api/Recommendation/suggestions/$customerId'));
-    print('Recommendations Response: ${response.body}');
-    if (response.statusCode == 200) {
-      return List<AccommodationGET>.from(
-          json.decode(response.body).map((x) => AccommodationGET.fromJson(x)));
-    } else {
-      throw Exception('Failed to load recommendations');
-    }
+  SuggestionsService({required this._apiClient});
+
+  final ApiClient _apiClient;
+
+  /// The customer comes from the token now. The route used to carry an id
+  /// (`/suggestions/{customerId}`) and had no authentication at all, so anyone
+  /// could read anyone else's recommendations. It also sent no bearer token —
+  /// this service was the only one with no `Authorization` header.
+  Future<List<AccommodationGET>> fetchRecommendations() async {
+    final page = await _apiClient.getPaged<AccommodationGET>(
+      '/api/Recommendation/suggestions',
+      parseItem: AccommodationGET.fromJson,
+      page: ApiPagination.firstPage,
+      pageSize: SuggestionLimits.topCount,
+    );
+    return page.items;
   }
 }

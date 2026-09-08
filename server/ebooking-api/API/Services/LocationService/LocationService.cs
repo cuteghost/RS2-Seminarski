@@ -1,10 +1,12 @@
-﻿using System;
+using System.Linq.Expressions;
+using Models.Domain;
 
 namespace Services.LocationService;
 
 public class LocationService : ILocationService
 {
     private const double EarthRadiusKm = 6371.0;
+    private const double DegreesToRadians = Math.PI / 180;
 
     public double CalculateDistance(double latitude1, double longitude1, double latitude2, double longitude2)
     {
@@ -25,8 +27,41 @@ public class LocationService : ILocationService
         return EarthRadiusKm * c;
     }
 
-    private double ToRadians(double degrees)
+    public Expression<Func<Accommodation, bool>> WithinRadius(double latitude, double longitude, double radiusInKilometers)
     {
-        return degrees * (Math.PI / 180);
+        var latitudeInRadians = ToRadians(latitude);
+        var longitudeInRadians = ToRadians(longitude);
+
+        var sineOfLatitude = Math.Sin(latitudeInRadians);
+        var cosineOfLatitude = Math.Cos(latitudeInRadians);
+
+        // Poredi se kosinus ugla umjesto same udaljenosti: kosinus opada na [0, pi], pa je
+        // "udaljenost manja od r" isto što i "kosinus veći od cos(r / R)". Time se izbjegava
+        // ACOS, koji u SQL Serveru puca kad zaokruživanje da argument neznatno veći od 1.
+        var minimumCosine = Math.Cos(radiusInKilometers / EarthRadiusKm);
+
+        return accommodation =>
+            accommodation.Location != null &&
+            (sineOfLatitude * Math.Sin(accommodation.Location.Latitude * DegreesToRadians)) +
+            (cosineOfLatitude * Math.Cos(accommodation.Location.Latitude * DegreesToRadians) *
+             Math.Cos((accommodation.Location.Longitude * DegreesToRadians) - longitudeInRadians))
+            >= minimumCosine;
     }
+
+    public Expression<Func<Accommodation, double>> ProximityScore(double latitude, double longitude)
+    {
+        var latitudeInRadians = ToRadians(latitude);
+        var longitudeInRadians = ToRadians(longitude);
+
+        var sineOfLatitude = Math.Sin(latitudeInRadians);
+        var cosineOfLatitude = Math.Cos(latitudeInRadians);
+
+        return accommodation =>
+            accommodation.Location == null ? -1.0 :
+            (sineOfLatitude * Math.Sin(accommodation.Location.Latitude * DegreesToRadians)) +
+            (cosineOfLatitude * Math.Cos(accommodation.Location.Latitude * DegreesToRadians) *
+             Math.Cos((accommodation.Location.Longitude * DegreesToRadians) - longitudeInRadians));
+    }
+
+    private static double ToRadians(double degrees) => degrees * DegreesToRadians;
 }

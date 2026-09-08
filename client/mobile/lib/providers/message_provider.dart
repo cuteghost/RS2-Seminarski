@@ -6,12 +6,24 @@ class MessageProvider with ChangeNotifier {
   final SignalRService signalRService;
 
   List<ChatGET> _chats = [];
-  Map<String, List<MessageGET>> _messages = {};
+  final Map<String, List<MessageGET>> _messages = {};
 
   List<ChatGET> get chats => _chats;
   Map<String, List<MessageGET>> get messages => _messages;
 
-  MessageProvider({required this.signalRService});
+  String? _connectionError;
+
+  String? get connectionError => _connectionError;
+
+  MessageProvider({required this.signalRService}) {
+    signalRService.onReconnected = _rejoin;
+  }
+
+  Future<void> _rejoin() async {
+    _connectionError = null;
+    await getChats();
+    await Future.wait(_chats.map((c) => addToChat(c.id)));
+  }
 
   Future<void> getChats() async {
     _chats = await signalRService.getChats();
@@ -23,16 +35,21 @@ class MessageProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> startSignalR() async {
-    print('From inside StartSignalR');
-    await signalRService.startConnection();
+  Future<bool> startSignalR() async {
+    final connected = await signalRService.startConnection();
+    if (!connected) return false;
+
+    signalRService.removeHandlers('ReceiveMessage');
+    signalRService.removeHandlers('ReadMessages');
+
     signalRService.onReceiveMessage('ReceiveMessage', (args) {
       if (args == null) return;
       final data = signalRService.handleIncommingDriverLocation(args);
-      _messages[data!.ChatId]!.add(data);
+      if (data == null) return;
+      _messages.putIfAbsent(data.chatId, () => <MessageGET>[]).add(data);
       for (var c in chats) {
-        if (c.Id == data.ChatId) {
-          c.Messages.add(data);
+        if (c.id == data.chatId) {
+          c.messages.add(data);
           break;
         }
       }
@@ -41,19 +58,52 @@ class MessageProvider with ChangeNotifier {
     signalRService.onReceiveMessage('ReadMessages', (args) {
       if (args == null) return;
       final data = signalRService.handleReadMessages(args);
+      if (data == null || data.isEmpty) return;
 
-      if (_messages[data![0].ChatId] == null) return;
-      for (var i = 0; i < _messages[data[0].ChatId]!.length; i++) {
-        _messages[data[0].ChatId]![i].IsRead = data[0].IsRead;
-      }
+      final chatId = data[0].chatId;
+      final ordered = List<MessageGET>.from(data)
+        ..sort((a, b) => a.timeStamp.compareTo(b.timeStamp));
+      _messages[chatId] = ordered;
       for (var c in chats) {
-        if (c.Id == data[0].ChatId) {
-          c.Messages = data;
+        if (c.id == chatId) {
+          c.messages = List<MessageGET>.from(ordered);
           break;
         }
       }
       notifyListeners();
     });
+    return true;
+  }
+
+  /// Everything the messenger needs right after sign-in.
+  ///
+  /// These are all hub invocations, so the order is forced: the connection
+  /// has to be up before the chat list can be asked for, and the chat list
+  /// has to exist before its messages can. Within one chat list the fetches
+  /// run together. Callers should run this next to their own independent
+  /// work rather than in front of it.
+  Future<void> loadInitialState() async {
+    if (!await startSignalR()) {
+      _connectionError =
+          'The messenger is not reachable right now. Your chats will load once it is back.';
+      notifyListeners();
+      return;
+    }
+
+    _connectionError = null;
+    await getChats();
+    await Future.wait(
+      _chats.map((c) async {
+        await getMessages(c.id);
+        await addToChat(c.id);
+      }),
+    );
+  }
+
+  Future<void> openChat(String chatId) async {
+    await addToChat(chatId);
+    await getMessages(chatId);
+    await readMessages(chatId);
   }
 
   Future<void> sendMessage(MessagePOST messagePost) async {
@@ -68,6 +118,14 @@ class MessageProvider with ChangeNotifier {
 
   Future<void> stopSignalR() async {
     await signalRService.stopConnection();
+  }
+
+  Future<void> clear() async {
+    _chats = [];
+    _messages.clear();
+    _connectionError = null;
+    notifyListeners();
+    await stopSignalR();
   }
 
   Future<void> addToChat(String chatId) async {

@@ -12,7 +12,9 @@ public class UserGET
     public Gender UserGender { get; set; }
     public string UserEmail { get; set; } = string.Empty;
     public string UserSocialLink { get; set; } = string.Empty;
-    public bool UserisActive { get; set; } = true;
+    public string? UserSocialProvider { get; set; }
+    public bool UserIsSocialAccount => !string.IsNullOrEmpty(UserSocialProvider);
+    public bool UserIsActive { get; set; } = true;
     public byte[]? UserImage { get; set; }
 }
 public enum Gender

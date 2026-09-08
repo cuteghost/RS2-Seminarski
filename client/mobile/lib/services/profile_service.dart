@@ -1,123 +1,74 @@
 import 'package:ebooking/models/partner_model.dart';
 import 'package:ebooking/models/profile_model.dart';
-import 'package:ebooking/services/auth_service.dart';
-import 'package:ebooking/config/config.dart' as config;
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:ebooking/services/api_client.dart';
+import 'package:ebooking/services/secure_storage.dart';
+
+Map<String, dynamic> _object(dynamic data) => data as Map<String, dynamic>;
 
 class ProfileService {
+  ProfileService({required this._apiClient, required this._secureStorage});
+
+  final ApiClient _apiClient;
   final SecureStorage _secureStorage;
 
-  ProfileService({required SecureStorage secureStorage})
-      : _secureStorage = secureStorage;
-
   Future<Profile> fetchProfile() async {
-    String? token = await _secureStorage.getToken();
-    final response = await http.get(
-        Uri.parse('${config.AppConfig.baseUrl}/api/Customer/details'),
-        headers: {'Authorization': 'Bearer $token'});
-    print('Profile Response: ${response.body}');
-    if (response.statusCode == 200) {
-      return Profile.fromJson(jsonDecode(response.body));
-    }
-    if (response.statusCode == 401) {
-      throw Exception('401 Unauthorized');
-    } else {
-      throw Exception('Failed to load profile');
-    }
+    return Profile.fromJson(
+      await _apiClient.get<Map<String, dynamic>>(
+        '/api/Customer/Details',
+        parse: _object,
+      ),
+    );
   }
 
-  updateProfile(Profile profile) async {
-    String? token = await _secureStorage.getToken();
-    final response = await http.patch(
-        Uri.parse('${config.AppConfig.baseUrl}/api/Customer/UpdateDetails'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json'
-        },
-        body: jsonEncode(profile.toJson()));
-    print('Update Profile Response: ${response.body}');
-    print('Update Profile Response Code: ${response.statusCode}');
-    if (response.statusCode == 200) {
-      return true;
-    }
-    if (response.statusCode == 401) {
-      throw Exception('401 Unauthorized');
-    } else {
-      throw Exception('Failed to update profile');
-    }
+  Future<Profile> updateProfile(Profile profile) async {
+    return Profile.fromJson(
+      await _apiClient.patch<Map<String, dynamic>>(
+        '/api/Customer/UpdateDetails',
+        body: profile.toJson(),
+        parse: _object,
+      ),
+    );
   }
 
-  updateEmail(String newEmail, String password) async {
-    String? token = await _secureStorage.getToken();
-    final response = await http.patch(
-        Uri.parse('${config.AppConfig.baseUrl}/api/User/UpdateEmail'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json'
-        },
-        body: jsonEncode({'email': newEmail, 'password': password}));
-    if (response.statusCode == 200) {
-      return true;
-    }
-    if (response.statusCode == 401) {
-      throw Exception('Wrong Password');
-    } else {
-      throw Exception('Failed to update email');
-    }
+  /// Changing the email or the password reissues the token: the old one holds
+  /// the old email and was signed before the change.
+  Future<void> updateEmail(String newEmail, String password) async {
+    final token = await _apiClient.patch<String>(
+      '/api/User/UpdateEmail',
+      body: <String, String>{'email': newEmail, 'password': password},
+      parse: (data) => _object(data)['token'] as String,
+    );
+    await _secureStorage.saveToken(token);
   }
 
-  updatePassword(String oldPassword, String newPassword) async {
-    String? token = await _secureStorage.getToken();
-    final response = await http.patch(
-        Uri.parse('${config.AppConfig.baseUrl}/api/User/UpdatePassword'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json'
-        },
-        body: jsonEncode(
-            {'oldPassword': oldPassword, 'newPassword': newPassword}));
-    if (response.statusCode == 200) {
-      return true;
-    }
-    if (response.statusCode == 401) {
-      throw Exception('Wrong Password');
-    } else {
-      throw Exception('Failed to update password');
-    }
+  Future<void> updatePassword(String oldPassword, String newPassword) async {
+    final token = await _apiClient.patch<String>(
+      '/api/User/UpdatePassword',
+      body: <String, String>{
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+      },
+      parse: (data) => _object(data)['token'] as String,
+    );
+    await _secureStorage.saveToken(token);
   }
 
-  fetchPartner() async {
-    final response = await http.get(
-        Uri.parse('${config.AppConfig.baseUrl}/api/Partner/PartnerDetails'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ${await _secureStorage.getToken()}'
-        });
-    if (response.statusCode == 200) {
-      print('Partner Response: ${response.body}');
-      return Partner.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to load partner ${response.statusCode}');
-    }
+  Future<Partner> fetchPartner() async {
+    return Partner.fromJson(
+      await _apiClient.get<Map<String, dynamic>>(
+        '/api/Partner/PartnerDetails',
+        parse: _object,
+      ),
+    );
   }
 
-  updatePartner(Partner partner) async {
-    final response = await http.patch(
-        Uri.parse('${config.AppConfig.baseUrl}/api/Partner/Update'),
-        headers: {
-          'Authorization': 'Bearer ${await _secureStorage.getToken()}',
-          'Content-Type': 'application/json'
-        },
-        body: jsonEncode(partner.toJson()));
-
-    if (response.statusCode == 200) {
-      return true;
-    } else {
-      print('Update Partner Response: ${response.body}');
-      print('PartnerID ${partner.id}');
-      throw Exception('Failed to update partner');
-    }
+  Future<Partner> updatePartner(Partner partner) async {
+    return Partner.fromJson(
+      await _apiClient.patch<Map<String, dynamic>>(
+        '/api/Partner/Update',
+        body: partner.toJson(),
+        parse: _object,
+      ),
+    );
   }
 }

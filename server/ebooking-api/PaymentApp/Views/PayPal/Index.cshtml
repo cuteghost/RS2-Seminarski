@@ -1,24 +1,50 @@
-﻿<div>
-    <p class="text-center">PLEASE CHOOSE A WAY TO PAY (PAYPAL OR CREDIT/DEBIT CARD )</p>
+<div>
+    <p class="text-center">Choose a payment method (PayPal or card)</p>
 </div>
 
 <div>
-    <p class="text-center">Your stay at @ViewBag.AccommodationName cost breakdown</p>
-    <p class="text-center">Total Amount: @ViewBag.TotalPrice</p>
-    <p class="text-center">Price Per Night: @ViewBag.PricePerNight</p>
-    <p class="text-center">Number of Days: @ViewBag.NumberOfDays</p>
-    
+    <p class="text-center">Stay: @ViewBag.AccommodationName</p>
+    <p class="text-center">Price per night: @ViewBag.PricePerNight</p>
+    <p class="text-center">Number of nights: @ViewBag.NumberOfDays</p>
+    <p class="text-center"><strong>Total: @ViewBag.TotalPrice @ViewBag.Currency</strong></p>
 </div>
 
 <div class="text-center">
     <div id="paypal-button-container"></div>
+    <p id="payment-error" class="text-danger"></p>
 </div>
 
 @section Scripts {
-    @*Use ViewBag.ClientId to load Paypal Javascript SDK*@
-    <script src="https://www.paypal.com/sdk/js?client-id=@ViewBag.ClientId"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=@ViewBag.ClientId&currency=@ViewBag.Currency"></script>
 
     <script>
+        const reservationId = "@ViewBag.ReservationId";
+        const authToken = "@ViewBag.Token";
+
+        function authHeaders(extra) {
+            const headers = extra || {};
+            if (authToken) {
+                headers["Authorization"] = "Bearer " + authToken;
+            }
+            return headers;
+        }
+
+        function showError(message) {
+            document.getElementById("payment-error").textContent = message;
+        }
+
+        function describe(error) {
+            if (!error) {
+                return "";
+            }
+
+            if (typeof error === "string") {
+                return error;
+            }
+
+            return error.message || error.name || JSON.stringify(error);
+        }
+
         paypal.Buttons({
             style: {
                 layout: 'vertical',
@@ -28,15 +54,8 @@
             createOrder: (data, actions) => {
                 return fetch("@Url.Action("Order")", {
                     method: "post",
-                    headers: { 
-                        "Content-Type":"Application/json"
-                    },
-                    body: JSON.stringify({
-                      "numberOfDays": @Html.Raw(Json.Serialize(ViewBag.NumberOfDays)),
-                      "pricePerNight": @Html.Raw(Json.Serialize(ViewBag.PricePerNight)),
-                      "accommodationId": "@ViewBag.AccommodationId",
-                      "accommodationName": "@ViewBag.AccommodationName"
-                    })
+                    headers: authHeaders({ "Content-Type": "application/json" }),
+                    body: JSON.stringify({ "reservationId": reservationId })
                 }).then((response) => {
                     if (!response.ok) {
                         return response.json().then(error => { throw error; });
@@ -44,18 +63,33 @@
 
                     return response.json();
                 }).then((order) => order.id)
-                .catch(error => alert(error.message));
+                .catch(error => {
+                    console.error("createOrder", error);
+                    showError(describe(error) || "Order creation failed.");
+                    throw error;
+                });
             },
             onApprove: (data, actions) => {
                 return fetch(`@Url.Action("Capture")?orderId=${data.orderID}`, {
                     method: "post",
+                    headers: authHeaders({})
                 }).then((response) => {
                     if (!response.ok) {
                         return response.json().then(error => { throw error; });
                     }
 
                     window.location.href = "@Url.Action("Success")";
-                }).catch(error => alert(error.message));
+                }).catch(error => {
+                    console.error("onApprove", error);
+                    showError(describe(error) || "Payment was not confirmed.");
+                });
+            },
+            onCancel: () => {
+                showError("Payment was cancelled. The reservation is kept and can be paid later.");
+            },
+            onError: (error) => {
+                console.error("paypal", error);
+                showError("PayPal interrupted the payment: " + (describe(error) || "no error description") + ". Check that the buyer and merchant are in the same country and that the sandbox account is active.");
             }
         }).render('#paypal-button-container');
     </script>

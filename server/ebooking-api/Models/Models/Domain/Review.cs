@@ -27,6 +27,7 @@ public class Review : ISoftDeleted
     [Required]
     public bool WouldRecommend { get; set; } = false;
 
+    [MaxLength(1000)]
     public string Comment { get; set; } = string.Empty;
 
     public virtual Customer Customer { get; set; }

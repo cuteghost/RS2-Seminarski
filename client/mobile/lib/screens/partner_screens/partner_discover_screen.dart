@@ -1,41 +1,40 @@
-import 'dart:io';
+import 'package:ebooking/widgets/remote_image.dart';
 
-import 'package:ebooking/models/accomodation_model.dart';
+import 'package:ebooking/models/accommodation_model.dart';
 import 'package:ebooking/providers/accommodation_provider.dart';
-import 'package:ebooking/screens/login_screen.dart';
 import 'package:ebooking/screens/customer_screens/search_screen.dart';
-import 'package:ebooking/widgets/CustomPartnerBottomNavigationBar.dart';
+import 'package:ebooking/widgets/custom_partner_bottom_navigation_bar.dart';
+import 'package:ebooking/services/api_client.dart';
+import 'package:ebooking/utils/session_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking/screens/customer_screens/accommodation_details_screen.dart';
 import 'package:ebooking/screens/customer_screens/history_screen.dart';
-import 'package:ebooking/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 
 class PartnerDiscoverPage extends StatefulWidget {
+  const PartnerDiscoverPage({super.key});
+
   @override
-  _DiscoverPropertiesPageState createState() => _DiscoverPropertiesPageState();
+  DiscoverPropertiesPageState createState() => DiscoverPropertiesPageState();
 }
 
-class _DiscoverPropertiesPageState extends State<PartnerDiscoverPage> {
+class DiscoverPropertiesPageState extends State<PartnerDiscoverPage> {
   Position? _currentPosition;
-  List<AccommodationGET> _nearbyAccommodations = [];
+  // Null while the request is still out, so the spinner means loading
+  // rather than empty -- an empty result used to spin forever.
+  List<AccommodationGET>? _nearbyAccommodations;
+  String? _nearbyError;
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation().then((_) {
-      _getNearbyAccommodations().then((value) {
-        setState(() {
-          _nearbyAccommodations = value;
-        });
-      });
-    });
+    _loadNearby();
   }
 
   Future<void> _getCurrentLocation() async {
     final Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
     );
     if (mounted) {
       setState(() {
@@ -44,43 +43,47 @@ class _DiscoverPropertiesPageState extends State<PartnerDiscoverPage> {
     }
   }
 
-  Future<List<AccommodationGET>> _getNearbyAccommodations() async {
-    if (_currentPosition != null) {
-      var nearby =
-          await Provider.of<AccommodationProvider>(context, listen: false)
-              .fetchNearbyAccommodations(
-                  _currentPosition!.latitude, _currentPosition!.longitude);
-      return nearby;
-    } else {
-      print('Current position is null');
-      List<AccommodationGET> empty = [];
-      return empty;
+  Future<void> _loadNearby() async {
+    await _getCurrentLocation();
+    if (!mounted) return;
+    if (_currentPosition == null) {
+      setState(() => _nearbyAccommodations = <AccommodationGET>[]);
+      return;
     }
-  }
-
-  void _openSearchAccommodations(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SearchAccommodationsScreen(),
-      ),
-    );
+    try {
+      final nearby =
+          await Provider.of<AccommodationProvider>(
+            context,
+            listen: false,
+          ).fetchNearbyAccommodations(
+            _currentPosition!.latitude,
+            _currentPosition!.longitude,
+          );
+      if (!mounted) return;
+      setState(() => _nearbyAccommodations = nearby);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _nearbyAccommodations = <AccommodationGET>[];
+        _nearbyError = e.message;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Discover Properties'),
-        actions: //logout button
-            [
+        title: const Text('Discover Properties'),
+        actions: [
           IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () {
-              Provider.of<AuthProvider>(context, listen: false).logout();
-              // Navigate to the LoginScreen
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => LoginPage()));
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final (signedOut, message) = await signOut(context);
+              if (!signedOut) {
+                messenger.showSnackBar(SnackBar(content: Text(message)));
+              }
             },
           ),
         ],
@@ -90,92 +93,88 @@ class _DiscoverPropertiesPageState extends State<PartnerDiscoverPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Search Input
-            Container(
-              padding: EdgeInsets.all(16.0),
+            ColoredBox(
               color: Colors.grey.shade200,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to the SearchAccommodationsPage when the button is pressed
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SearchAccommodationsScreen(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey.shade200,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Search for location or property',
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                    SizedBox(width: 8.0), // Adjust spacing
-                    Icon(Icons.search),
-                  ],
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const SearchAccommodationsScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade200,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        'Search for location or property',
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                      SizedBox(width: 8.0),
+                      Icon(Icons.search),
+                    ],
+                  ),
                 ),
               ),
             ),
             // Nearby Properties Header
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
                 'Nearby Accommodations',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
               ),
             ),
             // Nearby Properties Horizontal Scroll
-            !_nearbyAccommodations.isEmpty
-                ? SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: List.generate(
-                        _nearbyAccommodations
-                            .length, // Number of nearby properties
-                        (index) => InkWell(
-                          onTap: () {
-                            // Navigate to PropertyDetailsPage when a property is tapped
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    AccommodationDetailsScreen(
-                                        accommodation:
-                                            _nearbyAccommodations[index]),
-                              ),
-                            );
-                          },
-                          child: NearbyPropertyCard(
-                            image:
-                                _nearbyAccommodations[index].images.images[0]!,
-                            propertyName: _nearbyAccommodations[index].name,
-                            pricePerNight:
-                                _nearbyAccommodations[index].pricePerNight,
+            if (_nearbyAccommodations == null)
+              const Center(child: CircularProgressIndicator())
+            else if (_nearbyAccommodations!.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  _nearbyError ?? 'No accommodations within 10 km of you.',
+                ),
+              )
+            else
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: List.generate(
+                    _nearbyAccommodations!.length,
+                    (index) => InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AccommodationDetailsScreen(
+                              accommodation: _nearbyAccommodations![index],
+                            ),
                           ),
-                        ),
+                        );
+                      },
+                      child: NearbyPropertyCard(
+                        imageUrl: _nearbyAccommodations![index].firstImageUrl,
+                        propertyName: _nearbyAccommodations![index].name,
+                        pricePerNight:
+                            _nearbyAccommodations![index].pricePerNight,
                       ),
                     ),
-                  )
-                : Container(
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
                   ),
+                ),
+              ),
             // Property Header
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
                 'Accommodation Quick Filters',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
               ),
             ),
             // Filters Horizontal Scroll
@@ -184,39 +183,39 @@ class _DiscoverPropertiesPageState extends State<PartnerDiscoverPage> {
               child: Row(
                 children: [
                   FilterChip(
-                    label: Text('Pool'),
+                    label: const Text('Pool'),
                     onSelected: (bool selected) {},
                   ),
-                  SizedBox(width: 8.0),
+                  const SizedBox(width: 8.0),
                   FilterChip(
-                    label: Text('Bathub'),
+                    label: const Text('Bathub'),
                     onSelected: (bool selected) {},
                   ),
-                  SizedBox(width: 8.0),
+                  const SizedBox(width: 8.0),
                   FilterChip(
-                    label: Text('Terrace'),
+                    label: const Text('Terrace'),
                     onSelected: (bool selected) {},
                   ),
-                  SizedBox(width: 8.0),
+                  const SizedBox(width: 8.0),
                   FilterChip(
-                    label: Text('View'),
+                    label: const Text('View'),
                     onSelected: (bool selected) {},
                   ),
-                  SizedBox(width: 8.0),
+                  const SizedBox(width: 8.0),
                   FilterChip(
-                    label: Text('Sea View'),
+                    label: const Text('Sea View'),
                     onSelected: (bool selected) {},
                   ),
                 ],
               ),
             ),
             // Reservation History
-            Container(
-              padding: EdgeInsets.all(16.0),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Reservation History',
                     style: TextStyle(
                       fontSize: 18.0,
@@ -225,16 +224,14 @@ class _DiscoverPropertiesPageState extends State<PartnerDiscoverPage> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // Handle reservation logic
-                      // Navigate to the BookingScreen
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ReservationHistoryPage(),
+                          builder: (context) => const ReservationHistoryPage(),
                         ),
                       );
                     },
-                    child: Text('View All'),
+                    child: const Text('View All'),
                   ),
                 ],
               ),
@@ -242,24 +239,29 @@ class _DiscoverPropertiesPageState extends State<PartnerDiscoverPage> {
           ],
         ),
       ),
-      bottomNavigationBar: CustomPartnerBottomNavigationBar(),
+      bottomNavigationBar: const CustomPartnerBottomNavigationBar(
+        currentIndex: 0,
+      ),
     );
   }
 }
 
 class NearbyPropertyCard extends StatelessWidget {
-  final File image;
+  final String? imageUrl;
   final String propertyName;
   final double pricePerNight;
 
-  NearbyPropertyCard(
-      {required this.image,
-      required this.propertyName,
-      required this.pricePerNight});
+  const NearbyPropertyCard({
+    super.key,
+    required this.imageUrl,
+    required this.propertyName,
+    required this.pricePerNight,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(8.0),
       width: 200.0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,25 +272,21 @@ class NearbyPropertyCard extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.0),
               border: Border.all(color: Colors.grey.shade300),
-              image: DecorationImage(
-                image: FileImage(image),
-                fit: BoxFit.cover,
-              ),
+              color: Colors.grey.shade200,
             ),
+            clipBehavior: Clip.antiAlias,
+            alignment: Alignment.center,
+            child: RemoteImage(path: imageUrl, width: double.infinity),
           ),
-          SizedBox(height: 8.0),
-          // Distance from Current Location
+          const SizedBox(height: 8.0),
           Text(
             propertyName,
-            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
           ),
+          const Text('Less than 10km away', style: TextStyle(fontSize: 12.0)),
           Text(
-            'Less than 10km away',
-            style: TextStyle(fontSize: 12.0),
-          ),
-          Text(
-            '\$ ${pricePerNight} per night',
-            style: TextStyle(fontSize: 12.0),
+            '\$ $pricePerNight per night',
+            style: const TextStyle(fontSize: 12.0),
           ),
         ],
       ),

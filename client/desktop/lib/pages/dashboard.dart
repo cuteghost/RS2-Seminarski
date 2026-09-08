@@ -1,181 +1,277 @@
-import 'package:ebooking_desktop/providers/admin_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
-// Make sure this import points to your actual drawer.dart file location
-import 'package:ebooking_desktop/widgets/drawer.dart';
+import 'package:intl/intl.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:provider/provider.dart';
 
-void main() {
-  runApp(DashboardApp());
-}
+import 'package:ebooking_desktop/config/app_theme.dart';
+import 'package:ebooking_desktop/providers/admin_provider.dart';
+import 'package:ebooking_desktop/widgets/app_shell.dart';
+import 'package:ebooking_desktop/widgets/nocturne.dart';
+import 'package:ebooking_desktop/widgets/reservation_status_tag.dart';
 
-class DashboardApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Dashboard',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: DashboardPage(),
-    );
-  }
-}
-
+/// Pregled — četiri statistike, trend rezervacija, tabela nedavnih rezervacija.
+///
+/// Koristi `Consumer` umjesto `Provider.of(..., listen: false)` da se ekran osvježi čim podaci
+/// stignu; `reservationsPerDay()` živi u `AdminProvider` umjesto lokalno u `build()` da se
+/// ugniježđena petlja 30 × N rezervacija ne ponavlja na svaki rebuild.
 class DashboardPage extends StatelessWidget {
-  // Dummy data for the bar chart
-  final List<BarChartGroupData> barGroups = [
-    BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 8)]),
-  ];
-  // Function to build a stat card
-  Widget buildStatCard({required IconData icon, required String label, required String value}) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12), // Rounded corners
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: DashboardStat(
-          icon: icon,
-          label: label,
-          value: value,
-        ),
-      ),
-    );
-  }
+  const DashboardPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final accommodationWithHighestRents = Provider.of<AdminProvider>(context, listen: false).getHighestRent();
-    final accommodationWithLowestRents = Provider.of<AdminProvider>(context, listen: false).getLowestRent();
-    final activeUsers = Provider.of<AdminProvider>(context, listen: false).profiles.length;
-    final activeProperties = Provider.of<AdminProvider>(context, listen: false).accommodations.length;
-    final reservations = Provider.of<AdminProvider>(context, listen: false).reservations;
-    calculateNumberOfRentsPerDay() {
-      final List<BarChartGroupData> barGroups = [];
-      
-      List<DateTime> last30Days = [];
-      DateTime today = DateTime.now();
-      for (int i = 0; i < 30; i++) {
-        last30Days.add(today.subtract(Duration(days: i)));
-      }
+    return Consumer<AdminProvider>(
+      builder: (context, admin, _) {
+        if (admin.isLoading && !admin.hasData) {
+          return const SectionScaffold(
+            child: NLoading(label: 'Loading data…'),
+          );
+        }
 
-      Map<DateTime, int> counts = {};
+        if (admin.error != null && !admin.hasData) {
+          return SectionScaffold(
+            child: NErrorState(
+              message: admin.error!,
+              onRetry: admin.loadAll,
+            ),
+          );
+        }
 
-      for (var day in last30Days) {
-        counts[day] = reservations.where((reservation) => reservation.startDate.isBefore(day.add(Duration(days: 1))) && reservation.endDate.isAfter(day.subtract(Duration(days: 1)))).length;
-      }
+        return SectionScaffold(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              NPageHeader(
+                title: 'Dashboard',
+                subtitle: 'Status of properties, users and demand.',
+                actions: [
+                  OutlinedButton.icon(
+                    onPressed: admin.isLoading ? null : admin.loadAll,
+                    icon: Icon(PhosphorIcons.arrowsClockwise(), size: 14),
+                    label: const Text('Refresh'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpace.x6),
+              _StatRow(admin: admin),
+              const SizedBox(height: AppSpace.x6),
+              _ReservationTrend(admin: admin),
+              const SizedBox(height: AppSpace.x6),
+              _RecentReservations(admin: admin),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
 
-      for (int i = 0; i < last30Days.length; i++) {
-        barGroups.add(BarChartGroupData(x: last30Days[i].day, barRods: [BarChartRodData(toY: counts[last30Days[i]] != null ? counts[last30Days[i]]!.toDouble() : 0)]));
-      }
-      return barGroups;
-    }
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Dashboard'),
+class _StatRow extends StatelessWidget {
+  final AdminProvider admin;
+  const _StatRow({required this.admin});
+
+  @override
+  Widget build(BuildContext context) {
+    final highest = admin.highestRent;
+    final lowest = admin.lowestRent;
+    final money = NumberFormat.currency(locale: 'bs', symbol: 'KM ', decimalDigits: 0);
+
+    // BUGFIX: ovaj Row je imao `crossAxisAlignment: CrossAxisAlignment.stretch`,
+    // a nalazi se u Column-u unutar `SingleChildScrollView`-a — tamo je
+    // visina NEOGRANIČENA. `stretch` u toj situaciji traži od djece da se
+    // rastegnu na beskonačnu visinu, što obara layout i pokreće kaskadu
+    // render grešaka svaki frame. `IntrinsicHeight` daje redu konkretnu
+    // visinu (najviša kartica), pa se kartice i dalje poravnavaju.
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _StatCard(
+              kicker: 'Highest nightly rate',
+              value: highest == null ? '—' : money.format(highest.pricePerNight),
+              caption: highest?.name ?? 'No properties entered',
+            ),
+          ),
+          const SizedBox(width: AppSpace.x4),
+          Expanded(
+            child: _StatCard(
+              kicker: 'Lowest nightly rate',
+              value: lowest == null ? '—' : money.format(lowest.pricePerNight),
+              caption: lowest?.name ?? 'No properties entered',
+            ),
+          ),
+          const SizedBox(width: AppSpace.x4),
+          Expanded(
+            child: _StatCard(
+              kicker: 'Registered users',
+              value: '${admin.userTotalCount}',
+              caption: '${admin.userActiveCount} active',
+            ),
+          ),
+          const SizedBox(width: AppSpace.x4),
+          Expanded(
+            child: _StatCard(
+              kicker: 'Properties',
+              value: '${admin.accommodations.length}',
+              caption: '${admin.activeAccommodationCount} active '
+                  '· ${admin.availableCities.length} cities',
+            ),
+          ),
+        ],
       ),
-      drawer: CustomDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            
-            SizedBox(height: 32),
-            Wrap(
-              alignment: WrapAlignment.spaceEvenly,
-              runSpacing: 16.0,
-              children: <Widget>[
-                buildStatCard(
-                  icon: Icons.attach_money,
-                  label: 'Property with Highest Price',
-                  value: '${accommodationWithHighestRents.name} - ${accommodationWithHighestRents.pricePerNight}',
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String kicker;
+  final String value;
+  final String caption;
+
+  const _StatCard({
+    required this.kicker,
+    required this.value,
+    required this.caption,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return NCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          NKicker(kicker),
+          const SizedBox(height: AppSpace.x2),
+          Text(
+            value,
+            style: theme.textTheme.headlineSmall,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSpace.x1),
+          Text(
+            caption,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReservationTrend extends StatelessWidget {
+  final AdminProvider admin;
+  const _ReservationTrend({required this.admin});
+
+  @override
+  Widget build(BuildContext context) {
+    final data = admin.reservationsPerDay(days: 30);
+    final total = data.fold<num>(0, (sum, d) => sum + d.value);
+
+    return NCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const NKicker('Last 30 days'),
+          const SizedBox(height: AppSpace.x1),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Text(
+                  'Occupancy by day',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-                buildStatCard(
-                  icon: Icons.attach_money,
-                  label: 'Property with Lowest Price',
-                  value: '${accommodationWithLowestRents.name} - ${accommodationWithLowestRents.pricePerNight}',
-                ),
-                buildStatCard(
-                  icon: Icons.person,
-                  label: 'Number of Active Users',
-                  value: activeUsers.toString(),
-                ),
-                buildStatCard(
-                  icon: Icons.home,
-                  label: 'Number of Active Properties',
-                  value: activeProperties.toString(),
+              ),
+              Text(
+                'Total $total nights in the period',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpace.x6),
+          NBarChart(data: data, height: 150, showEveryLabel: false),
+        ],
+      ),
+    );
+  }
+}
+
+class _RecentReservations extends StatelessWidget {
+  final AdminProvider admin;
+  const _RecentReservations({required this.admin});
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('dd.MM.yyyy');
+
+    final reservations = admin.reservations.toList()
+      ..sort((a, b) => b.startDate.compareTo(a.startDate));
+    final visible = reservations.take(8).toList();
+
+    return NCard(
+      padding: EdgeInsets.zero,
+      clip: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpace.x4, AppSpace.x4, AppSpace.x4, AppSpace.x3),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const NKicker('Recent activity'),
+                const SizedBox(height: AppSpace.x1),
+                Text(
+                  'Reservations',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            Text(
-              'Trends of Rents for Last Month',
-              style: TextStyle(fontSize: 20),
+          ),
+          NTable(
+            columns: const [
+              NColumn('Property', flex: 3),
+              NColumn('Location', flex: 2),
+              NColumn('Dates', width: 200),
+              NColumn('Guests', width: 80),
+              NColumn('Status', width: 120),
+            ],
+            rowCount: visible.length,
+            empty: const NEmptyState(
+              message: 'No reservations recorded for the selected period.',
             ),
-            SizedBox(height: 16),
-            Container(
-              height: 250,
-              child: BarChart(
-                BarChartData(
-                  gridData: FlGridData(show: false),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: Border.all(
-                      color: const Color(0xff37434d),
-                      width: 1,
-                    ),
-                  ),
-                  
-                  barGroups: calculateNumberOfRentsPerDay(),
-                ),
-              ),
+            cellsBuilder: (context, index) {
+              final r = visible[index];
+              final accommodation = r.accommodation;
 
-            ),
-            
-          ],
-        ),
+              final status = r.status;
+
+              return [
+                Text(
+                  accommodation?.name ?? 'Unknown property',
+                  overflow: TextOverflow.ellipsis,
+                ),
+                NMutedCell(accommodation?.location.placeLabel ?? '—'),
+                NMutedCell(
+                  '${dateFormat.format(r.startDate)} – '
+                  '${dateFormat.format(r.endDate)}',
+                ),
+                NMutedCell('${r.numberOfGuests}'),
+                status == null
+                    ? const NMutedCell('—')
+                    : NTag(status.label, variant: reservationTagVariant(status)),
+              ];
+            },
+          ),
+        ],
       ),
     );
   }
 }
 
-class DashboardStat extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const DashboardStat({
-    Key? key,
-    required this.icon,
-    required this.label,
-    required this.value,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Icon(icon, size: 24),
-        SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: TextStyle(fontSize: 16),
-            ),
-            Text(
-              value,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}

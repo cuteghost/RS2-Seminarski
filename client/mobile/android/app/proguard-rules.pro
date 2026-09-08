@@ -19,6 +19,14 @@
     public static <fields>;
 }
 
+# Play Core / deferred components.
+# Flutter's embedding references com.google.android.play.core.* from
+# FlutterPlayStoreSplitApplication and PlayStoreDeferredComponentManager, but
+# this app does not use deferred components and does not ship Play Core, so
+# R8 fails the release build on the missing classes. This app does not use
+# deferred components, so suppressing the references is correct here.
+-dontwarn com.google.android.play.core.**
+
 # General optimizations
 -optimizationpasses 5
 -dontusemixedcaseclassnames

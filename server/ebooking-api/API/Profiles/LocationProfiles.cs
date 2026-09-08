@@ -12,6 +12,6 @@ public class LocationProfiles : AutoMapper.Profile
             opt => opt.MapFrom(src => src.City != null && src.City.Country != null ? src.City.Country.Name : string.Empty)
         ).ReverseMap();
         CreateMap<Location, LocationPOST>().ReverseMap();
-        CreateMap<Location, LocationPatch>().ReverseMap();
+        CreateMap<Location, LocationPATCH>().ReverseMap();
     }
 }

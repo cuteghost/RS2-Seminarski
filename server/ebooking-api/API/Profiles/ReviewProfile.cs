@@ -9,5 +9,6 @@ public class ReviewProfile : AutoMapper.Profile
     public ReviewProfile()
     {
         CreateMap<Review, ReviewPOST>().ReverseMap();
+        CreateMap<Review, ReviewGET>().ReverseMap();
     }
 }

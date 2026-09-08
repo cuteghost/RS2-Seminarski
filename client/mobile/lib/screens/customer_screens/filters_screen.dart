@@ -1,242 +1,288 @@
+import 'package:ebooking/config/app_theme.dart';
+import 'package:ebooking/providers/catalog_provider.dart';
+import 'package:ebooking/utils/rating.dart';
 import 'package:flutter/material.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:provider/provider.dart';
 
-class FiltersPage extends StatefulWidget {
-  @override
-  _FiltersPageState createState() => _FiltersPageState();
+class AccommodationFilters {
+  final double? minPrice;
+  final double? maxPrice;
+  final double? minRating;
+  final String? typeId;
+  final Set<String> amenityIds;
+
+  const AccommodationFilters({
+    this.minPrice,
+    this.maxPrice,
+    this.minRating,
+    this.typeId,
+    this.amenityIds = const <String>{},
+  });
 }
 
-class _FiltersPageState extends State<FiltersPage> {
-  bool freeCancellation = false;
-  double ratings = 5.0;
-  List<bool> accommodationButtonStates = List.generate(8, (index) => false);
-  List<bool> mealsButtonStates = [false, false];
-  List<bool> roomFacilitiesButtonStates = List.generate(13, (index) => false);
-  List<bool> bedroomsButtonStates = List.generate(4, (index) => false);
-  bool freeCancellationButtonState = false;
-  int priceFrom = 0;
-  int priceTo = 0;
+class FiltersPage extends StatefulWidget {
+  final AccommodationFilters? initial;
+
+  const FiltersPage({super.key, this.initial});
+
+  @override
+  FiltersPageState createState() => FiltersPageState();
+}
+
+class FiltersPageState extends State<FiltersPage> {
+  static const double _maxPrice = 500;
+
+  late RangeValues priceRange;
+  late double minRating;
+  String? selectedTypeId;
+  late Set<String> selectedAmenityIds;
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initial;
+    priceRange = RangeValues(
+      initial?.minPrice ?? 0,
+      initial?.maxPrice ?? _maxPrice,
+    );
+    minRating = initial?.minRating ?? 0;
+    selectedTypeId = initial?.typeId;
+    selectedAmenityIds = {...?initial?.amenityIds};
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final catalog = Provider.of<CatalogProvider>(context, listen: false);
+      await catalog.load();
+      if (!mounted || catalog.error == null) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(catalog.error!)));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final catalog = Provider.of<CatalogProvider>(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Filters'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // Apply Filters logic
-            },
-            child: Text(
-              'Apply Filters',
-              style: TextStyle(color: Colors.blue),
-            ),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Filters')),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildFilterButton('Location', () {
-              showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) {
-                  // You can return the widget for your modal content here
-                  return Container(
-                      height: 200.0,
-                      child: Expanded(
-                          child: TextField(
-                        decoration: InputDecoration(
-                            labelText: 'Location',
-                            labelStyle: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18.0,
-                            )),
-                      )));
-                },
-              );
-              // Open Location Modal
-            }),
-            _buildFilterButton('Price', () {
-              showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) {
-                  // You can return the widget for your modal content here
-                  return Container(
-                    height: 200.0,
-                    child: Row(children: [
-                      Expanded(
-                        child: TextField(
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            setState(() {
-                              priceFrom = int.tryParse(value) ?? 0;
-                            });
-                          },
-                          decoration: InputDecoration(
-                              labelText: 'From',
-                              labelStyle: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18.0,
-                              )),
-                        ),
-                      ),
-                      Spacer(),
-                      Expanded(
-                        child: TextField(
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            setState(() {
-                              priceTo = int.tryParse(value) ?? 0;
-                            });
-                          },
-                          decoration: InputDecoration(
-                              labelText: 'To',
-                              labelStyle: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18.0,
-                              )),
-                        ),
-                      ),
-                    ]),
+            Text('PRICE PER NIGHT', style: textTheme.labelSmall),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '\$${priceRange.start.round()} \u2013 \$${priceRange.end.round()}',
+                  style: textTheme.bodyMedium,
+                ),
+              ],
+            ),
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: AppColors.accent,
+                inactiveTrackColor: AppColors.border,
+                thumbColor: AppColors.text,
+                trackHeight: 3,
+              ),
+              child: RangeSlider(
+                values: priceRange,
+                min: 0,
+                max: _maxPrice,
+                divisions: 50,
+                onChanged: (values) => setState(() => priceRange = values),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text('MINIMUM RATING', style: textTheme.labelSmall),
+            Row(
+              children: [
+                Icon(
+                  PhosphorIcons.star(PhosphorIconsStyle.fill),
+                  size: 15,
+                  color: AppColors.accent,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  minRating == 0 ? 'Any' : formatRating(minRating),
+                  style: textTheme.bodyMedium,
+                ),
+              ],
+            ),
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: AppColors.accent,
+                inactiveTrackColor: AppColors.border,
+                thumbColor: AppColors.text,
+                trackHeight: 3,
+              ),
+              child: Slider(
+                value: minRating,
+                min: 0,
+                max: maxRating.toDouble(),
+                divisions: maxRating,
+                onChanged: (value) => setState(() => minRating = value),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _singleSection(
+              'TYPE OF ACCOMMODATION',
+              {for (final type in catalog.types) type.id: type.name},
+              selectedTypeId,
+              catalog,
+              textTheme,
+              (id) => setState(
+                () => selectedTypeId = selectedTypeId == id ? null : id,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _section(
+              'AMENITIES',
+              {
+                for (final amenity in catalog.amenities)
+                  amenity.id: amenity.name,
+              },
+              selectedAmenityIds,
+              catalog,
+              textTheme,
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.pop(
+                    context,
+                    AccommodationFilters(
+                      minPrice: priceRange.start,
+                      maxPrice: priceRange.end,
+                      minRating: minRating,
+                      typeId: selectedTypeId,
+                      amenityIds: selectedAmenityIds,
+                    ),
                   );
                 },
-              );
-            }),
-            _buildFilterSection(
-                'Type of Accommodation',
-                [
-                  'House',
-                  'Hotels',
-                  'Resorts',
-                  'Apartments',
-                  'Villas',
-                  'Hostels',
-                  'Cottages',
-                  'Penthouse',
-                ],
-                accommodationButtonStates),
-            _buildSliderSection('Ratings', [
-              Slider(
-                value: ratings,
-                onChanged: (value) {
-                  setState(() {
-                    ratings = value;
-                  });
-                },
-                min: 0,
-                max: 10,
-                divisions: 10,
-                label: ratings.toString(),
+                child: const Text('Apply filters'),
               ),
-            ]),
-            _buildFilterSection(
-                'Meals',
-                ['Breakfast Included', 'Kitchen Facilities'],
-                mealsButtonStates),
-            _buildFilterSection(
-                'Room Facilities',
-                [
-                  'Bathtub',
-                  'Balcony',
-                  'Private Bathroom',
-                  'AC',
-                  'Terrace',
-                  'Kitchen',
-                  'Private pool',
-                  'Coffee Machine',
-                  'View',
-                  'Sea view',
-                  'Washing Machine',
-                  'Spa Tub',
-                  'Soundproof'
-                ],
-                roomFacilitiesButtonStates),
-            _buildFilterSection(
-                'Number of Bedrooms',
-                ['1 bedroom', '2 bedrooms', '3 bedrooms', '4+ bedrooms'],
-                bedroomsButtonStates),
-            _buildToggleButton('Free Cancellation', freeCancellationButtonState,
-                () {
-              setState(() {
-                freeCancellationButtonState = !freeCancellationButtonState;
-              });
-            }),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFilterButton(String label, VoidCallback onPressed) {
-    return TextButton(
-      onPressed: () {
-        onPressed(); // Execute the provided onPressed callback
-      },
-      child: Text(label),
-    );
-  }
-
-  Widget _buildFilterSection(
-      String header, List<String> buttonNames, List<bool> buttonStates) {
-    List<Widget> buttons = [];
-    for (int i = 0; i < buttonStates.length; i++) {
-      buttons.add(_buildToggleButton(
-        buttonNames[i],
-        buttonStates[i],
-        () {
-          setState(() {
-            buttonStates[i] = !buttonStates[i];
-          });
-        },
-      ));
-    }
-
+  Widget _section(
+    String label,
+    Map<String, String> options,
+    Set<String> selected,
+    CatalogProvider catalog,
+    TextTheme textTheme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            header,
-            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+        Text(label, style: textTheme.labelSmall),
+        const SizedBox(height: 9),
+        if (options.isEmpty)
+          Text(
+            catalog.isLoading
+                ? 'Loading...'
+                : catalog.error ?? 'Nothing to filter on yet.',
+            style: textTheme.bodySmall?.copyWith(color: AppColors.textTertiary),
+          )
+        else
+          Wrap(
+            spacing: 9,
+            runSpacing: 9,
+            children: [
+              for (final option in options.entries)
+                _Chip(
+                  label: option.value,
+                  selected: selected.contains(option.key),
+                  onTap: () => setState(() {
+                    if (!selected.add(option.key)) selected.remove(option.key);
+                  }),
+                ),
+            ],
           ),
-        ),
-        Wrap(
-          children: buttons,
-          spacing: 8.0, // Adjust the spacing between buttons
-        ),
       ],
     );
   }
 
-  Widget _buildToggleButton(
-      String label, bool isToggled, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isToggled ? Colors.blue : null,
+  Widget _singleSection(
+    String label,
+    Map<String, String> options,
+    String? selected,
+    CatalogProvider catalog,
+    TextTheme textTheme,
+    ValueChanged<String> onSelect,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: textTheme.labelSmall),
+        const SizedBox(height: 9),
+        if (options.isEmpty)
+          Text(
+            catalog.isLoading
+                ? 'Loading...'
+                : catalog.error ?? 'Nothing to filter on yet.',
+            style: textTheme.bodySmall?.copyWith(color: AppColors.textTertiary),
+          )
+        else
+          Wrap(
+            spacing: 9,
+            runSpacing: 9,
+            children: [
+              for (final option in options.entries)
+                _Chip(
+                  label: option.value,
+                  selected: selected == option.key,
+                  onTap: () => onSelect(option.key),
+                ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _Chip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(99),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.accentTint : null,
+          border: Border.all(
+            color: selected ? AppColors.accent : AppColors.border,
+          ),
+          borderRadius: BorderRadius.circular(99),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: selected ? AppColors.accentText : AppColors.text,
+          ),
+        ),
       ),
-    );
-  }
-
-  Widget _buildSliderSection(String header, List<Widget> buttons) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            header,
-            style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-          ),
-        ),
-        Wrap(
-          children: buttons,
-          spacing: 8.0, // Adjust the spacing between buttons
-        ),
-      ],
     );
   }
 }

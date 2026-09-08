@@ -1,87 +1,87 @@
 class MessagePOST {
-  final String Content;
-  final DateTime TimeStamp;
-  final String ChatId;
+  final String content;
+  final DateTime timeStamp;
+  final String chatId;
 
-  MessagePOST({
-    required this.Content,
-    required this.TimeStamp,
-    required this.ChatId,
+  const MessagePOST({
+    required this.content,
+    required this.timeStamp,
+    required this.chatId,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'content': Content,
+      'content': content,
       'timeStamp': DateTime.now().toIso8601String(),
-      'chatId': ChatId,
+      'chatId': chatId,
     };
   }
 }
 
 class MessageGET {
-  final String Sender;
-  final String Content;
-  final DateTime TimeStamp;
-  bool IsRead;
-  final String ChatId;
-  final bool IsCurrent;
+  final String sender;
+  final String content;
+  final DateTime timeStamp;
+  bool isRead;
+  final String chatId;
+  final bool isCurrent;
 
   MessageGET({
-    required this.Sender,
-    required this.Content,
-    required this.TimeStamp,
-    required this.IsRead,
-    required this.ChatId,
-    required this.IsCurrent,
+    required this.sender,
+    required this.content,
+    required this.timeStamp,
+    required this.isRead,
+    required this.chatId,
+    required this.isCurrent,
   });
 
   factory MessageGET.fromJson(Map<String, dynamic> json) {
     return MessageGET(
-      Sender: json['senderId'],
-      Content: json['content'],
-      TimeStamp: DateTime.parse(json['timeStamp']),
-      IsRead: json['isRead'],
-      ChatId: json['chatId'],
-      IsCurrent: json['isCurrent'],
+      sender: json['senderId'],
+      content: json['content'],
+      timeStamp: DateTime.parse(json['timeStamp']),
+      isRead: json['isRead'],
+      chatId: json['chatId'],
+      isCurrent: json['isCurrent'],
     );
   }
 }
 
 class ChatPOST {
-  final String User2;
+  final String user2;
 
-  ChatPOST({
-    required this.User2,
-  });
+  const ChatPOST({required this.user2});
 
   Map<String, dynamic> toJson() {
-    return {
-      'user2Id': User2,
-    };
+    return {'user2Id': user2};
   }
 }
 
 class ChatGET {
-  final String Id;
-  final String User1;
-  final String User2;
-  List<MessageGET> Messages;
+  final String id;
+  final String user1;
+  final String user2;
+  List<MessageGET> messages;
 
   ChatGET({
-    required this.Id,
-    required this.User1,
-    required this.User2,
-    required this.Messages,
+    required this.id,
+    required this.user1,
+    required this.user2,
+    required this.messages,
   });
 
   factory ChatGET.fromJson(Map<String, dynamic> json) {
+    final messages = (json['messages'] as List)
+        .map((e) => MessageGET.fromJson(e))
+        .toList();
+    messages.sort((a, b) => a.timeStamp.compareTo(b.timeStamp));
     return ChatGET(
-      Id: json['id'],
-      User1: json['user1'],
-      User2: json['user2'],
-      Messages: (json['messages'] as List)
-          .map((e) => MessageGET.fromJson(e))
-          .toList(),
+      id: json['id'],
+      user1: json['user1'],
+      user2: json['user2'],
+      messages: messages,
     );
   }
+
+  MessageGET? get lastMessage => messages.isEmpty ? null : messages.last;
 }
