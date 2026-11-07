@@ -7,6 +7,7 @@ import 'package:pdf/widgets.dart' as pw;
 
 import 'package:ebooking_desktop/models/accomodation_model.dart';
 import 'package:ebooking_desktop/models/reservation_model.dart';
+import 'package:ebooking_desktop/models/report_model.dart';
 
 /// Generisanje .pdf izvještaja.
 ///
@@ -243,6 +244,145 @@ class ReportGenerator {
             pw.SizedBox(height: 18),
             _methodologyNote(),
           ],
+        ],
+      ),
+    );
+
+    return document.save();
+  }
+
+  static Future<Uint8List> serverOverview(ReportOverview report) async {
+    final money = NumberFormat.currency(
+        locale: 'en', symbol: '${report.currency} ', decimalDigits: 2);
+    final theme = await _theme();
+    final document = pw.Document(theme: theme);
+
+    // SVG text would otherwise be drawn with the built-in Helvetica, which is
+    // Latin-1 only: a customer called "Selimović" makes the whole export throw.
+    pw.Font? svgFont(String family, String style, String weight) {
+      final isBold = weight == 'bold' || (int.tryParse(weight) ?? 400) >= 600;
+      return isBold
+          ? theme.defaultTextStyle.fontBold
+          : theme.defaultTextStyle.fontNormal;
+    }
+
+    pw.Widget chart(String svg) => svg.isEmpty
+        ? _emptyNotice('The chart is not available.')
+        : pw.SvgImage(svg: svg, width: 515, customFontLookup: svgFont);
+
+    document.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.fromLTRB(40, 44, 40, 48),
+        header: (context) => _header(
+          context,
+          title: 'Growth and turnover',
+          subtitle: 'Period: ${_dateFormat.format(report.from)} – '
+              '${_dateFormat.format(report.to)} · charts generated on the server',
+        ),
+        footer: _footer,
+        build: (context) => [
+          _summaryRow([
+            ('New properties', '${report.newAccommodations}'),
+            ('New users', '${report.newUsers}'),
+            ('Payment turnover', money.format(report.totalRevenue)),
+          ]),
+          pw.SizedBox(height: 18),
+          chart(report.growthSvg),
+          pw.SizedBox(height: 14),
+          _table(
+            headers: const [
+              'Period',
+              'New properties',
+              'New users',
+              'Total properties',
+              'Total users',
+            ],
+            alignments: const [
+              pw.Alignment.centerLeft,
+              pw.Alignment.centerRight,
+              pw.Alignment.centerRight,
+              pw.Alignment.centerRight,
+              pw.Alignment.centerRight,
+            ],
+            widths: const {
+              0: pw.FlexColumnWidth(2),
+              1: pw.FixedColumnWidth(80),
+              2: pw.FixedColumnWidth(70),
+              3: pw.FixedColumnWidth(84),
+              4: pw.FixedColumnWidth(70),
+            },
+            rows: [
+              for (final point in report.growth)
+                [
+                  point.label,
+                  '${point.newAccommodations}',
+                  '${point.newUsers}',
+                  '${point.totalAccommodations}',
+                  '${point.totalUsers}',
+                ],
+            ],
+          ),
+          pw.NewPage(),
+          chart(report.topCustomersSvg),
+          pw.SizedBox(height: 14),
+          if (report.topCustomers.isEmpty)
+            _emptyNotice('No payments recorded for the selected period.')
+          else
+            _table(
+              headers: const ['Customer', 'Email', 'Payments', 'Total paid'],
+              alignments: const [
+                pw.Alignment.centerLeft,
+                pw.Alignment.centerLeft,
+                pw.Alignment.centerRight,
+                pw.Alignment.centerRight,
+              ],
+              widths: const {
+                0: pw.FlexColumnWidth(2.2),
+                1: pw.FlexColumnWidth(2.8),
+                2: pw.FixedColumnWidth(64),
+                3: pw.FixedColumnWidth(96),
+              },
+              rows: [
+                for (final customer in report.topCustomers)
+                  [
+                    customer.displayName,
+                    customer.email,
+                    '${customer.paymentCount}',
+                    money.format(customer.totalPaid),
+                  ],
+              ],
+            ),
+          pw.SizedBox(height: 18),
+          chart(report.topAccommodationsSvg),
+          pw.SizedBox(height: 14),
+          if (report.topAccommodations.isEmpty)
+            _emptyNotice('No payments recorded for the selected period.')
+          else
+            _table(
+              headers: const ['Property', 'City', 'Payments', 'Turnover'],
+              alignments: const [
+                pw.Alignment.centerLeft,
+                pw.Alignment.centerLeft,
+                pw.Alignment.centerRight,
+                pw.Alignment.centerRight,
+              ],
+              widths: const {
+                0: pw.FlexColumnWidth(3),
+                1: pw.FlexColumnWidth(1.6),
+                2: pw.FixedColumnWidth(64),
+                3: pw.FixedColumnWidth(96),
+              },
+              rows: [
+                for (final accommodation in report.topAccommodations)
+                  [
+                    accommodation.name,
+                    accommodation.cityName,
+                    '${accommodation.paymentCount}',
+                    money.format(accommodation.totalRevenue),
+                  ],
+              ],
+            ),
         ],
       ),
     );

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:ebooking/config/app_theme.dart';
 import 'package:ebooking/models/feedback_model.dart';
 import 'package:ebooking/providers/feedback_provider.dart';
@@ -5,13 +7,19 @@ import 'package:ebooking/screens/customer_screens/history_screen.dart';
 import 'package:ebooking/services/api_client.dart';
 import 'package:ebooking/utils/navigation_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
 class FeedbackPage extends StatefulWidget {
   final String accommodationID;
+  final String reservationId;
 
-  const FeedbackPage({super.key, required this.accommodationID});
+  const FeedbackPage({
+    super.key,
+    required this.accommodationID,
+    required this.reservationId,
+  });
 
   @override
   FeedbackPageState createState() => FeedbackPageState();
@@ -23,6 +31,42 @@ class FeedbackPageState extends State<FeedbackPage> {
   bool? recommendUs = true;
   final commentsController = TextEditingController();
   bool _isSubmitting = false;
+  Uint8List? _photo;
+
+  static const int _maxPhotoBytes = 5 * 1024 * 1024;
+
+  Future<void> _pickPhoto() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1600,
+      maxHeight: 1600,
+      imageQuality: 85,
+    );
+    if (picked == null) return;
+
+    final Uint8List bytes;
+    try {
+      bytes = await picked.readAsBytes();
+    } on Exception catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('That photo could not be read. Pick another one.'),
+        ),
+      );
+      return;
+    }
+
+    if (bytes.length > _maxPhotoBytes) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('The photo is larger than 5 MB.')),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() => _photo = bytes);
+  }
 
   @override
   void dispose() {
@@ -46,6 +90,8 @@ class FeedbackPageState extends State<FeedbackPage> {
           wouldRecommend: recommendUs!,
           comment: commentsController.text,
           accommodationId: widget.accommodationID,
+          reservationId: widget.reservationId,
+          image: _photo,
         ),
       );
     } on ApiException catch (e) {
@@ -128,6 +174,10 @@ class FeedbackPageState extends State<FeedbackPage> {
               maxLines: 3,
               decoration: const InputDecoration(hintText: 'Optional...'),
             ),
+            const SizedBox(height: 20),
+            Text('Photo', style: textTheme.titleMedium),
+            const SizedBox(height: 8),
+            _photoPicker(textTheme),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -145,6 +195,45 @@ class FeedbackPageState extends State<FeedbackPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _photoPicker(TextTheme textTheme) {
+    final photo = _photo;
+    if (photo == null) {
+      return OutlinedButton.icon(
+        onPressed: _isSubmitting ? null : _pickPhoto,
+        icon: Icon(PhosphorIcons.camera(), size: 18),
+        label: const Text('Add a photo (optional)'),
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppColors.radiusMd),
+          child: Image.memory(photo, width: 96, height: 96, fit: BoxFit.cover),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextButton(
+                onPressed: _isSubmitting ? null : _pickPhoto,
+                child: const Text('Change photo'),
+              ),
+              TextButton(
+                onPressed: _isSubmitting
+                    ? null
+                    : () => setState(() => _photo = null),
+                child: const Text('Remove photo'),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

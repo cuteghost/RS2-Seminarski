@@ -9,6 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 using PaymentApp.Clients;
 using PaymentApp.Extensions;
 using Seminarski.Database;
+using Models.Messaging;
+using PaymentApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +34,8 @@ if (string.IsNullOrWhiteSpace(jwtKey))
     Environment.Exit(1);
 }
 
+var rabbitMqConnectionString = RabbitMqConnection.FromEnvironment();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     var dbConnectionString = ServiceRegistry.ReadFromEnv();
@@ -40,6 +44,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IPaymentService, Database.Services.PaymentService.PaymentService>();
 builder.Services.AddScoped<ITokenHandlerService, TokenHandlerService>();
+builder.Services.AddSingleton<INotificationPublisher>(provider =>
+    new NotificationPublisher(rabbitMqConnectionString, provider.GetRequiredService<ILogger<NotificationPublisher>>()));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

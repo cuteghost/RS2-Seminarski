@@ -69,6 +69,9 @@ public static class BulkSeedInitializer
             await CopyAsync(connection, transaction, "Reservations", ReservationRows(set), cancellationToken);
             await CopyAsync(connection, transaction, "Reviews", ReviewRows(set), cancellationToken);
 
+            await ExecuteAsync(connection, transaction, SeedSql.BackfillAccommodationCreatedAt, cancellationToken);
+            await ExecuteAsync(connection, transaction, SeedSql.PaymentsForCompletedReservations, cancellationToken);
+
             await transaction.CommitAsync(cancellationToken);
         }
         catch
@@ -82,6 +85,20 @@ public static class BulkSeedInitializer
             "{Accommodations} smještaja, {Reservations} rezervacija i {Reviews} recenzija.",
             set.Users.Count, set.Partners.Count, set.Customers.Count,
             set.Accommodations.Count, set.Reservations.Count, set.Reviews.Count);
+    }
+
+    private static async Task ExecuteAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        string sql,
+        CancellationToken cancellationToken)
+    {
+        await using var command = new SqlCommand(sql, connection, transaction)
+        {
+            CommandTimeout = TimeoutInSeconds
+        };
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     private static async Task CopyAsync(
@@ -333,6 +350,7 @@ public static class BulkSeedInitializer
             ("Id", typeof(Guid)),
             ("CustomerId", typeof(Guid)),
             ("AccommodationId", typeof(Guid)),
+            ("ReservationId", typeof(Guid)),
             ("Rating", typeof(int)),
             ("Satisfaction", typeof(bool)),
             ("WouldRecommend", typeof(bool)),
@@ -345,6 +363,7 @@ public static class BulkSeedInitializer
                 review.Id,
                 review.CustomerId,
                 review.AccommodationId,
+                review.ReservationId,
                 review.Rating,
                 review.Satisfaction,
                 review.WouldRecommend,

@@ -1,7 +1,5 @@
 import 'package:ebooking/config/app_theme.dart';
-import 'package:ebooking/models/reservation_model.dart';
 import 'package:ebooking/providers/payment_provider.dart';
-import 'package:ebooking/providers/reservation_provider.dart';
 import 'package:ebooking/screens/customer_screens/reservation_confirmation_screen.dart';
 import 'package:ebooking/services/api_client.dart';
 import 'package:flutter/material.dart';
@@ -11,21 +9,14 @@ import 'package:webview_flutter/webview_flutter.dart' as webview;
 enum _Stage { preparing, paying, checking, stopped }
 
 class CheckoutScreen extends StatefulWidget {
-  final ReservationPOST? reservation;
-  final String? reservationId;
+  final String reservationId;
   final String accommodationName;
-
-  const CheckoutScreen.forNewBooking({
-    super.key,
-    required ReservationPOST this.reservation,
-    required this.accommodationName,
-  }) : reservationId = null;
 
   const CheckoutScreen.forExistingBooking({
     super.key,
-    required String this.reservationId,
+    required this.reservationId,
     required this.accommodationName,
-  }) : reservation = null;
+  });
 
   @override
   CheckoutScreenState createState() => CheckoutScreenState();
@@ -54,14 +45,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     });
 
     try {
-      final reservationId =
-          _reservationId ??
-          widget.reservationId ??
-          (await Provider.of<ReservationProvider>(
-            context,
-            listen: false,
-          ).makeReservation(widget.reservation!)).id;
-      if (!mounted || attempt != _attempt) return;
+      final reservationId = _reservationId ?? widget.reservationId;
 
       final payment = Provider.of<PaymentProvider>(context, listen: false);
       final uri = await payment.checkoutUri(reservationId);

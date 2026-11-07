@@ -157,6 +157,8 @@ Servisi nakon podizanja:
 | REST API | http://localhost:9999 |
 | Messenger (SignalR) | http://localhost:8888 |
 | PaymentApp (PayPal) | http://localhost:9090 |
+| Worker (RabbitMQ consumer) | bez HTTP-a, vidi `docker-compose logs worker` |
+| Mailpit (lokalni SMTP, kodovi za reset lozinke) | http://localhost:8025 |
 | RabbitMQ Management | http://localhost:15672 |
 | MSSQL baza | localhost:7777 |
 
@@ -290,9 +292,13 @@ Fizičkom uređaju ovo ne treba — tamo aplikacija koristi stvarnu lokaciju.
 ### 4.2. RabbitMQ (asinhrona obrada)
 
 1. Prijaviti se kao Customer i napraviti rezervaciju.
-2. Nakon rezervacije, API šalje poruku na RabbitMQ; Messenger servis je preuzima i u pozadini
-   kreira poruku dobrodošlice od vlasnika smještaja (Partner) prema kupcu.
-3. Poruka se pojavljuje u razgovoru bez ručnog osvježavanja (SignalR).
+2. Nakon rezervacije API objavljuje događaje na RabbitMQ. Zaseban `EBooking.Worker` servis
+   (bez HTTP API-ja) ih konzumira i:
+   - upisuje in-app notifikacije za gosta i vlasnika (tab **Alerts** u mobilnoj aplikaciji,
+     osvježava se automatski svakih 20 sekundi),
+   - upisuje sistemsku poruku vlasnika u razgovor sa gostom,
+   - šalje email sa kodom za reset lozinke (lokalno ga hvata Mailpit na http://localhost:8025).
+3. Isti tok se pokreće pri promjeni statusa rezervacije, otkazivanju i plaćanju.
 
 Promet na brokeru se može pratiti na http://localhost:15672.
 
@@ -363,7 +369,8 @@ RS2-Seminarski/
 │   ├── .env.example                  # predložak konfiguracije
 │   └── ebooking-api/
 │       ├── API/                      # glavni REST API servis
-│       ├── Messenger/                # SignalR servis (RabbitMQ consumer)
+│       ├── Messenger/                # SignalR servis (chat)
+│       ├── EBooking.Worker/          # RabbitMQ consumer: notifikacije, sistemske poruke, email
 │       ├── PaymentApp/               # servis za plaćanje
 │       ├── Database/                 # EF Core kontekst, migracije i seed
 │       ├── Models/                   # domenski modeli i DTO objekti

@@ -1,4 +1,5 @@
-﻿using API.Exceptions;
+using Database.Services.ImageValidation;
+using API.Exceptions;
 using API.Extensions;
 using AutoMapper;
 using Database.Services.AccommodationCatalogService;
@@ -148,6 +149,8 @@ public class AdministratorController : Controller
         if (string.IsNullOrWhiteSpace(userDto.Password))
             throw new BusinessException("Password is required.");
 
+        ImageContentValidator.EnsureValid(userDto.Image, "Profile image");
+
         var user = _mapper.Map<User>(userDto);
         var creatorId = await _currentUser.GetAdministratorIdAsync();
 
@@ -161,6 +164,8 @@ public class AdministratorController : Controller
     public async Task<IActionResult> UpdateUser([FromBody] AdministratorPATCH userDto)
     {
         var administratorId = await _currentUser.GetAdministratorIdAsync();
+
+        ImageContentValidator.EnsureValid(userDto.Image, "Profile image");
 
         var changes = _mapper.Map<User>(userDto);
         var updated = await _adminRepo.UpdateAdministrator(administratorId, changes);

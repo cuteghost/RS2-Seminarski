@@ -46,6 +46,13 @@ public partial class Accommodation : ISoftDeleted
     public AccommodationDetails? AccommodationDetails { get; set; }
 
     public bool IsDeleted { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
+
+    public bool IsPromoted { get; set; }
+
+    public DateTime? PromotedAt { get; set; }
+
     public virtual Partner? Owner { get; set; }
 
     /// <summary>

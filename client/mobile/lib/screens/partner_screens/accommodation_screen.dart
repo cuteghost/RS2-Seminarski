@@ -11,6 +11,7 @@ import 'package:ebooking/widgets/asset_thumbnail.dart';
 import 'package:ebooking/widgets/custom_partner_bottom_navigation_bar.dart';
 import 'package:ebooking/widgets/remote_image.dart';
 import 'package:ebooking/services/api_client.dart';
+import 'package:ebooking/utils/accommodation_rules.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
 import 'package:permission_handler/permission_handler.dart';
@@ -303,7 +304,6 @@ class AccommodationScreenState extends State<AccommodationScreen> {
 
       final patch = AccommodationPATCH(
         id: accommodation.id,
-        status: _status,
         location: movedTo,
         images: replacement,
         // Fixes a bug: this used to send _nameController.text, but the Name
@@ -318,6 +318,9 @@ class AccommodationScreenState extends State<AccommodationScreen> {
       );
 
       updated = await provider.updateAccommodation(patch);
+      if (updated.status != _status) {
+        updated = await provider.setStatus(accommodation.id, _status);
+      }
     } on ApiException catch (e) {
       failure = e.message;
     }
@@ -394,8 +397,7 @@ class AccommodationScreenState extends State<AccommodationScreen> {
                       accommodation.name = value;
                     },
                     initialValue: accommodation.name,
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Please enter a name' : null,
+                    validator: AccommodationRules.name,
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
@@ -435,25 +437,16 @@ class AccommodationScreenState extends State<AccommodationScreen> {
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (_) => hasChanges.value = true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter the price per night';
-                      }
-                      if (double.tryParse(value) == null) {
-                        return 'Enter a valid number';
-                      }
-                      return null;
-                    },
+                    validator: AccommodationRules.price,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _descriptionController,
                     decoration: const InputDecoration(labelText: 'Description'),
                     maxLines: 3,
+                    maxLength: AccommodationRules.descriptionMax,
                     onChanged: (_) => hasChanges.value = true,
-                    validator: (v) => (v == null || v.isEmpty)
-                        ? 'Please enter a description'
-                        : null,
+                    validator: AccommodationRules.description,
                   ),
                 ],
               ),
@@ -719,9 +712,7 @@ class AccommodationScreenState extends State<AccommodationScreen> {
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (_) => hasChanges.value = true,
-                    validator: (v) => (v == null || v.isEmpty)
-                        ? 'Please enter the number of beds'
-                        : null,
+                    validator: AccommodationRules.beds,
                   ),
                   const SizedBox(height: 16),
                   if (catalog.amenities.isEmpty)

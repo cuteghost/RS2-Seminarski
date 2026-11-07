@@ -16,7 +16,6 @@ class ContactListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final userId = Provider.of<AuthProvider>(context, listen: false).userId;
     return FutureBuilder(
       future: Future.wait([
         Provider.of<MessageProvider>(context, listen: false).getChats(),
@@ -57,12 +56,7 @@ class ContactListScreen extends StatelessWidget {
                       Divider(color: AppColors.divider, height: 1, indent: 76),
                   itemBuilder: (context, index) {
                     final chat = chats[index];
-                    var unread = 0;
-                    for (var m in chat.messages) {
-                      if (m.isRead == false && m.sender != userId) {
-                        unread++;
-                      }
-                    }
+                    final unread = chat.unreadCount;
                     final lastMessage = chat.lastMessage?.content ?? '';
 
                     return ListTile(
@@ -159,6 +153,18 @@ class MessengerScreenState extends State<MessengerScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   late Future<void> _opening;
+  int _shownCount = 0;
+  bool _keepPosition = false;
+
+  Future<void> _loadOlder(MessageProvider provider) async {
+    _keepPosition = true;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await provider.loadOlderMessages(widget.chatId);
+    } on StateError catch (error) {
+      messenger.showSnackBar(SnackBar(content: Text(error.message)));
+    }
+  }
 
   @override
   void initState() {
@@ -166,10 +172,27 @@ class MessengerScreenState extends State<MessengerScreen> {
     _opening = _open();
   }
 
-  Future<void> _open() => Provider.of<MessageProvider>(
-    context,
-    listen: false,
-  ).openChat(widget.chatId);
+  /// The messages arrive while the FutureBuilder still shows the spinner, so
+  /// the list only exists a frame after [_opening] completes. Jump once it is
+  /// attached, and again while the extent keeps growing: ListView lays its
+  /// rows out lazily, so the first maxScrollExtent is only an estimate.
+  void _scrollToBottom([int attempts = 5]) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+      final position = _scrollController.position;
+      final target = position.maxScrollExtent;
+      if (position.pixels != target) _scrollController.jumpTo(target);
+      if (attempts > 1) _scrollToBottom(attempts - 1);
+    });
+  }
+
+  Future<void> _open() async {
+    await Provider.of<MessageProvider>(
+      context,
+      listen: false,
+    ).openChat(widget.chatId);
+    _scrollToBottom();
+  }
 
   void _retry() {
     setState(() {
@@ -191,13 +214,14 @@ class MessengerScreenState extends State<MessengerScreen> {
     return Consumer<MessageProvider>(
       builder: (context, messageProvider, child) {
         var messages = messageProvider.messages[widget.chatId] ?? [];
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_scrollController.hasClients) {
-            _scrollController.jumpTo(
-              _scrollController.position.maxScrollExtent,
-            );
-          }
-        });
+        final hasOlder = messageProvider.hasOlderMessages(widget.chatId);
+        final loadingOlder = messageProvider.isLoadingOlder(widget.chatId);
+        if (messages.length != _shownCount) {
+          final grewAtBottom = !_keepPosition;
+          _shownCount = messages.length;
+          _keepPosition = false;
+          if (grewAtBottom) _scrollToBottom();
+        }
 
         void sendMessage() async {
           if (_controller.text.isEmpty) return;
@@ -291,9 +315,23 @@ class MessengerScreenState extends State<MessengerScreen> {
                         horizontal: 16,
                         vertical: 12,
                       ),
-                      itemCount: messages.length,
+                      itemCount: messages.length + (hasOlder ? 1 : 0),
                       itemBuilder: (context, index) {
-                        final message = messages[index];
+                        if (hasOlder && index == 0) {
+                          return Center(
+                            child: TextButton(
+                              onPressed: loadingOlder
+                                  ? null
+                                  : () => _loadOlder(messageProvider),
+                              child: Text(
+                                loadingOlder
+                                    ? 'Loading...'
+                                    : 'Load earlier messages',
+                              ),
+                            ),
+                          );
+                        }
+                        final message = messages[hasOlder ? index - 1 : index];
                         // sender == userId means *this device's user* sent it,
                         // so it belongs on the right -- the opposite of the old
                         // ternary, which put your own messages on the left.

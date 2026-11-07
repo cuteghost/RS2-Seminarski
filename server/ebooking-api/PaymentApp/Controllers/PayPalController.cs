@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PaymentApp.Clients;
 using PaymentApp.Models.PayPal;
+using PaymentApp.Services;
 
 namespace PaymentApp.Controllers;
 
@@ -16,30 +17,34 @@ public class PaypalController : Controller
 {
     private readonly PaypalClient _paypalClient;
     private readonly IPaymentService _paymentService;
+    private readonly INotificationPublisher _notifications;
     private readonly ILogger<PaypalController> _logger;
 
-    public PaypalController(PaypalClient paypalClient, IPaymentService paymentService, ILogger<PaypalController> logger)
+    public PaypalController(PaypalClient paypalClient,
+                            IPaymentService paymentService,
+                            INotificationPublisher notifications,
+                            ILogger<PaypalController> logger)
     {
         _paypalClient = paypalClient;
         _paymentService = paymentService;
+        _notifications = notifications;
         _logger = logger;
     }
 
     public async Task<IActionResult> Index([FromQuery] Guid reservationId, [FromQuery] string? token)
     {
-        var ticketReservationId = User.FindFirstValue(TokenHandlerService.ReservationClaim);
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        _logger.LogInformation(
-            "Otvaranje platne stranice: reservationId {ReservationId}, rid iz ulaznice {TicketReservationId}, korisnik {UserId}.",
-            reservationId, ticketReservationId ?? "bez rid claima", userId ?? "bez nameidentifier claima");
-
         try
         {
             EnsureTicketMatches(reservationId);
 
             var customerId = await ResolveCustomerId();
             var summary = await _paymentService.GetSummary(reservationId, customerId);
+
+            if (summary.IsPaid)
+            {
+                ViewBag.ErrorMessage = "The reservation has already been paid.";
+                return View("PaymentError");
+            }
 
             var totalPrice = summary.Amount.ToString("F2", CultureInfo.InvariantCulture);
 
@@ -51,10 +56,6 @@ public class PaypalController : Controller
             ViewBag.NumberOfDays = summary.Nights;
             ViewBag.TotalPrice = totalPrice;
             ViewBag.Currency = summary.Currency;
-
-            _logger.LogInformation(
-                "Platna stranica za rezervaciju {ReservationId} je pripremljena: {Amount} {Currency} za {Nights} noći.",
-                reservationId, totalPrice, summary.Currency, summary.Nights);
 
             return View();
         }
@@ -73,8 +74,12 @@ public class PaypalController : Controller
     {
         try
         {
+            var reservationId = TicketReservationId();
+            if (request.ReservationId != reservationId)
+                throw new BusinessException("The payment ticket does not belong to this reservation.");
+
             var customerId = await ResolveCustomerId();
-            var payment = await _paymentService.StartPayment(request.ReservationId, customerId);
+            var payment = await _paymentService.StartPayment(reservationId, customerId);
 
             var value = payment.Amount.ToString("F2", CultureInfo.InvariantCulture);
 
@@ -90,6 +95,8 @@ public class PaypalController : Controller
             {
                 _logger.LogError(e, "Kreiranje narudžbe za plaćanje {PaymentId} nije uspjelo (HTTP {StatusCode}).",
                     payment.Id, e.StatusCode);
+
+                await _paymentService.FailPayment(payment.Id, e.Message);
 
                 return BadRequest(new { message = e.Message });
             }
@@ -108,9 +115,16 @@ public class PaypalController : Controller
 
         try
         {
-            var settled = await _paymentService.GetByProviderOrder(orderId);
-            if (settled != null && settled.Status == PaymentStatus.Completed)
-                return Ok(new { reservationId = settled.ReservationId, amount = settled.Amount, status = settled.Status });
+            var reservationId = TicketReservationId();
+            var customerId = await ResolveCustomerId();
+
+            var owned = await _paymentService.GetOwnedByProviderOrder(orderId, reservationId, customerId);
+
+            if (owned.Status == PaymentStatus.Completed)
+                return Ok(new { reservationId = owned.ReservationId, amount = owned.Amount, status = owned.Status });
+
+            if (owned.Status != PaymentStatus.Created)
+                return BadRequest(new { message = "This payment attempt is no longer open. Please start the payment again." });
 
             CaptureOrderResponse response;
             try
@@ -122,7 +136,7 @@ public class PaypalController : Controller
                 _logger.LogError(e, "Naplata narudžbe {OrderId} nije uspjela (HTTP {StatusCode}, oznaka {Issue}).",
                     orderId, e.StatusCode, e.Issue ?? "bez oznake");
 
-                await _paymentService.FailPayment(orderId, e.Message);
+                await _paymentService.FailPayment(owned.Id, e.Message);
 
                 return BadRequest(new { message = e.Message });
             }
@@ -132,7 +146,7 @@ public class PaypalController : Controller
                 var reason = $"PayPal returned order {orderId} in status {response.status ?? "no status"}, but the payment is confirmed only in the COMPLETED status.";
 
                 _logger.LogError("{Reason}", reason);
-                await _paymentService.FailPayment(orderId, reason);
+                await _paymentService.FailPayment(owned.Id, reason);
 
                 return BadRequest(new { message = reason });
             }
@@ -143,15 +157,17 @@ public class PaypalController : Controller
                 var reason = $"PayPal's response for order {orderId} is in status COMPLETED but does not contain a single capture item.";
 
                 _logger.LogError("{Reason}", reason);
-                await _paymentService.FailPayment(orderId, reason);
+                await _paymentService.FailPayment(owned.Id, reason);
 
                 return BadRequest(new { message = reason });
             }
 
             var capturedAmount = decimal.Parse(capture.amount.value, CultureInfo.InvariantCulture);
-            var payment = await _paymentService.CompletePayment(orderId, capture.id, capturedAmount, capture.amount.currency_code);
+            var payment = await _paymentService.CompletePayment(owned.Id, capture.id, capturedAmount, capture.amount.currency_code);
 
             _logger.LogInformation("Plaćanje {PaymentId} za rezervaciju {ReservationId} je naplaćeno.", payment.Id, payment.ReservationId);
+
+            NotifyPaid(owned);
 
             return Ok(new { reservationId = payment.ReservationId, amount = payment.Amount, status = payment.Status });
         }
@@ -167,10 +183,52 @@ public class PaypalController : Controller
         return View();
     }
 
-    private void EnsureTicketMatches(Guid reservationId)
+    private void NotifyPaid(Payment payment)
+    {
+        var reservation = payment.Reservation;
+        var accommodationName = reservation?.accommodation?.Name ?? "your accommodation";
+        var amount = $"{payment.Amount.ToString("F2", CultureInfo.InvariantCulture)} {payment.Currency}";
+
+        if (Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var guestUserId))
+        {
+            _notifications.Publish(new NotificationEvent
+            {
+                UserId = guestUserId,
+                Type = NotificationType.PaymentCompleted,
+                Title = "Payment received",
+                Body = $"Your payment of {amount} for {accommodationName} was completed successfully.",
+                RelatedEntityId = payment.ReservationId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        var ownerUserId = reservation?.accommodation?.Owner?.UserId;
+        if (ownerUserId.HasValue)
+        {
+            _notifications.Publish(new NotificationEvent
+            {
+                UserId = ownerUserId.Value,
+                Type = NotificationType.PaymentCompleted,
+                Title = "Reservation paid",
+                Body = $"The guest paid {amount} for the reservation at {accommodationName}.",
+                RelatedEntityId = payment.ReservationId,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    private Guid TicketReservationId()
     {
         var raw = User.FindFirstValue(TokenHandlerService.ReservationClaim);
-        if (!Guid.TryParse(raw, out var ticketReservationId) || ticketReservationId != reservationId)
+        if (!Guid.TryParse(raw, out var ticketReservationId))
+            throw new BusinessException("The payment ticket does not identify a reservation.");
+
+        return ticketReservationId;
+    }
+
+    private void EnsureTicketMatches(Guid reservationId)
+    {
+        if (TicketReservationId() != reservationId)
             throw new BusinessException("The payment ticket does not belong to this reservation.");
     }
 

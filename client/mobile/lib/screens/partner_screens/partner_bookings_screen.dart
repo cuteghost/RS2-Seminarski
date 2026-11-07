@@ -45,7 +45,9 @@ class _PartnerBookingsScreenState extends State<PartnerBookingsScreen> {
     listen: false,
   ).fetchPartnerReservations();
 
-  void _reload() => setState(() => _bookings = _load());
+  void _reload() => setState(() {
+    _bookings = _load();
+  });
 
   Future<void> _apply(
     ReservationGET reservation,
@@ -477,8 +479,9 @@ class _BookingCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final accommodation = reservation.accommodation;
     final guest = reservation.guest;
+    final checkIn = reservation.checkInTime;
     final dateRange =
-        '${DateFormat('d MMM').format(reservation.startDate)} – ${DateFormat('d MMM').format(reservation.endDate)}';
+        '${DateFormat('d MMM').format(reservation.startDate)} – ${DateFormat('d MMM').format(reservation.endDate)}${checkIn == null ? '' : ' · check-in $checkIn'}';
     final nights = reservation.endDate.difference(reservation.startDate).inDays;
     final canClose = stayHasEnded(reservation);
     final reason = reservation.statusReason;

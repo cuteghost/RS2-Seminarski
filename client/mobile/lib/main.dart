@@ -4,6 +4,8 @@ import 'package:ebooking/providers/accommodation_provider.dart';
 import 'package:ebooking/providers/feedback_provider.dart';
 import 'package:ebooking/providers/location_provider.dart';
 import 'package:ebooking/providers/message_provider.dart';
+import 'package:ebooking/providers/notification_provider.dart';
+import 'package:ebooking/services/notification_service.dart';
 import 'package:ebooking/providers/catalog_provider.dart';
 import 'package:ebooking/providers/payment_provider.dart';
 import 'package:ebooking/providers/profile_provider.dart';
@@ -92,6 +94,11 @@ void main() {
           ),
         ),
         ChangeNotifierProvider(
+          create: (context) => NotificationProvider(
+            service: NotificationService(apiClient: apiClient),
+          ),
+        ),
+        ChangeNotifierProvider(
           create: (context) => FeedbackProvider(
             feedbackService: FeedbackService(apiClient: apiClient),
           ),
@@ -155,6 +162,7 @@ class MyApp extends StatelessWidget {
                 context,
                 listen: false,
               );
+              Provider.of<NotificationProvider>(context, listen: false).start();
 
               return FutureBuilder(
                 // The profile is a plain HTTP call and shares nothing with

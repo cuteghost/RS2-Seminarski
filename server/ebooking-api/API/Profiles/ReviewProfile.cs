@@ -1,14 +1,13 @@
-﻿using Models.Domain;
+using Models.Domain;
 using Models.DTO.ReviewDTO;
 
 namespace Profiles;
 
 public class ReviewProfile : AutoMapper.Profile
 {
-
     public ReviewProfile()
     {
-        CreateMap<Review, ReviewPOST>().ReverseMap();
-        CreateMap<Review, ReviewGET>().ReverseMap();
+        CreateMap<Review, ReviewGET>()
+            .ForMember(dest => dest.ImageUrl, opt => opt.Ignore());
     }
 }

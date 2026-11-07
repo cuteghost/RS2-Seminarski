@@ -38,6 +38,20 @@ class AccommodationProvider with ChangeNotifier {
     return updated;
   }
 
+  Future<AccommodationGET> setStatus(String accommodationId, bool status) async {
+    final updated = await accommodationService.setStatus(
+      accommodationId,
+      status,
+    );
+    notifyListeners();
+    return updated;
+  }
+
+  Future<List<AccommodationGET>> fetchPromoted() async {
+    final page = await accommodationService.fetchPromoted();
+    return page.items;
+  }
+
   Future<Uint8List> fetchImage(String imageUrl) {
     return accommodationService.fetchImage(imageUrl);
   }

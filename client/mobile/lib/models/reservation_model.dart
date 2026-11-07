@@ -70,6 +70,7 @@ class ReservationGET {
   final AccommodationGET? accommodation;
   final String? thumbnailUrl;
   final ReservationGuest? guest;
+  final String? checkInTime;
   ReservationGET({
     required this.id,
     required this.accommodationId,
@@ -86,6 +87,7 @@ class ReservationGET {
     this.statusReason,
     this.accommodation,
     this.guest,
+    this.checkInTime,
   });
 
   bool get isActive =>
@@ -115,7 +117,13 @@ class ReservationGET {
       guest: json['guest'] == null
           ? null
           : ReservationGuest.fromJson(json['guest'] as Map<String, dynamic>),
+      checkInTime: _shortTime(json['checkInTime'] as String?),
     );
+  }
+
+  static String? _shortTime(String? raw) {
+    if (raw == null || raw.length < 5) return null;
+    return raw.substring(0, 5);
   }
 }
 
@@ -124,13 +132,20 @@ class ReservationPOST {
   final DateTime startDate;
   final DateTime endDate;
   final int numberOfGuests;
+  final int checkInHour;
+  final int checkInMinute;
 
   ReservationPOST({
     required this.accommodationId,
     required this.startDate,
     required this.endDate,
     required this.numberOfGuests,
+    required this.checkInHour,
+    required this.checkInMinute,
   });
+
+  String get checkInTime =>
+      '${checkInHour.toString().padLeft(2, '0')}:${checkInMinute.toString().padLeft(2, '0')}:00';
 
   Map<String, dynamic> toJson() {
     return {
@@ -138,6 +153,7 @@ class ReservationPOST {
       'StartDate': startDate.toIso8601String(),
       'EndDate': endDate.toIso8601String(),
       'NumberOfGuests': numberOfGuests,
+      'CheckInTime': checkInTime,
     };
   }
 }

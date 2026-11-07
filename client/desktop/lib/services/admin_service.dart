@@ -274,6 +274,18 @@ class AdminService {
         response, 'Property status successfully changed.');
   }
 
+  /// `PATCH /api/Accommodation/Promote/{id}?promoted=`
+  Future<String> setAccommodationPromoted({
+    required String accommodationId,
+    required bool promoted,
+  }) async {
+    final uri = Uri.parse('${config.AppConfig.baseUrl}/api/Accommodation/Promote/$accommodationId')
+        .replace(queryParameters: {'promoted': '$promoted'});
+    final response = await http.patch(uri, headers: await _headers());
+    return ApiResponseHandler.successMessage(
+        response, 'Property promotion successfully changed.');
+  }
+
   /// `DELETE /api/Accommodation/Delete/{id}`
   Future<String> deleteAccommodation(String accommodationId) async {
     final response = await http.delete(

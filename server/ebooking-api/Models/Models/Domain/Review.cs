@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Domain;
@@ -17,12 +17,14 @@ public class Review : ISoftDeleted
     [ForeignKey("Accommodation")]
     public Guid AccommodationId { get; set; }
 
+    [ForeignKey("Reservation")]
+    public Guid? ReservationId { get; set; }
+
     [Required]
     public int Rating { get; set; }
 
     [Required]
     public bool Satisfaction { get; set; } = false;
-
 
     [Required]
     public bool WouldRecommend { get; set; } = false;
@@ -32,5 +34,7 @@ public class Review : ISoftDeleted
 
     public virtual Customer Customer { get; set; }
     public virtual Accommodation Accommodation { get; set; }
+    public virtual Reservation? Reservation { get; set; }
+    public virtual ReviewImage? Image { get; set; }
     public bool IsDeleted { get; set; }
 }

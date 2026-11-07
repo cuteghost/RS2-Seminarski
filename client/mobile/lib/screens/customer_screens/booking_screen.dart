@@ -7,11 +7,21 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:ebooking/screens/customer_screens/checkout_screen.dart';
 import 'package:ebooking/screens/customer_screens/reservation_confirmation_screen.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
-enum _PayChoice { now, later }
+const TimeOfDay earliestCheckIn = TimeOfDay(hour: 12, minute: 0);
+const TimeOfDay latestCheckIn = TimeOfDay(hour: 22, minute: 0);
+const Color freeDayColor = Color(0xFF2563EB);
+
+int _minutesOf(TimeOfDay time) => time.hour * 60 + time.minute;
+
+bool isCheckInTimeAllowed(TimeOfDay time) =>
+    _minutesOf(time) >= _minutesOf(earliestCheckIn) &&
+    _minutesOf(time) <= _minutesOf(latestCheckIn);
+
+String formatTime(TimeOfDay time) =>
+    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
 DateTime dateOnly(DateTime day) => DateTime(day.year, day.month, day.day);
 
@@ -50,6 +60,7 @@ class BookingScreen extends StatefulWidget {
 
 class BookingScreenState extends State<BookingScreen> {
   int numberOfGuests = 1;
+  TimeOfDay checkInTime = const TimeOfDay(hour: 14, minute: 0);
   DateTime? fromDate;
   DateTime? toDate;
   final CalendarFormat _calendarFormat = CalendarFormat.month;
@@ -61,6 +72,73 @@ class BookingScreenState extends State<BookingScreen> {
     super.initState();
     _prefillFromSearch();
     _loadReservedDates();
+  }
+
+  int get _maxGuests {
+    final beds = widget.accommodation.accommodationDetails.numberOfBeds;
+    return beds < 1 ? 1 : beds;
+  }
+
+  Future<void> _pickCheckInTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: checkInTime,
+      helpText: 'Check-in time',
+    );
+    if (picked == null || !mounted) return;
+
+    if (!isCheckInTimeAllowed(picked)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Check-in is possible between ${formatTime(earliestCheckIn)} and ${formatTime(latestCheckIn)}.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    setState(() => checkInTime = picked);
+  }
+
+  /// A day nobody holds. Blue, as the application describes free dates, so a
+  /// guest can tell open days from booked (red) ones at a glance.
+  Widget _freeDay(DateTime date, {bool outside = false}) {
+    return Center(
+      child: Container(
+        height: 36,
+        width: 36,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: freeDayColor.withValues(alpha: outside ? 0.05 : 0.12),
+        ),
+        child: Center(
+          child: Text(
+            date.day.toString(),
+            style: TextStyle(
+              color: outside
+                  ? freeDayColor.withValues(alpha: 0.5)
+                  : freeDayColor,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _legendDot(Color color, String label, TextTheme textTheme) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+        ),
+        const SizedBox(width: 6),
+        Text(label, style: textTheme.bodySmall),
+      ],
+    );
   }
 
   void _prefillFromSearch() {
@@ -152,11 +230,11 @@ class BookingScreenState extends State<BookingScreen> {
     final total = widget.accommodation.pricePerNight * nights;
     final textTheme = Theme.of(context).textTheme;
 
-    final choice = await showDialog<_PayChoice>(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('When do you want to pay?'),
+        title: const Text('Send booking request?'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,6 +246,10 @@ class BookingScreenState extends State<BookingScreen> {
               style: textTheme.bodySmall,
             ),
             Text(
+              'Check-in at ${formatTime(checkInTime)}',
+              style: textTheme.bodySmall,
+            ),
+            Text(
               '$nights night${nights > 1 ? 's' : ''} · $numberOfGuests guest${numberOfGuests > 1 ? 's' : ''}',
               style: textTheme.bodySmall,
             ),
@@ -175,49 +257,34 @@ class BookingScreenState extends State<BookingScreen> {
             Text('\$${total.toStringAsFixed(2)}', style: textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
-              'Pay now opens PayPal straight away. Pay later holds the booking and leaves the payment for the Trips screen. Either way the host still has to answer, and the amount is worked out again on the server before you pay.',
+              'The host has to confirm the booking first. Once it is confirmed you can pay with PayPal from the Trips screen.',
               style: textTheme.bodySmall,
             ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
             child: const Text('Back'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(_PayChoice.later),
-            child: const Text('Pay later'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(_PayChoice.now),
-            child: const Text('Pay now'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Send request'),
           ),
         ],
       ),
     );
 
-    if (choice == null || !mounted) return;
+    if (confirmed != true || !mounted) return;
 
     final reservation = ReservationPOST(
       accommodationId: widget.accommodation.id,
       startDate: start,
       endDate: end,
       numberOfGuests: numberOfGuests,
+      checkInHour: checkInTime.hour,
+      checkInMinute: checkInTime.minute,
     );
-
-    if (choice == _PayChoice.now) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CheckoutScreen.forNewBooking(
-            accommodationName: widget.accommodation.name,
-            reservation: reservation,
-          ),
-        ),
-      );
-      return;
-    }
 
     await _holdWithoutPaying(reservation);
   }
@@ -307,13 +374,22 @@ class BookingScreenState extends State<BookingScreen> {
                       const SizedBox(width: 14),
                       _StepperCircle(
                         icon: PhosphorIcons.plus(),
-                        enabled: true,
+                        enabled: numberOfGuests < _maxGuests,
                         accent: true,
-                        onTap: () => setState(() => numberOfGuests++),
+                        onTap: () => setState(() {
+                          if (numberOfGuests < _maxGuests) numberOfGuests++;
+                        }),
                       ),
                     ],
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'This place hosts up to $_maxGuests guest${_maxGuests > 1 ? 's' : ''}.',
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.textTertiary,
               ),
             ),
             const SizedBox(height: 22),
@@ -417,25 +493,25 @@ class BookingScreenState extends State<BookingScreen> {
                     if (isDayTaken(date, reservedRanges)) {
                       return _takenDay(date);
                     }
-                    return Center(
-                      child: Text(
-                        date.day.toString(),
-                        style: const TextStyle(color: AppColors.text),
-                      ),
-                    );
+                    return _freeDay(date);
                   },
                   outsideBuilder: (context, date, events) {
                     if (isDayTaken(date, reservedRanges)) {
                       return _takenDay(date, outside: true);
                     }
-                    return Center(
-                      child: Text(
-                        date.day.toString(),
-                        style: TextStyle(
-                          color: AppColors.textTertiary.withValues(alpha: 0.6),
+                    if (date.isBefore(today) || date.isAfter(lastDay)) {
+                      return Center(
+                        child: Text(
+                          date.day.toString(),
+                          style: TextStyle(
+                            color: AppColors.textTertiary.withValues(
+                              alpha: 0.6,
+                            ),
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    }
+                    return _freeDay(date, outside: true);
                   },
                   selectedBuilder: (context, date, events) {
                     return Center(
@@ -488,6 +564,55 @@ class BookingScreenState extends State<BookingScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 16,
+              children: [
+                _legendDot(freeDayColor, 'Free', textTheme),
+                _legendDot(AppColors.error, 'Booked', textTheme),
+                _legendDot(AppColors.accent, 'Your stay', textTheme),
+              ],
+            ),
+            const SizedBox(height: 22),
+            Text('Check-in time', style: textTheme.titleMedium),
+            const SizedBox(height: 10),
+            InkWell(
+              borderRadius: BorderRadius.circular(AppColors.radiusMd),
+              onTap: _pickCheckInTime,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(AppColors.radiusMd),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      PhosphorIcons.clock(),
+                      size: 18,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        formatTime(checkInTime),
+                        style: textTheme.bodyMedium,
+                      ),
+                    ),
+                    Text(
+                      '${formatTime(earliestCheckIn)}–${formatTime(latestCheckIn)}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             if (fromDate != null) ...[
               const SizedBox(height: 10),
               Text(
@@ -508,13 +633,13 @@ class BookingScreenState extends State<BookingScreen> {
                       width: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Confirm booking'),
+                  : const Text('Request booking'),
             ),
             if (_placing)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  'Holding your dates without paying...',
+                  'Sending your booking request...',
                   style: textTheme.bodySmall?.copyWith(
                     color: AppColors.textTertiary,
                   ),

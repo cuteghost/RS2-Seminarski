@@ -55,15 +55,15 @@ class ReservationConfirmationPage extends StatelessWidget {
               ),
               const SizedBox(height: 28),
               Text(
-                paid ? 'You’re all booked' : 'Your dates are held',
+                paid ? 'You’re all booked' : 'Booking request sent',
                 style: textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
               Text(
                 paid
-                    ? 'Your payment for $accommodationName went through. The host still has to accept the booking, and you can follow that under Trips.'
-                    : '$accommodationName is booked but not paid yet. Pay it whenever you like from Trips. The host still has to accept the booking.',
+                    ? 'Your payment for $accommodationName went through. Your stay is confirmed and paid, and you can find it under Trips.'
+                    : 'Your request for $accommodationName was sent to the host. Once the host confirms it, you can pay from Trips.',
                 style: textTheme.bodyLarge?.copyWith(
                   color: AppColors.textSecondary,
                 ),

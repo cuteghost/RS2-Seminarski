@@ -44,6 +44,26 @@ class AccommodationService {
     );
   }
 
+  Future<AccommodationGET> setStatus(String accommodationId, bool status) {
+    return _apiClient.patch<AccommodationGET>(
+      '/api/Accommodation/Status/$accommodationId',
+      query: <String, String>{'status': '$status'},
+      parse: (data) => AccommodationGET.fromJson(data as Map<String, dynamic>),
+    );
+  }
+
+  Future<Paged<AccommodationGET>> fetchPromoted({
+    int page = ApiPagination.firstPage,
+    int pageSize = ApiPagination.defaultPageSize,
+  }) {
+    return _apiClient.getPaged<AccommodationGET>(
+      '/api/Accommodation/GetPromoted',
+      parseItem: AccommodationGET.fromJson,
+      page: page,
+      pageSize: pageSize,
+    );
+  }
+
   Future<Uint8List> fetchImage(String imageUrl) {
     return _apiClient.getBytes(imageUrl);
   }

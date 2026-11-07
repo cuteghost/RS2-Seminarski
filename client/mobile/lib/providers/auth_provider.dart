@@ -119,6 +119,22 @@ class AuthProvider with ChangeNotifier {
 
   Future<String> currentEmail() => _authService.currentUserEmail();
 
+  Future<String> requestPasswordReset(String email) {
+    return _authService.requestPasswordReset(email);
+  }
+
+  Future<String> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) {
+    return _authService.resetPassword(
+      email: email,
+      code: code,
+      newPassword: newPassword,
+    );
+  }
+
   Future<String> roleCheck() async {
     _userId = await _authService.currentUserId();
     _role = await _authService.roleCheck();

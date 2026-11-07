@@ -18,6 +18,7 @@ public class LocationController : Controller
         _locationService = locationService;
     }
 
+    [Authorize(Roles = Roles.Administrator)]
     [HttpPost]
     [Route("Add")]
     public async Task<IActionResult> Add([FromBody] LocationPOST locationDto)

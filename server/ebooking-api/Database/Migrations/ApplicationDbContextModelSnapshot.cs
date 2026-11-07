@@ -37,12 +37,18 @@ namespace Database.Migrations
                     b.Property<Guid>("AccommodationTypeId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPromoted")
                         .HasColumnType("bit");
 
                     b.Property<Guid?>("LocationId")
@@ -59,6 +65,9 @@ namespace Database.Migrations
                     b.Property<double>("PricePerNight")
                         .HasColumnType("float");
 
+                    b.Property<DateTime?>("PromotedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal>("ReviewScore")
                         .HasColumnType("decimal(3,1)");
 
@@ -72,6 +81,9 @@ namespace Database.Migrations
                     b.HasIndex("AccommodationImagesId");
 
                     b.HasIndex("AccommodationTypeId");
+
+                    b.HasIndex("IsPromoted")
+                        .HasFilter("[IsPromoted] = 1 AND [IsDeleted] = 0");
 
                     b.HasIndex("LocationId");
 
@@ -88,6 +100,7 @@ namespace Database.Migrations
                             AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000005"),
                             Description = "Vila sa pet spavaćih soba i pogledom na sarajevsku kotlinu, deset minuta vožnje od centra grada.",
                             IsDeleted = false,
+                            IsPromoted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000001"),
                             Name = "Villa Poljine",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
@@ -103,6 +116,7 @@ namespace Database.Migrations
                             AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000004"),
                             Description = "Apartman u srcu Baščaršije, uz Sebilj i glavnu pješačku zonu, sa potpuno opremljenom kuhinjom.",
                             IsDeleted = false,
+                            IsPromoted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000002"),
                             Name = "Apartman Baščaršija",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
@@ -118,6 +132,7 @@ namespace Database.Migrations
                             AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000002"),
                             Description = "Hotel na obali Miljacke, preko puta Vijećnice, sa doručkom i besplatnim parkingom za goste.",
                             IsDeleted = false,
+                            IsPromoted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000003"),
                             Name = "Hotel Vijećnica",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
@@ -133,6 +148,7 @@ namespace Database.Migrations
                             AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000006"),
                             Description = "Hostel uz Latinsku ćupriju sa zajedničkom kuhinjom i sobama za dva do šest gostiju.",
                             IsDeleted = false,
+                            IsPromoted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000004"),
                             Name = "Hostel Latinska Ćuprija",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
@@ -148,6 +164,7 @@ namespace Database.Migrations
                             AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000008"),
                             Description = "Potkrovni stan na Marijin Dvoru sa velikom terasom, pogledom na Trebević i dva parking mjesta.",
                             IsDeleted = false,
+                            IsPromoted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000005"),
                             Name = "Penthouse Marijin Dvor",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
@@ -163,6 +180,7 @@ namespace Database.Migrations
                             AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000001"),
                             Description = "Kuća na padinama Trebevića sa baštom i roštiljem, idealna za porodični boravak van gradske vreve.",
                             IsDeleted = false,
+                            IsPromoted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000006"),
                             Name = "Kuća na Trebeviću",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
@@ -178,6 +196,7 @@ namespace Database.Migrations
                             AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000004"),
                             Description = "Apartman u starom dijelu Mostara, nekoliko koraka od Starog mosta i mostarske čaršije.",
                             IsDeleted = false,
+                            IsPromoted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000007"),
                             Name = "Apartman Stari Most",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000001"),
@@ -193,6 +212,7 @@ namespace Database.Migrations
                             AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000005"),
                             Description = "Vila sa privatnim bazenom na Bačvicama, sa direktnim izlazom na šetnicu i gradsku plažu.",
                             IsDeleted = false,
+                            IsPromoted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000008"),
                             Name = "Villa Riva",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000002"),
@@ -208,6 +228,7 @@ namespace Database.Migrations
                             AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000004"),
                             Description = "Apartman unutar zidina Dioklecijanove palače, sa klimom i pogledom na staru gradsku jezgru.",
                             IsDeleted = false,
+                            IsPromoted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000009"),
                             Name = "Apartman Dioklecijan",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000002"),
@@ -223,6 +244,7 @@ namespace Database.Migrations
                             AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000002"),
                             Description = "Hotel iznad dubrovačkih gradskih zidina, sa spa centrom, restoranom i pogledom na otvoreno more.",
                             IsDeleted = false,
+                            IsPromoted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000010"),
                             Name = "Hotel Adriatic",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000002"),
@@ -238,6 +260,7 @@ namespace Database.Migrations
                             AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000007"),
                             Description = "Vikendica u zelenilu Rožnika, dvadeset minuta hoda od centra Ljubljane, sa kaminom i terasom.",
                             IsDeleted = false,
+                            IsPromoted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000011"),
                             Name = "Vikendica Rožnik",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000003"),
@@ -253,6 +276,7 @@ namespace Database.Migrations
                             AccommodationTypeId = new Guid("0000000f-0000-0000-0000-000000000003"),
                             Description = "Resort nadomak Salzburga sa unutrašnjim bazenom, wellness centrom i pogledom na Alpe.",
                             IsDeleted = false,
+                            IsPromoted = false,
                             LocationId = new Guid("00000003-0000-0000-0000-000000000012"),
                             Name = "Resort Alpenblick",
                             OwnerId = new Guid("00000006-0000-0000-0000-000000000003"),
@@ -1838,6 +1862,50 @@ namespace Database.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Models.Domain.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("RelatedEntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "IsRead", "CreatedAt");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("Models.Domain.Partner", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1905,6 +1973,42 @@ namespace Database.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Models.Domain.PasswordResetToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FailedAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "UsedAt");
+
+                    b.ToTable("PasswordResetTokens");
+                });
+
             modelBuilder.Entity("Models.Domain.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1970,6 +2074,9 @@ namespace Database.Migrations
 
                     b.Property<Guid>("AccommodationId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<TimeOnly?>("CheckInTime")
+                        .HasColumnType("time");
 
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
@@ -2982,6 +3089,9 @@ namespace Database.Migrations
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("ReservationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("Satisfaction")
                         .HasColumnType("bit");
 
@@ -2994,6 +3104,10 @@ namespace Database.Migrations
 
                     b.HasIndex("CustomerId");
 
+                    b.HasIndex("ReservationId")
+                        .IsUnique()
+                        .HasFilter("[ReservationId] IS NOT NULL AND [IsDeleted] = 0");
+
                     b.ToTable("Reviews");
 
                     b.HasData(
@@ -3005,6 +3119,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000001"),
                             IsDeleted = false,
                             Rating = 1,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000001"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3016,6 +3131,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000002"),
                             IsDeleted = false,
                             Rating = 2,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000002"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3027,6 +3143,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000002"),
                             IsDeleted = false,
                             Rating = 2,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000006"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3038,6 +3155,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000003"),
                             IsDeleted = false,
                             Rating = 3,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000007"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3049,6 +3167,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000003"),
                             IsDeleted = false,
                             Rating = 3,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000011"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3060,6 +3179,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000004"),
                             IsDeleted = false,
                             Rating = 4,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000012"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3071,6 +3191,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000004"),
                             IsDeleted = false,
                             Rating = 4,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000016"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3082,6 +3203,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000005"),
                             IsDeleted = false,
                             Rating = 5,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000017"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3093,6 +3215,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000005"),
                             IsDeleted = false,
                             Rating = 5,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000021"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3104,6 +3227,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000001"),
                             IsDeleted = false,
                             Rating = 6,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000022"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3115,6 +3239,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000001"),
                             IsDeleted = false,
                             Rating = 6,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000026"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3126,6 +3251,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000002"),
                             IsDeleted = false,
                             Rating = 7,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000027"),
                             Satisfaction = true,
                             WouldRecommend = true
                         },
@@ -3137,6 +3263,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000002"),
                             IsDeleted = false,
                             Rating = 7,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000031"),
                             Satisfaction = true,
                             WouldRecommend = true
                         },
@@ -3148,6 +3275,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000003"),
                             IsDeleted = false,
                             Rating = 8,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000032"),
                             Satisfaction = true,
                             WouldRecommend = true
                         },
@@ -3159,6 +3287,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000003"),
                             IsDeleted = false,
                             Rating = 8,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000036"),
                             Satisfaction = true,
                             WouldRecommend = true
                         },
@@ -3170,6 +3299,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000004"),
                             IsDeleted = false,
                             Rating = 9,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000037"),
                             Satisfaction = true,
                             WouldRecommend = true
                         },
@@ -3181,6 +3311,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000004"),
                             IsDeleted = false,
                             Rating = 9,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000041"),
                             Satisfaction = true,
                             WouldRecommend = true
                         },
@@ -3192,6 +3323,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000005"),
                             IsDeleted = false,
                             Rating = 10,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000042"),
                             Satisfaction = true,
                             WouldRecommend = true
                         },
@@ -3203,6 +3335,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000005"),
                             IsDeleted = false,
                             Rating = 10,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000046"),
                             Satisfaction = true,
                             WouldRecommend = true
                         },
@@ -3214,6 +3347,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000001"),
                             IsDeleted = false,
                             Rating = 1,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000047"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3225,6 +3359,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000001"),
                             IsDeleted = false,
                             Rating = 1,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000051"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3236,6 +3371,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000002"),
                             IsDeleted = false,
                             Rating = 2,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000052"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3247,6 +3383,7 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000002"),
                             IsDeleted = false,
                             Rating = 2,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000056"),
                             Satisfaction = false,
                             WouldRecommend = false
                         },
@@ -3258,9 +3395,34 @@ namespace Database.Migrations
                             CustomerId = new Guid("00000007-0000-0000-0000-000000000003"),
                             IsDeleted = false,
                             Rating = 3,
+                            ReservationId = new Guid("0000000b-0000-0000-0000-000000000057"),
                             Satisfaction = false,
                             WouldRecommend = false
                         });
+                });
+
+            modelBuilder.Entity("Models.Domain.ReviewImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("Image")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ReviewId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewId")
+                        .IsUnique();
+
+                    b.ToTable("ReviewImages");
                 });
 
             modelBuilder.Entity("Models.Domain.User", b =>
@@ -3626,6 +3788,17 @@ namespace Database.Migrations
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("Models.Domain.Notification", b =>
+                {
+                    b.HasOne("Models.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Models.Domain.Partner", b =>
                 {
                     b.HasOne("Models.Domain.Country", "Country")
@@ -3639,6 +3812,17 @@ namespace Database.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("Country");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Domain.PasswordResetToken", b =>
+                {
+                    b.HasOne("Models.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -3698,9 +3882,27 @@ namespace Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Models.Domain.Reservation", "Reservation")
+                        .WithMany()
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("Accommodation");
 
                     b.Navigation("Customer");
+
+                    b.Navigation("Reservation");
+                });
+
+            modelBuilder.Entity("Models.Domain.ReviewImage", b =>
+                {
+                    b.HasOne("Models.Domain.Review", "Review")
+                        .WithOne("Image")
+                        .HasForeignKey("Models.Domain.ReviewImage", "ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Review");
                 });
 
             modelBuilder.Entity("Models.Domain.Accommodation", b =>
@@ -3721,6 +3923,11 @@ namespace Database.Migrations
             modelBuilder.Entity("Models.Domain.Chat", b =>
                 {
                     b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Models.Domain.Review", b =>
+                {
+                    b.Navigation("Image");
                 });
 #pragma warning restore 612, 618
         }

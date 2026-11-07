@@ -11,6 +11,7 @@ using Services.CurrentUserService;
 using Services.FacebookService;
 using Services.Google;
 using Authentication.Services.TokenHandlerService;
+using Services.PasswordResetService;
 
 namespace Controllers.UserControllers;
 
@@ -28,16 +29,40 @@ public class AuthController : Controller
     private readonly IFacebookAuthService _facebook;
     private readonly IGoogleAuthService _googleAuthService;
     private readonly ICurrentUserService _currentUser;
+    private readonly IPasswordResetService _passwordReset;
 
     public AuthController(ILoginRepository loginRepository, ITokenHandlerService tokenHandlerService, IMapper mapper,
-                          IFacebookAuthService facebook, IGoogleAuthService googleAuthService, ICurrentUserService currentUser)
+                          IFacebookAuthService facebook, IGoogleAuthService googleAuthService, ICurrentUserService currentUser,
+                          IPasswordResetService passwordReset)
     {
+        _passwordReset = passwordReset;
         _loginRepository = loginRepository;
         _tokenHandlerService = tokenHandlerService;
         _currentUser = currentUser;
         _mapper = mapper;
         _facebook = facebook;
         _googleAuthService = googleAuthService;
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO request)
+    {
+        await _passwordReset.RequestReset(request.Email);
+
+        return Ok(new BaseResponse<object>(
+            "If an account with that email exists, a reset code has been sent to it. The code is valid for 15 minutes.", null));
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO request)
+    {
+        await _passwordReset.ResetPassword(request.Email, request.Code, request.NewPassword);
+
+        return Ok(new BaseResponse<object>("Your password has been changed. Please log in with the new password.", null));
     }
 
     [AllowAnonymous]

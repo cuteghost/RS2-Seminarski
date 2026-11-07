@@ -22,9 +22,12 @@ class FeedbackService {
   /// The review this customer left for one accommodation. `ByAccommodation`
   /// cannot answer this: it pages through everyone's reviews and drops the
   /// ones without a comment.
-  Future<MyReview> fetchMine(String accommodationId) {
+  Future<MyReview> fetchMine(String accommodationId, {String? reservationId}) {
     return _apiClient.get<MyReview>(
       '/api/Feedback/Mine/$accommodationId',
+      query: reservationId == null
+          ? null
+          : <String, String>{'reservationId': reservationId},
       parse: (data) => MyReview.fromJson(data as Map<String, dynamic>),
     );
   }

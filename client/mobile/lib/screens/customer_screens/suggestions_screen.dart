@@ -89,6 +89,9 @@ class SuggestionsScreenState extends State<SuggestionsScreen> {
                 pricePerNight: accommodation.pricePerNight,
                 reviewScore: accommodation.reviewScore,
                 address: accommodation.location.address,
+                reason: accommodation.recommendationReasons.isEmpty
+                    ? accommodation.recommendationReason
+                    : accommodation.recommendationReasons.take(2).join(' · '),
                 onTap: () {
                   Navigator.push(
                     context,

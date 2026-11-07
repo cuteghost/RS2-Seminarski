@@ -1,3 +1,5 @@
+import 'package:ebooking/utils/server_time.dart';
+
 class MessagePOST {
   final String content;
   final DateTime timeStamp;
@@ -10,11 +12,7 @@ class MessagePOST {
   });
 
   Map<String, dynamic> toJson() {
-    return {
-      'content': content,
-      'timeStamp': DateTime.now().toIso8601String(),
-      'chatId': chatId,
-    };
+    return {'content': content, 'chatId': chatId};
   }
 }
 
@@ -39,10 +37,34 @@ class MessageGET {
     return MessageGET(
       sender: json['senderId'],
       content: json['content'],
-      timeStamp: DateTime.parse(json['timeStamp']),
+      timeStamp: parseServerUtc(json['timeStamp'] as String),
       isRead: json['isRead'],
       chatId: json['chatId'],
-      isCurrent: json['isCurrent'],
+      isCurrent: json['isCurrent'] as bool? ?? false,
+    );
+  }
+}
+
+class MessagePage {
+  final List<MessageGET> items;
+  final int page;
+  final bool hasMore;
+
+  const MessagePage({
+    required this.items,
+    required this.page,
+    required this.hasMore,
+  });
+
+  factory MessagePage.fromJson(Map<String, dynamic> json) {
+    final items = (json['items'] as List? ?? const [])
+        .map((e) => MessageGET.fromJson(e as Map<String, dynamic>))
+        .toList();
+    items.sort((a, b) => a.timeStamp.compareTo(b.timeStamp));
+    return MessagePage(
+      items: items,
+      page: (json['page'] as num?)?.toInt() ?? 1,
+      hasMore: json['hasMore'] as bool? ?? false,
     );
   }
 }
@@ -59,29 +81,35 @@ class ChatPOST {
 
 class ChatGET {
   final String id;
+  final String user1Id;
+  final String user2Id;
   final String user1;
   final String user2;
-  List<MessageGET> messages;
+  MessageGET? lastMessage;
+  int unreadCount;
 
   ChatGET({
     required this.id,
+    required this.user1Id,
+    required this.user2Id,
     required this.user1,
     required this.user2,
-    required this.messages,
+    required this.lastMessage,
+    required this.unreadCount,
   });
 
   factory ChatGET.fromJson(Map<String, dynamic> json) {
-    final messages = (json['messages'] as List)
-        .map((e) => MessageGET.fromJson(e))
-        .toList();
-    messages.sort((a, b) => a.timeStamp.compareTo(b.timeStamp));
+    final last = json['lastMessage'];
     return ChatGET(
       id: json['id'],
-      user1: json['user1'],
-      user2: json['user2'],
-      messages: messages,
+      user1Id: json['user1Id'] as String? ?? '',
+      user2Id: json['user2Id'] as String? ?? '',
+      user1: json['user1'] as String? ?? '',
+      user2: json['user2'] as String? ?? '',
+      lastMessage: last == null
+          ? null
+          : MessageGET.fromJson(last as Map<String, dynamic>),
+      unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
     );
   }
-
-  MessageGET? get lastMessage => messages.isEmpty ? null : messages.last;
 }

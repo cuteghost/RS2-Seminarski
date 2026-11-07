@@ -13,4 +13,6 @@ public class ReservationPOST
     [Required]
     public Guid AccommodationId { get; set; }
 
+    public TimeOnly? CheckInTime { get; set; }
+
 }

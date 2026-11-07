@@ -3,11 +3,13 @@ import 'package:ebooking/config/app_theme.dart';
 import 'package:ebooking/config/config.dart';
 import 'package:ebooking/providers/auth_provider.dart';
 import 'package:ebooking/providers/message_provider.dart';
+import 'package:ebooking/providers/notification_provider.dart';
 import 'package:ebooking/providers/profile_provider.dart';
 import 'package:ebooking/screens/customer_screens/customer_register_screen.dart';
 import 'package:ebooking/services/api_client.dart';
 import 'package:ebooking/screens/partner_screens/my_accommodations_screen.dart';
 import 'package:ebooking/utils/navigation_utils.dart';
+import 'package:ebooking/screens/forgot_password_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ebooking/screens/customer_screens/discover_screen.dart';
 import 'package:flutter/gestures.dart';
@@ -52,6 +54,22 @@ class _LoginPageState extends State<LoginPage> {
         'FACEBOOK_APP_ID.';
   }
 
+  Future<void> _openForgotPassword() async {
+    final email = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            ForgotPasswordScreen(initialEmail: _emailController.text.trim()),
+      ),
+    );
+    if (!mounted || email == null) return;
+    setState(() {
+      _emailController.text = email;
+      _passwordController.clear();
+      _errorMessage = null;
+    });
+  }
+
   // Shared post-login sequence: identical for email/password, Facebook and
   // Google -- only how `loggedIn` was obtained differs between the three.
   Future<void> _afterSuccessfulLogin() async {
@@ -64,6 +82,10 @@ class _LoginPageState extends State<LoginPage> {
       context,
       listen: false,
     );
+    final notificationProvider = Provider.of<NotificationProvider>(
+      context,
+      listen: false,
+    );
 
     final String role;
     try {
@@ -72,6 +94,7 @@ class _LoginPageState extends State<LoginPage> {
         messageProvider.loadInitialState(),
         if (role != Roles.partner) profileProvider.getProfile(),
       ]);
+      notificationProvider.start();
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -247,6 +270,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     onSubmitted: (_) =>
                         _isSubmitting ? null : _submitEmailLogin(),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _isSubmitting ? null : _openForgotPassword,
+                      child: const Text('Forgot password?'),
+                    ),
                   ),
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 14),

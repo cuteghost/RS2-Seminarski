@@ -1,8 +1,9 @@
-﻿namespace Models.DTO.MessengerDTO;
+namespace Models.DTO.MessengerDTO;
 
 public class MessageGET
 {
-    public string Content { get; set; }
+    public Guid Id { get; set; }
+    public string Content { get; set; } = string.Empty;
     public DateTime TimeStamp { get; set; }
     public bool isCurrent { get; set; } = true;
     public Guid SenderId { get; set; }

@@ -78,22 +78,12 @@ class _MyAccommodationsScreenState extends State<MyAccommodationsScreen> {
   }
 
   Future<void> _publish(AccommodationGET accommodation) async {
-    final patch = AccommodationPATCH(
-      id: accommodation.id,
-      status: true,
-      name: accommodation.name,
-      accommodationTypeId: accommodation.accommodationTypeId,
-      pricePerNight: accommodation.pricePerNight,
-      description: accommodation.description,
-      accommodationDetails: accommodation.accommodationDetails,
-      images: null,
-    );
     String? failure;
     try {
       await Provider.of<AccommodationProvider>(
         context,
         listen: false,
-      ).updateAccommodation(patch);
+      ).setStatus(accommodation.id, true);
     } on ApiException catch (e) {
       failure = e.message;
     }

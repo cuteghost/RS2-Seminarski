@@ -9,10 +9,8 @@ public class AccommodationPOST
     public string Name { get; set; } = string.Empty;
     public Guid AccommodationTypeId { get; set; }
     public double PricePerNight { get; set; }
-    public byte[]? ImageThumb { get; set; }
     public string Description { get; set; } = string.Empty;
     public AccommodationImagesPOST? AccommodationImages { get; set; }
     public LocationPOST? Location { get; set; }
     public AccommodationDetailsPOST? AccommodationDetails { get; set; }
-
 }

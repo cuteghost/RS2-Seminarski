@@ -14,6 +14,9 @@ public class Reservation : ISoftDeleted
     public DateTime StartDate { get; set; }
     [Required]
     public DateTime EndDate { get; set; }
+
+    [Column(TypeName = "time")]
+    public TimeOnly? CheckInTime { get; set; }
     [ForeignKey("accommodation")]
     public Guid AccommodationId { get; set; }
     [ForeignKey("customer")]

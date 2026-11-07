@@ -9,7 +9,6 @@ namespace Database.Services.AccommodationImageService;
 public class AccommodationImageService : IAccommodationImageService
 {
     private const string ImagesForeignKey = "AccommodationImagesId";
-    private const int RequiredImageCount = 5;
 
     private readonly ApplicationDbContext _context;
 
@@ -94,9 +93,7 @@ public class AccommodationImageService : IAccommodationImageService
 
     public async Task Replace(Guid accommodationId, AccommodationImages images)
     {
-        var required = new[] { images.Image1, images.Image2, images.Image3, images.Image4, images.Image5 };
-        if (required.Any(image => image == null || image.Length == 0))
-            throw new BusinessException($"Accommodation must have the first {RequiredImageCount} images filled in. Send images 1 to {RequiredImageCount}; the remaining 15 slots are optional.");
+        AccommodationImageRules.EnsureValid(images);
 
         var accommodation = await _context.Accommodations
             .FirstOrDefaultAsync(a => a.Id == accommodationId && !a.IsDeleted);

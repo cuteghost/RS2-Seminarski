@@ -91,6 +91,38 @@ class _ManagePropertiesPageState extends State<ManagePropertiesPage> {
     }
   }
 
+  Future<void> _togglePromoted(AccommodationGET item) async {
+    final promoting = !item.isPromoted;
+    final confirmed = await nConfirm(
+      context,
+      title: promoting ? 'Promote property' : 'Stop promoting property',
+      message: promoting
+          ? 'Property "${item.name}" will be shown in the "Featured stays" section '
+              'of the mobile app and marked as featured in listings.'
+          : 'Property "${item.name}" will no longer be shown as featured.',
+      confirmLabel: promoting ? 'Promote' : 'Stop promoting',
+      destructive: !promoting,
+    );
+    if (!confirmed || !mounted) return;
+
+    setState(() => _busyAccommodationId = item.id);
+    final admin = context.read<AdminProvider>();
+
+    try {
+      final message = await admin.setAccommodationPromoted(
+        accommodationId: item.id,
+        promoted: promoting,
+      );
+      if (!mounted) return;
+      nToast(context, message);
+    } catch (e) {
+      if (!mounted) return;
+      nToast(context, ApiResponseHandler.describe(e), isError: true);
+    } finally {
+      if (mounted) setState(() => _busyAccommodationId = null);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AdminProvider>(
@@ -146,6 +178,7 @@ class _ManagePropertiesPageState extends State<ManagePropertiesPage> {
                     busyAccommodationId: _busyAccommodationId,
                     onDelete: (item) => _deleteAccommodation(context, admin, item),
                     onToggleStatus: _toggleStatus,
+                    onTogglePromoted: _togglePromoted,
                   ),
                 ),
                 const SizedBox(height: AppSpace.x4),
@@ -246,6 +279,7 @@ class _PropertyTable extends StatelessWidget {
   final String? busyAccommodationId;
   final void Function(AccommodationGET item) onDelete;
   final void Function(AccommodationGET item) onToggleStatus;
+  final void Function(AccommodationGET item) onTogglePromoted;
 
   const _PropertyTable({
     required this.items,
@@ -253,6 +287,7 @@ class _PropertyTable extends StatelessWidget {
     required this.busyAccommodationId,
     required this.onDelete,
     required this.onToggleStatus,
+    required this.onTogglePromoted,
   });
 
   @override
@@ -268,8 +303,11 @@ class _PropertyTable extends StatelessWidget {
         NColumn('City, country', flex: 3),
         NColumn('Price / night', width: 120, align: Alignment.centerRight),
         NColumn('Rating', width: 110, align: Alignment.centerRight),
-        NColumn('Status', width: 120),
-        NColumn('', width: 76, align: Alignment.centerRight),
+        // Centred: left-aligned it touched the right-aligned rating column
+        // and the two headers read as one word ("RATINGSTATUS").
+        NColumn('Status', width: 120, align: Alignment.center),
+        NColumn('Featured', width: 96),
+        NColumn('', width: 112, align: Alignment.centerRight),
       ],
       rowCount: items.length,
       empty: const NEmptyState(
@@ -288,6 +326,17 @@ class _PropertyTable extends StatelessWidget {
           Text(money.format(item.pricePerNight)),
           _Rating(score: item.reviewScore),
           NStatusTag(active: item.status),
+          item.isPromoted
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(PhosphorIcons.star(PhosphorIconsStyle.fill),
+                        size: 14, color: AppColors.warning),
+                    const SizedBox(width: 4),
+                    const Text('Yes'),
+                  ],
+                )
+              : const NMutedCell('No'),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
@@ -315,6 +364,19 @@ class _PropertyTable extends StatelessWidget {
                       ? 'Deactivate property'
                       : 'Activate property',
                   onPressed: () => onToggleStatus(item),
+                ),
+                NIconAction(
+                  icon: item.isPromoted
+                      ? PhosphorIcons.star(PhosphorIconsStyle.fill)
+                      : PhosphorIcons.star(),
+                  tooltip: item.isPromoted
+                      ? 'Stop promoting property'
+                      : (item.status
+                          ? 'Promote property'
+                          : 'Activate the property before promoting it'),
+                  onPressed: item.isPromoted || item.status
+                      ? () => onTogglePromoted(item)
+                      : null,
                 ),
                 NIconAction(
                   icon: PhosphorIcons.trash(),
@@ -586,11 +648,16 @@ class _ReviewsSection extends StatefulWidget {
 
 class _ReviewsSectionState extends State<_ReviewsSection> {
   late Future<List<AccommodationReview>> _reviews;
+  String? _token;
 
   @override
   void initState() {
     super.initState();
-    _reviews = context.read<AdminProvider>().reviewsFor(widget.accommodationId);
+    final admin = context.read<AdminProvider>();
+    _reviews = admin.reviewsFor(widget.accommodationId);
+    admin.adminService.currentToken().then((token) {
+      if (mounted) setState(() => _token = token);
+    });
   }
 
   @override
@@ -650,6 +717,18 @@ class _ReviewsSectionState extends State<_ReviewsSection> {
               if (review.comment.isNotEmpty) ...[
                 const SizedBox(height: 2),
                 Text(review.comment, style: theme.textTheme.bodySmall),
+              ],
+              if (review.imageUrl != null) ...[
+                const SizedBox(height: AppSpace.x2),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: AuthorizedImage(
+                    path: review.imageUrl!,
+                    token: _token,
+                    width: 160,
+                    height: 110,
+                  ),
+                ),
               ],
               const SizedBox(height: AppSpace.x3),
             ],

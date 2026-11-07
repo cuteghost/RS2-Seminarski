@@ -68,10 +68,12 @@ class SignalRService {
     }
   }
 
-  Future<List<MessageGET>> getMessages(String chatId) async {
-    final response = await _hubConnection.invoke('GetMessages', args: [chatId]);
-    if (response is! List) return const [];
-    return response.map((e) => MessageGET.fromJson(_asMap(e))).toList();
+  static const int messagePageSize = 30;
+
+  Future<MessagePage> getMessages(String chatId, {int page = 1}) async {
+    final response = await _hubConnection
+        .invoke('GetMessages', args: [chatId, page, messagePageSize]);
+    return MessagePage.fromJson(_asMap(response));
   }
 
   Future<void> sendMessage(MessagePOST messagePost) async {
@@ -91,10 +93,6 @@ class SignalRService {
       // Potvrda čitanja nije kritična — ne rušimo tok, ali logiramo.
       if (kDebugMode) debugPrint('SignalRService.readMessages: $e');
     }
-  }
-
-  Future<void> addToChat(String chatId) async {
-    await _hubConnection.invoke('AddToChat', args: [chatId]);
   }
 
   Future<ChatGET> openChat(String otherUserId) async {

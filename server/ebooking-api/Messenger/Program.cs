@@ -2,8 +2,7 @@ using Authentication.Extensions;
 using Authentication.Services.HashService;
 using Authentication.Services.TokenHandlerService;
 using Database;
-using Messenger.Repositories;
-using Messenger.Repository;
+using Database.Services.MessagingService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.SignalR;
@@ -11,7 +10,6 @@ using System.Text;
 using Seminarski.Database;
 using Messenger;
 using Messenger.Middleware;
-using EasyNetQ;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,11 +61,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 #endregion
 
+var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ORIGINS") ?? "http://localhost:9999,http://localhost:9090,http://localhost:8888")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
 builder.Services.AddCors(option =>
 {
-    option.AddPolicy("FirstPolicy", builder =>
+    option.AddPolicy("FirstPolicy", policy =>
     {
-        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        policy.WithOrigins(corsOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
     });
 });
 
@@ -76,10 +77,8 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddScoped<IHashService, HashService>();
 builder.Services.AddScoped<ITokenHandlerService, TokenHandlerService>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
-builder.Services.AddSingleton<IChatHub, ChatHub>();
-builder.Services.AddScoped<INotifierService, NotifierService>();
+builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
 builder.Services.AddSignalR();
-builder.Services.AddHostedService<ConsumeRabbitMQHostedService>();
 
 
 var app = builder.Build();

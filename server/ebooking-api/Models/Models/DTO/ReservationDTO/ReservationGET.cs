@@ -16,6 +16,8 @@ public class ReservationGET
     public DateTime StartDate { get; set; }
     [Required]
     public DateTime EndDate { get; set; }
+
+    public TimeOnly? CheckInTime { get; set; }
     [Required]
     public bool IsRated { get; set; }
 

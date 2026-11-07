@@ -2,6 +2,7 @@ import 'package:ebooking/config/app_theme.dart';
 import 'package:ebooking/models/feedback_model.dart';
 import 'package:ebooking/providers/feedback_provider.dart';
 import 'package:ebooking/services/api_client.dart';
+import 'package:ebooking/widgets/remote_image.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:provider/provider.dart';
@@ -15,10 +16,12 @@ class ReviewScreen extends StatefulWidget {
     super.key,
     required this.accommodationId,
     required this.accommodationName,
+    this.reservationId,
   });
 
   final String accommodationId;
   final String accommodationName;
+  final String? reservationId;
 
   @override
   State<ReviewScreen> createState() => _ReviewScreenState();
@@ -36,7 +39,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   Future<MyReview> _load() => Provider.of<FeedbackProvider>(
     context,
     listen: false,
-  ).myReview(widget.accommodationId);
+  ).myReview(widget.accommodationId, reservationId: widget.reservationId);
 
   void _retry() {
     setState(() {
@@ -150,6 +153,17 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         : textTheme.bodyLarge?.copyWith(height: 1.35),
                   ),
                 ),
+                if (review.imageUrl != null) ...[
+                  const SizedBox(height: 14),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppColors.radiusMd),
+                    child: RemoteImage(
+                      path: review.imageUrl,
+                      width: double.infinity,
+                      height: 220,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 14),
                 Text(
                   'A review can be sent once per stay and cannot be changed '

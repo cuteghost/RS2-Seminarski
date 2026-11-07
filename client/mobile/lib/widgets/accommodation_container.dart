@@ -107,7 +107,9 @@ class AccommodationContainer extends StatelessWidget {
                     style: textTheme.bodySmall,
                   ),
                   const SizedBox(height: 3),
-                  reviews > 0
+                  // The listing API sends the average score but no count, so
+                  // the score alone decides whether the property is reviewed.
+                  reviews > 0 || reviewScore > 0
                       ? Row(
                           children: [
                             Icon(
@@ -117,7 +119,9 @@ class AccommodationContainer extends StatelessWidget {
                             ),
                             const SizedBox(width: 5),
                             Text(
-                              '${formatRating(reviewScore)} · $reviews reviews',
+                              reviews > 0
+                                  ? '${formatRating(reviewScore)} · $reviews reviews'
+                                  : formatRating(reviewScore),
                               style: textTheme.bodySmall,
                             ),
                           ],

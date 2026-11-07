@@ -44,6 +44,7 @@ class AccommodationGET {
   final Location location;
   final int imageCount;
   final List<String> imageUrls;
+  final bool isPromoted;
 
   final AccommodationDetails accommodationDetails;
 
@@ -61,6 +62,7 @@ class AccommodationGET {
     required this.imageCount,
     required this.imageUrls,
     required this.accommodationDetails,
+    this.isPromoted = false,
   });
 
   factory AccommodationGET.fromJson(Map<String, dynamic> json) {
@@ -86,6 +88,7 @@ class AccommodationGET {
       accommodationDetails: AccommodationDetails.fromJson(
         json['accommodationDetails'] as Map<String, dynamic>?,
       ),
+      isPromoted: json['isPromoted'] == true,
     );
   }
 

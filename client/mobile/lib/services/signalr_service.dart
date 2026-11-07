@@ -55,7 +55,7 @@ class SignalRService {
     return (response as List).map((e) => ChatGET.fromJson(e)).toList();
   }
 
-  MessageGET? handleIncommingDriverLocation(List<dynamic>? args) {
+  MessageGET? handleIncomingMessage(List<dynamic>? args) {
     if (args != null) {
       var jsonResponse = json.decode(json.encode(args[0]));
       MessageGET data = MessageGET.fromJson(jsonResponse);
@@ -104,26 +104,20 @@ class SignalRService {
     await _hubConnection.stop();
   }
 
-  Future<List<MessageGET>> getMessages(String chatId) async {
-    if (!isConnected && !await startConnection()) {
-      throw StateError(
-        'The messenger is offline, so this conversation could not be loaded.',
-      );
-    }
-    final response = await _hubConnection.invoke('GetMessages', args: [chatId]);
-    final messages = (response as List)
-        .map((e) => MessageGET.fromJson(e))
-        .toList();
-    messages.sort((a, b) => a.timeStamp.compareTo(b.timeStamp));
-    return messages;
-  }
+  static const int messagePageSize = 30;
 
-  Future<void> addToChat(String chatId) async {
+  Future<MessagePage> getMessages(String chatId, {int page = 1}) async {
     if (!isConnected && !await startConnection()) {
       throw StateError(
         'The messenger is offline, so this conversation could not be loaded.',
       );
     }
-    await _hubConnection.invoke('AddToChat', args: [chatId]);
+    final response = await _hubConnection.invoke(
+      'GetMessages',
+      args: [chatId, page, messagePageSize],
+    );
+    return MessagePage.fromJson(
+      json.decode(json.encode(response)) as Map<String, dynamic>,
+    );
   }
 }

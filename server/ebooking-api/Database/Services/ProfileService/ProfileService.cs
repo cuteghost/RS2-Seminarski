@@ -1,3 +1,4 @@
+using Database.Services.ImageValidation;
 using API.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Models.Domain;
@@ -141,7 +142,10 @@ public class ProfileService : IProfileService
             user.Gender = (Models.Domain.Gender)profile.Gender.Value;
 
         if (profile.Image != null)
+        {
+            ImageContentValidator.EnsureValid(profile.Image, "Profile image");
             user.Image = profile.Image;
+        }
     }
 
     private static string SocialLink(string value)

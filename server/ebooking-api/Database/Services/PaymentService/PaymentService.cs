@@ -22,32 +22,58 @@ public class PaymentService : IPaymentService
         return AmountFor(reservation);
     }
 
+    public async Task<PaymentSummary> GetSummary(Guid reservationId, Guid customerId)
+    {
+        var reservation = await LoadReservation(reservationId);
+        EnsurePayable(reservation, customerId);
+
+        var latest = await GetForReservation(reservationId);
+        var isPaid = latest?.Status == PaymentStatus.Completed;
+
+        return new PaymentSummary
+        {
+            ReservationId = reservationId,
+            PaymentId = latest?.Id,
+            AccommodationName = reservation.accommodation!.Name,
+            PricePerNight = (double)PricePerNightFor(reservation),
+            Nights = (reservation.EndDate.Date - reservation.StartDate.Date).Days,
+            Amount = isPaid ? latest!.Amount : AmountFor(reservation),
+            Currency = latest?.Currency ?? "USD",
+            IsPaid = isPaid
+        };
+    }
+
     public async Task<Payment> StartPayment(Guid reservationId, Guid customerId)
     {
         var reservation = await LoadReservation(reservationId);
+        EnsurePayable(reservation, customerId);
 
-        if (reservation.CustomerId != customerId)
-            throw new BusinessException("This reservation does not belong to you.");
-
-        if (reservation.Status == ReservationStatus.Cancelled || reservation.Status == ReservationStatus.Rejected)
-            throw new BusinessException("A cancelled or rejected reservation cannot be paid.");
-
-        var existing = await _context.Payments
-            .Where(p => !p.IsDeleted && p.ReservationId == reservationId)
+        var open = await _context.Payments
+            .Where(p => !p.IsDeleted && p.ReservationId == reservationId
+                        && (p.Status == PaymentStatus.Created || p.Status == PaymentStatus.Completed))
             .OrderByDescending(p => p.CreatedAt)
-            .FirstOrDefaultAsync();
+            .ToListAsync();
 
-        if (existing != null && existing.Status == PaymentStatus.Completed)
+        if (open.Any(p => p.Status == PaymentStatus.Completed))
             throw new BusinessException("The reservation has already been paid.");
 
         var amount = AmountFor(reservation);
 
-        if (existing != null && existing.Status == PaymentStatus.Created)
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        var reusable = open.FirstOrDefault(p => p.ProviderOrderId == null);
+        foreach (var abandoned in open.Where(p => p != reusable))
         {
-            existing.Amount = amount;
-            existing.ProviderOrderId = null;
+            abandoned.Status = PaymentStatus.Cancelled;
+            abandoned.FailureReason = "Superseded by a new payment attempt before it was captured.";
+        }
+
+        if (reusable != null)
+        {
+            reusable.Amount = amount;
             await _context.SaveChangesAsync();
-            return existing;
+            await transaction.CommitAsync();
+            return reusable;
         }
 
         var payment = new Payment
@@ -63,6 +89,7 @@ public class PaymentService : IPaymentService
 
         _context.Payments.Add(payment);
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return payment;
     }
@@ -73,8 +100,8 @@ public class PaymentService : IPaymentService
         if (payment == null)
             throw new NotFoundException($"Payment with identifier {paymentId} does not exist.");
 
-        if (payment.Status == PaymentStatus.Completed)
-            throw new BusinessException("The reservation has already been paid.");
+        if (payment.Status != PaymentStatus.Created)
+            throw new BusinessException("This payment attempt is no longer open.");
 
         payment.ProviderOrderId = providerOrderId;
         await _context.SaveChangesAsync();
@@ -82,9 +109,29 @@ public class PaymentService : IPaymentService
         return payment;
     }
 
-    public async Task<Payment> CompletePayment(string providerOrderId, string providerCaptureId, decimal capturedAmount, string currency)
+    public async Task<Payment> GetOwnedByProviderOrder(string providerOrderId, Guid reservationId, Guid customerId)
     {
-        var payment = await FindByOrder(providerOrderId);
+        var payment = await _context.Payments
+            .Include(p => p.Reservation)
+                .ThenInclude(r => r!.accommodation)
+                    .ThenInclude(a => a.Owner)
+            .FirstOrDefaultAsync(p => !p.IsDeleted && p.ProviderOrderId == providerOrderId);
+
+        if (payment == null || payment.Reservation == null)
+            throw new NotFoundException($"Payment for order {providerOrderId} does not exist.");
+
+        if (payment.ReservationId != reservationId)
+            throw new BusinessException("The payment ticket does not belong to this payment.");
+
+        if (payment.Reservation.CustomerId != customerId)
+            throw new BusinessException("This payment does not belong to you.");
+
+        return payment;
+    }
+
+    public async Task<Payment> CompletePayment(Guid paymentId, string providerCaptureId, decimal capturedAmount, string currency)
+    {
+        var payment = await FindById(paymentId);
 
         if (payment.Status == PaymentStatus.Completed)
             return payment;
@@ -116,9 +163,9 @@ public class PaymentService : IPaymentService
         return payment;
     }
 
-    public async Task<Payment> FailPayment(string providerOrderId, string reason)
+    public async Task<Payment> FailPayment(Guid paymentId, string reason)
     {
-        var payment = await FindByOrder(providerOrderId);
+        var payment = await FindById(paymentId);
 
         if (payment.Status == PaymentStatus.Completed)
             return payment;
@@ -132,18 +179,19 @@ public class PaymentService : IPaymentService
 
     public async Task<Payment?> GetForReservation(Guid reservationId)
     {
-        return await _context.Payments
+        var payments = await _context.Payments
             .AsNoTracking()
             .Where(p => !p.IsDeleted && p.ReservationId == reservationId)
             .OrderByDescending(p => p.CreatedAt)
-            .FirstOrDefaultAsync();
+            .ToListAsync();
+
+        return payments.FirstOrDefault(p => p.Status == PaymentStatus.Completed) ?? payments.FirstOrDefault();
     }
 
-    public async Task<Payment?> GetByProviderOrder(string providerOrderId)
+    public async Task<bool> IsPaid(Guid reservationId)
     {
         return await _context.Payments
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => !p.IsDeleted && p.ProviderOrderId == providerOrderId);
+            .AnyAsync(p => !p.IsDeleted && p.ReservationId == reservationId && p.Status == PaymentStatus.Completed);
     }
 
     public async Task<HashSet<Guid>> GetPaidReservationIds(IReadOnlyCollection<Guid> reservationIds)
@@ -172,35 +220,22 @@ public class PaymentService : IPaymentService
         return customer?.Id ?? Guid.Empty;
     }
 
-    public async Task<PaymentSummary> GetSummary(Guid reservationId, Guid customerId)
+    private static void EnsurePayable(Reservation reservation, Guid customerId)
     {
-        var reservation = await LoadReservation(reservationId);
-
         if (reservation.CustomerId != customerId)
             throw new BusinessException("This reservation does not belong to you.");
 
-        var payment = await StartPayment(reservationId, customerId);
-
-        return new PaymentSummary
-        {
-            ReservationId = reservationId,
-            PaymentId = payment.Id,
-            AccommodationName = reservation.accommodation!.Name,
-            PricePerNight = (double)PricePerNightFor(reservation),
-            Nights = (reservation.EndDate.Date - reservation.StartDate.Date).Days,
-            Amount = payment.Amount,
-            Currency = payment.Currency,
-            IsPaid = payment.Status == PaymentStatus.Completed
-        };
+        if (reservation.Status != ReservationStatus.Confirmed)
+            throw new BusinessException("Only a reservation confirmed by the accommodation owner can be paid.");
     }
 
-    private async Task<Payment> FindByOrder(string providerOrderId)
+    private async Task<Payment> FindById(Guid paymentId)
     {
         var payment = await _context.Payments
-            .FirstOrDefaultAsync(p => !p.IsDeleted && p.ProviderOrderId == providerOrderId);
+            .FirstOrDefaultAsync(p => !p.IsDeleted && p.Id == paymentId);
 
         if (payment == null)
-            throw new NotFoundException($"Payment for order {providerOrderId} does not exist.");
+            throw new NotFoundException($"Payment with identifier {paymentId} does not exist.");
 
         return payment;
     }

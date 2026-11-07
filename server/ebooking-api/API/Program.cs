@@ -35,6 +35,10 @@ using Database.Services.ReservationHistoryService;
 using Database.Services.UserImageService;
 using Database.Services.ProfileService;
 using Database.Services.PaymentService;
+using Database.Services.NotificationService;
+using Services.PasswordResetService;
+using Database.Services.ReportService;
+using Models.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +61,8 @@ if (string.IsNullOrWhiteSpace(jwtKey))
     throw new InvalidOperationException(
         "JWT signing key is not configured. Set the JWT_KEY environment variable. " +
         "See the rotation instructions in API/Program.cs for details.");
+
+var rabbitMqConnectionString = RabbitMqConnection.FromEnvironment();
 
 configuration["JWT:key"] = jwtKey;
 configuration["JWT:issuer"] = jwtIssuer;
@@ -101,9 +107,11 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IAccommodationImageService, AccommodationImageService>();
 builder.Services.AddScoped<IAccommodationCatalogService, AccommodationCatalogService>();
 builder.Services.AddScoped<IAccommodationWriteService, AccommodationWriteService>();
-// MessageProducer holds a long-lived RabbitMQ connection (EasyNetQ IBus), so it must be a
-// singleton - a scoped/transient lifetime would open a new broker connection per request.
-builder.Services.AddSingleton<IMessageProducer, MessageProducer>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddSingleton<IMessageProducer>(provider =>
+    new MessageProducer(rabbitMqConnectionString, provider.GetRequiredService<ILogger<MessageProducer>>()));
 #endregion
 
 #region SpecificRepositories
@@ -130,6 +138,7 @@ builder.Services.AddHttpClient("Facebook", c =>
 
 #region Recommendation
 builder.Services.AddSingleton<AccommodationRecommendationService>();
+builder.Services.AddScoped<RecommendationDataService>();
 builder.Services.AddScoped<RecommendationService>(provider =>
 {
     return new RecommendationService(
@@ -164,7 +173,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
-var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ORIGINS") ?? "http://localhost:9999,http://localhost9090,http://localhost:8888")
+var corsOrigins = (Environment.GetEnvironmentVariable("CORS_ORIGINS") ?? "http://localhost:9999,http://localhost:9090,http://localhost:8888")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
 builder.Services.AddCors(option =>

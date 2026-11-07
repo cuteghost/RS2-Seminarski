@@ -13,6 +13,7 @@ public class AccommodationGET
     public double PricePerNight { get; set; }
     public string Description { get; set; } = string.Empty;
     public float ReviewScore { get; set; }
+    public bool IsPromoted { get; set; }
     public Guid OwnerId { get; set; }
     public LocationGET? Location { get; set; }
     public int ImageCount { get; set; }

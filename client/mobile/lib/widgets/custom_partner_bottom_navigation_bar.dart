@@ -1,6 +1,7 @@
 import 'package:ebooking/config/app_theme.dart';
 import 'package:ebooking/providers/message_provider.dart';
-import 'package:ebooking/providers/auth_provider.dart';
+import 'package:ebooking/providers/notification_provider.dart';
+import 'package:ebooking/screens/notifications_screen.dart';
 import 'package:ebooking/screens/messenger_screen.dart';
 import 'package:ebooking/screens/partner_screens/my_accommodations_screen.dart';
 import 'package:ebooking/screens/partner_screens/partner_bookings_screen.dart';
@@ -26,18 +27,10 @@ class CustomPartnerBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userId = Provider.of<AuthProvider>(context, listen: false).userId;
-
-    return Consumer<MessageProvider>(
-      builder: (context, messageProvider, child) {
-        int unread = 0;
-        for (var c in messageProvider.chats) {
-          for (var m in c.messages) {
-            if (m.isRead == false && m.sender != userId) {
-              unread++;
-            }
-          }
-        }
+    return Consumer2<MessageProvider, NotificationProvider>(
+      builder: (context, messageProvider, notificationProvider, child) {
+        final unread = messageProvider.unreadCount;
+        final alerts = notificationProvider.unreadCount;
 
         return NavigationBar(
           selectedIndex: currentIndex,
@@ -54,6 +47,9 @@ class CustomPartnerBottomNavigationBar extends StatelessWidget {
                 navigateToPage(context, const ContactListScreen());
                 break;
               case 3:
+                navigateToPage(context, const NotificationsScreen());
+                break;
+              case 4:
                 navigateToPage(context, const PartnerProfilePage());
                 break;
             }
@@ -89,6 +85,21 @@ class CustomPartnerBottomNavigationBar extends StatelessWidget {
                 color: AppColors.accent,
               ),
               label: 'Inbox',
+            ),
+            NavigationDestination(
+              icon: alerts > 0
+                  ? Badge(
+                      label: Text('$alerts'),
+                      backgroundColor: AppColors.accent,
+                      textColor: AppColors.bg,
+                      child: Icon(PhosphorIcons.bell()),
+                    )
+                  : Icon(PhosphorIcons.bell()),
+              selectedIcon: Icon(
+                PhosphorIcons.bell(PhosphorIconsStyle.fill),
+                color: AppColors.accent,
+              ),
+              label: 'Alerts',
             ),
             NavigationDestination(
               icon: Icon(PhosphorIcons.user()),

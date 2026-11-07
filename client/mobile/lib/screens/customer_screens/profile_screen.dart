@@ -296,7 +296,7 @@ class ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 3),
+      bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 4),
     );
   }
 }

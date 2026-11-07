@@ -82,6 +82,9 @@ public class PaymentController : Controller
         if (reservation.CustomerId != customerId)
             throw new BusinessException("This reservation does not belong to you.");
 
+        if (reservation.Status != ReservationStatus.Confirmed)
+            throw new BusinessException("Only a reservation confirmed by the accommodation owner can be paid.");
+
         var ticket = await _tokenHandler.CreatePaymentTicketAsync(_currentUser.UserId, reservationId);
         if (string.IsNullOrEmpty(ticket))
             throw new BusinessException("The payment ticket could not be issued. Please log in again.");

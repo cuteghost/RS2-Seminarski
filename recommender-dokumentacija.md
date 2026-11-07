@@ -65,66 +65,72 @@ postoji — trenira u pozadini. Trening namjerno **ne** blokira `app.Run()`: ran
 sinhroni trening prije pokretanja uzrokovao da `webapi` kontejner promaši health check
 `start_period` i uđe u restart petlju.
 
-## 4. Predikcija i konačni skor
+## 4. Predikcija i konačni skor (hibridni model)
 
-`RecommendationController.GetSuggestions` uzima `customerId` **iz tokena** (ne iz rute —
-ranije je ruta primala `customerId`, pa je svako mogao čitati tuđe preporuke), zatim
-projektuje sve aktivne smještaje (`a.Status`) u `AccommodationCandidate(Id, ReviewScore)`
-i poziva `RecommendationService.GetRecommendations(customerId, candidates)`.
+Collaborative filtering iz poglavlja 3 ostaje osnova, ali konačni poredak je **hibridan**:
+pored ML predikcije koristi i signale iz prijave teme — historiju rezervacija, mjesta koja je
+korisnik već posjetio, sadržaje smještaja koje je bukirao i fizičku lokaciju korisnika.
+Svaki signal je stvaran podatak iz aplikacijskog toka (rezervacije, lokacija smještaja,
+veze smještaj–sadržaj, koordinate koje šalje mobilni klijent), ne seed niti neiskorišteno polje.
 
-`RecommendationService` lijeno učita model (`EnsureModelLoaded`, keširan u polju `_model`),
-napravi `PredictionEngine<AccommodationRating, AccommodationRatingPrediction>` i za svakog
-kandidata izračuna skor.
+Podatke priprema `RecommendationDataService`:
 
-### Formula
+- `GetActiveCandidates()` — svi aktivni smještaji sa gradom, tipom, cijenom, koordinatama i
+  listom sadržaja (`AccommodationDetailsAmenities`).
+- `GetCustomerProfile(customerId, latitude, longitude)` — iz `Completed` i `Confirmed`
+  rezervacija kupca: skup već posjećenih smještaja, skup gradova u kojima je boravio i
+  učestalost svakog sadržaja u smještajima koje je bukirao. Koordinate su opcione i
+  šalje ih mobilni Explore ekran.
 
-```
-skor(kandidat) = mlSkor + ReviewScoreWeight * kandidat.ReviewScore
+### 4.1. `GET /api/Recommendation/suggestions`
 
-gdje je:
-  mlSkor           = engine.Predict(customerId, kandidat.Id).Score
-                     odnosno UnknownPairScore (-1_000_000f) ako je predikcija NaN
-  ReviewScoreWeight = 0.1f
-```
+Za svakog kandidata kojeg kupac još nije posjetio `RecommendationService.GetRecommendations`
+sabira doprinose i bilježi razlog za svaki:
 
-Kandidati se sortiraju `OrderByDescending(skor).ThenBy(Id)`.
+| Signal | Doprinos | Razlog koji vidi korisnik |
+|---|---|---|
+| ML predikcija (MF) | predikcija 1–10 (samo ako model poznaje par) | „Guests with stays similar to yours rated it highly (predicted 8.4/10)" — kad je ≥ 6 |
+| Grad ranijeg boravka | `+1.5` | „In Mostar, where you have stayed before" |
+| Sadržaji kao u bukiranim smještajima | `2.0 × udio` (udio = težina zajedničkih sadržaja / ukupna težina profila) | „Offers Wi-Fi, Parking, Pool, like the places you booked" |
+| Blizina trenutnoj lokaciji (≤ 20 km) | `1.0 × (1 − d/20)` | „3.2 km from your current location" |
+| Prosječna ocjena smještaja | `0.1 × ReviewScore` | „Highly rated by guests (8.7/10)" — kad je ≥ 8 |
 
-**Zašto oba člana.** `ReviewScore` je zaokružen prosjek recenzija smještaja
-(`ReviewService.CalculateReviewScore`, `decimal(3,1)`, opseg 0–10) i živi na istoj skali
-kao i ocjene na kojima je model treniran, pa se dva člana mogu direktno sabrati. Težina
-`0.1` je namjerno mala: ML predikcija ostaje dominantna i personalizovana, dok
-`ReviewScore` (maksimalni doprinos `+1.0`) razdvaja smještaje koje model ocjenjuje slično
-i služi kao prior za korisnike o kojima model zna malo. Prije ovog ispravka `ReviewScore`
-se prosljeđivao kroz cijeli poziv ali se čitao samo u fallback putanji, pa su
-nerazlučivi kandidati završavali poredani po `Id` — slabo ocijenjen smještaj je mogao
-preteći odlično ocijenjen.
+Razlozi se sortiraju po veličini doprinosa; prvi je `Reason`, a svi su u `Reasons`.
+Ako nijedan signal ne prelazi prag, razlog je „Popular with guests (x/10)" ili
+„A new place you have not tried yet". Odgovor je `RecommendedAccommodationGET`
+(`AccommodationGET` + `Reason`, `Reasons`, `RecommendationScore`); mobilni klijent razlog
+prikazuje na kartici u sekciji „Suggested for you" i na ekranu svih preporuka.
 
-**`UnknownPairScore` umjesto `NaN`.** Matrix factorization vraća `NaN` za smještaj koji
-se nije pojavio u trening podacima (npr. novi oglas). Takvi kandidati dobijaju bazu
-`-1_000_000f`, što ih drži ispod svakog kandidata kojeg model umije ocijeniti, ali ih
-međusobno i dalje poređa po `ReviewScore` — što je jedini signal koji za njih postoji.
+### 4.2. `GET /api/Recommendation/similar/{accommodationId}`
 
-### Fallback
+Preporuke ispod detalja smještaja („You might also like"). Sličnost sa izvornim smještajem:
 
-Ako `MLModels/MLmodel.zip` ne postoji, `EnsureModelLoaded` loguje upozorenje i vrati
-`null`, pa `GetRecommendations` vraća `ByReviewScore(candidates)`:
-`OrderByDescending(ReviewScore).ThenBy(Id)` — dakle najbolje ocijenjeni smještaji,
-bez personalizacije, uz `FromModel = false`.
+| Signal | Doprinos | Razlog |
+|---|---|---|
+| Isti grad | `+2.0` | „Also in Sarajevo" |
+| Isti tip smještaja | `+1.0` | „Also a villa" |
+| Zajednički sadržaji (Jaccard) | `2.0 × J` | „Shares 4 amenities, e.g. Wi-Fi, Parking" |
+| Slična cijena (bliskost > 0.6) | `1.0 × bliskost` | „Similar price (120 per night)" |
+| Personalizacija (MF) | `0.2 × predikcija` | „Matches your past stays (predicted 7.9/10)" |
+| Prosječna ocjena | `0.1 × ReviewScore` | — |
+
+### 4.3. Kada model ne postoji
+
+Ako `MLModels/MLmodel.zip` još nije istreniran, ML doprinos se izostavlja, a ostali
+signali i dalje rade; `FromModel = false` i API to javlja u poruci odgovora.
 
 ## 5. Paginacija
 
 Rangiranje se radi nad cijelom listom kandidata, a stranica se reže tek nakon sortiranja
 (`Skip((page - 1) * pageSize).Take(pageSize)`). Tek za id-eve sa te stranice se dovlače
-puni entiteti, mapiraju u `AccommodationGET` i dopunjuju slikama i sadržajima
-(`_imageService.Attach`, `_catalog.AttachAmenities`). `total` u `PagedResponse` je broj
-svih rangiranih smještaja.
+puni entiteti, mapiraju u `RecommendedAccommodationGET` i dopunjuju slikama i sadržajima.
+`total` u `PagedResponse` je broj svih rangiranih smještaja.
 
 ## 6. Ograničenja
 
-- Hladan start: dok nema recenzija ni završenih rezervacija, model nema šta naučiti i
-  preporuke se svode na `ReviewScore`.
+- Hladan start: novi kupac nema historiju, pa preporuke zavise od lokacije i ocjena.
 - Model se ne re-trenira automatski nakon prvog treninga — postojanje fajla
   `MLModels/MLmodel.zip` je jedini uslov za preskakanje treninga. Za osvježavanje modela
   fajl treba obrisati (ili dodati zakazani re-trening).
-- `ReviewScoreWeight` je fiksna konstanta, nije evaluirana kroz A/B test niti podešena
-  na validacionom skupu.
+- Težine signala su fiksne konstante u `RecommendationService`, nisu evaluirane kroz
+  A/B test niti podešene na validacionom skupu.

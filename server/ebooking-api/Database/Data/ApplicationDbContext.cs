@@ -28,6 +28,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<AccommodationType> AccommodationTypes { get; set; }
     public DbSet<Amenity> Amenities { get; set; }
     public DbSet<AccommodationDetailsAmenity> AccommodationDetailsAmenities { get; set; }
+    public DbSet<ReviewImage> ReviewImages { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -107,6 +110,45 @@ public class ApplicationDbContext : DbContext
             .HasIndex(c => c.Name)
             .IsUnique()
             .HasFilter("[IsDeleted] = 0");
+
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.Reservation)
+            .WithMany()
+            .HasForeignKey(r => r.ReservationId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Review>()
+            .HasIndex(r => r.ReservationId)
+            .IsUnique()
+            .HasFilter("[ReservationId] IS NOT NULL AND [IsDeleted] = 0");
+
+        modelBuilder.Entity<ReviewImage>()
+            .HasOne(i => i.Review)
+            .WithOne(r => r.Image)
+            .HasForeignKey<ReviewImage>(i => i.ReviewId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.User)
+            .WithMany()
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Notification>()
+            .HasIndex(n => new { n.UserId, n.IsRead, n.CreatedAt });
+
+        modelBuilder.Entity<PasswordResetToken>()
+            .HasOne(t => t.User)
+            .WithMany()
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PasswordResetToken>()
+            .HasIndex(t => new { t.UserId, t.UsedAt });
+
+        modelBuilder.Entity<Accommodation>()
+            .HasIndex(a => a.IsPromoted)
+            .HasFilter("[IsPromoted] = 1 AND [IsDeleted] = 0");
 
         SeedData.Apply(modelBuilder);
 

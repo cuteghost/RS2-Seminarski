@@ -67,8 +67,11 @@ class FeedbackProvider with ChangeNotifier {
     }
   }
 
-  Future<MyReview> myReview(String accommodationId) {
-    return _feedbackService.fetchMine(accommodationId);
+  Future<MyReview> myReview(String accommodationId, {String? reservationId}) {
+    return _feedbackService.fetchMine(
+      accommodationId,
+      reservationId: reservationId,
+    );
   }
 
   Future<String> makeFeedback(FeedbackPOST feedback) async {

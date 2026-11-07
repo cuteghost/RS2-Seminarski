@@ -15,6 +15,7 @@ class SuggestionContainer extends StatelessWidget {
   /// screen leads with it; the suggestions list leaves it out.
   final double? distanceKm;
   final VoidCallback? onTap;
+  final String? reason;
 
   const SuggestionContainer({
     super.key,
@@ -25,6 +26,7 @@ class SuggestionContainer extends StatelessWidget {
     required this.address,
     this.distanceKm,
     this.onTap,
+    this.reason,
   });
 
   @override
@@ -61,6 +63,28 @@ class SuggestionContainer extends StatelessWidget {
                         : '${distanceKm!.toStringAsFixed(1)} km away · $address',
                     style: textTheme.bodySmall,
                   ),
+                  if ((reason ?? '').isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          PhosphorIcons.lightbulb(),
+                          size: 13,
+                          color: AppColors.accentLink,
+                        ),
+                        const SizedBox(width: 5),
+                        Expanded(
+                          child: Text(
+                            reason!,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppColors.accentLink,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 6),
                   Row(
                     children: [

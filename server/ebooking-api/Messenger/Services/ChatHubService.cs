@@ -1,10 +1,9 @@
-﻿using Authentication.Services.TokenHandlerService;
+using Authentication.Services.TokenHandlerService;
 using AutoMapper;
-using Database;
-using Messenger.Repositories;
+using Database.Services.MessagingService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
+using Models.Constants;
 using Models.Domain;
 using Models.DTO.MessengerDTO;
 using System.Security.Claims;
@@ -12,50 +11,57 @@ using System.Security.Claims;
 namespace Messenger;
 
 [Authorize]
-public class ChatHub : Hub, IChatHub
+public class ChatHub : Hub
 {
+    public const int DefaultMessagePageSize = 30;
+
     private readonly IMapper _mapper;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly IMessageRepository _messageRepository;
+    private readonly ITokenHandlerService _tokenHandlerService;
 
-
-    public ChatHub(IMapper mapper, IServiceScopeFactory serviceScopeFactory)
+    public ChatHub(IMapper mapper, IMessageRepository messageRepository, ITokenHandlerService tokenHandlerService)
     {
         _mapper = mapper;
-        _serviceScopeFactory = serviceScopeFactory;
+        _messageRepository = messageRepository;
+        _tokenHandlerService = tokenHandlerService;
     }
 
-    public async Task AddToChat(string chatId)
+    public override async Task OnConnectedAsync()
     {
-        await RequireParticipant(chatId);
-        await Groups.AddToGroupAsync(Context.ConnectionId, chatId);
+        await RequireValidCaller();
+        await base.OnConnectedAsync();
     }
 
     public async Task SendMessage(MessagePOST messageDto)
     {
-        var userId = await RequireParticipant(messageDto.ChatId.ToString());
-        messageDto.SenderId = userId;
+        var content = messageDto.Content?.Trim() ?? string.Empty;
+        if (content.Length == 0)
+            throw new HubException("The message is empty.");
 
-        var message = _mapper.Map<Message>(messageDto);
+        if (content.Length > MessageRepository.MaxMessageLength)
+            throw new HubException($"The message may have at most {MessageRepository.MaxMessageLength} characters.");
 
-        using var scope = _serviceScopeFactory.CreateScope();
-        var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
+        var (userId, chat) = await RequireParticipant(messageDto.ChatId);
 
-        messageRepository.Add(message);
-        MessageGET messageGET = _mapper.Map<MessageGET>(message);
-        messageGET.isCurrent = false;
-        var chatId = message.ChatId.ToString();
+        var message = await _messageRepository.AddAsync(chat.Id, userId, content);
 
-        await Clients.Group(chatId).SendAsync("ReceiveMessage", messageGET);
+        var forSender = _mapper.Map<MessageGET>(message);
+        forSender.isCurrent = true;
+
+        var forRecipient = _mapper.Map<MessageGET>(message);
+        forRecipient.isCurrent = false;
+
+        var recipientId = chat.User1Id == userId ? chat.User2Id : chat.User1Id;
+
+        await Clients.User(userId.ToString()).SendAsync("ReceiveMessage", forSender);
+        await Clients.User(recipientId.ToString()).SendAsync("ReceiveMessage", forRecipient);
     }
 
     public async Task<List<ChatGET>> GetChats()
     {
         var userId = await RequireValidCaller();
 
-        using var scope = _serviceScopeFactory.CreateScope();
-        var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
-        var chats = await messageRepository.GetChatsAsync(userId);
-        return chats.Select(chat => MapChat(chat, userId)).ToList();
+        return await _messageRepository.GetChatSummariesAsync(userId);
     }
 
     public async Task<ChatGET> OpenChat(Guid otherUserId)
@@ -65,71 +71,49 @@ public class ChatHub : Hub, IChatHub
         if (otherUserId == userId)
             throw new HubException("You cannot open a conversation with yourself.");
 
-        using var scope = _serviceScopeFactory.CreateScope();
-        var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
-
-        var chat = await messageRepository.GetOrCreateChatAsync(userId, otherUserId);
+        var chat = await _messageRepository.GetOrCreateChatAsync(userId, otherUserId);
         if (chat == null)
             throw new HubException($"User with identifier {otherUserId} does not exist.");
 
-        return MapChat(chat, userId);
+        var summaries = await _messageRepository.GetChatSummariesAsync(userId);
+        return summaries.First(c => c.Id == chat.Id);
     }
 
-    private ChatGET MapChat(Chat chat, Guid callerId)
+    public async Task<PagedMessagesGET> GetMessages(Guid chatId, int page, int pageSize)
     {
-        var isFirst = chat.User1Id == callerId;
-        return new ChatGET
+        var (userId, _) = await RequireParticipant(chatId);
+        (page, pageSize) = Pagination.Normalize(page, pageSize <= 0 ? DefaultMessagePageSize : pageSize);
+
+        var (items, totalCount) = await _messageRepository.GetMessagesAsync(chatId, page, pageSize);
+
+        var messages = _mapper.Map<List<MessageGET>>(items);
+        foreach (var message in messages)
+            message.isCurrent = message.SenderId == userId;
+
+        return new PagedMessagesGET
         {
-            Id = chat.Id,
-            User1Id = isFirst ? chat.User1Id : chat.User2Id,
-            User2Id = isFirst ? chat.User2Id : chat.User1Id,
-            User1 = isFirst ? chat.User1.DisplayName : chat.User2.DisplayName,
-            User2 = isFirst ? chat.User2.DisplayName : chat.User1.DisplayName,
-            Messages = _mapper.Map<List<MessageGET>>(chat.Messages.OrderByDescending(m => m.Timestamp))
+            Items = messages,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            HasMore = page * pageSize < totalCount
         };
     }
 
-    public async Task InitChat(string chatId)
+    public async Task ReadMessages(Guid chatId)
     {
-        await RequireParticipant(chatId);
-        await Groups.AddToGroupAsync(Context.ConnectionId, chatId);
-    }
+        var (userId, chat) = await RequireParticipant(chatId);
 
+        var changed = await _messageRepository.MarkReadAsync(chatId, userId);
+        if (changed.Count == 0)
+            return;
 
-    public async Task<List<MessageGET>> GetMessages(string chatId)
-    {
-        var userId = await RequireParticipant(chatId);
+        var senderId = chat.User1Id == userId ? chat.User2Id : chat.User1Id;
+        var mapped = _mapper.Map<List<MessageGET>>(changed);
+        foreach (var message in mapped)
+            message.isCurrent = true;
 
-        using var scope = _serviceScopeFactory.CreateScope();
-        var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
-        var messages = _mapper.Map<List<MessageGET>>(await messageRepository.GetMessagesAsync(chatId));
-        foreach (var m in messages)
-        {
-            m.isCurrent = m.SenderId == userId;
-        }
-        return messages;
-    }
-
-    public async Task ReadMessages(string chatId)
-    {
-        var userId = await RequireParticipant(chatId);
-
-        using var scope = _serviceScopeFactory.CreateScope();
-        var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
-        var messages = await messageRepository.ReadMessages(chatId, userId);
-        await Clients.Group(chatId).SendAsync("ReadMessages", _mapper.Map<List<MessageGET>>(messages));
-    }
-
-    public async Task AddToGroup(string chatId)
-    {
-        await RequireParticipant(chatId);
-        await Groups.AddToGroupAsync(Context.ConnectionId, chatId);
-    }
-
-    public async Task RemoveFromGroup(string chatId)
-    {
-        await RequireParticipant(chatId);
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatId);
+        await Clients.User(senderId.ToString()).SendAsync("ReadMessages", mapped);
     }
 
     private async Task<Guid> RequireValidCaller()
@@ -146,40 +130,21 @@ public class ChatHub : Hub, IChatHub
         if (!Guid.TryParse(rawUserId, out var userId) || !int.TryParse(rawVersion, out var version))
             return Reject("The token was issued before server-side logout was introduced. Please log in again.");
 
-        using var scope = _serviceScopeFactory.CreateScope();
-        var tokenHandlerService = scope.ServiceProvider.GetRequiredService<ITokenHandlerService>();
-
-        if (!await tokenHandlerService.IsTokenVersionValid(userId, version))
+        if (!await _tokenHandlerService.IsTokenVersionValid(userId, version))
             return Reject("The token was revoked by logout or the account no longer exists. Please log in again.");
 
         return userId;
     }
 
-    /// <summary>
-    /// Authenticates the caller and then checks that the conversation is actually theirs.
-    /// <see cref="RequireValidCaller"/> alone only proves the token is valid, so without this
-    /// any logged in user could read, mark read or write into any chat by guessing its id.
-    /// Must run before anything is returned or the connection joins the SignalR group.
-    ///
-    /// <para>
-    /// Unlike <see cref="Reject"/> this does not <c>Context.Abort()</c>. An invalid token makes the
-    /// whole connection untrustworthy, but a chat the caller does not belong to is a per-call
-    /// authorization failure: the session stays valid for their own conversations. Aborting would
-    /// also swallow the message - the connection dies before the error frame reaches the client, so
-    /// the caller sees a cancelled task instead of the reason.
-    /// </para>
-    /// </summary>
-    private async Task<Guid> RequireParticipant(string chatId)
+    private async Task<(Guid UserId, Chat Chat)> RequireParticipant(Guid chatId)
     {
         var userId = await RequireValidCaller();
 
-        using var scope = _serviceScopeFactory.CreateScope();
-        var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
-
-        if (!await messageRepository.IsParticipantAsync(chatId, userId))
+        var chat = await _messageRepository.GetChatAsync(chatId);
+        if (chat == null || (chat.User1Id != userId && chat.User2Id != userId))
             throw new HubException("You are not a participant of this conversation.");
 
-        return userId;
+        return (userId, chat);
     }
 
     private Guid Reject(string reason)

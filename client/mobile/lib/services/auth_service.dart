@@ -85,6 +85,36 @@ class AuthService {
     await _secureStorage.saveToken(token);
   }
 
+  Future<String> requestPasswordReset(String email) async {
+    final result = await _apiClient.postWithMessage<void>(
+      '/api/Auth/forgot-password',
+      body: <String, String>{'email': email},
+      authenticated: false,
+      unauthorizedIsExpiredSession: false,
+      parse: (_) {},
+    );
+    return result.message;
+  }
+
+  Future<String> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    final result = await _apiClient.postWithMessage<void>(
+      '/api/Auth/reset-password',
+      body: <String, String>{
+        'email': email,
+        'code': code,
+        'newPassword': newPassword,
+      },
+      authenticated: false,
+      unauthorizedIsExpiredSession: false,
+      parse: (_) {},
+    );
+    return result.message;
+  }
+
   Future<void> logout() async {
     try {
       await _apiClient.post<void>(

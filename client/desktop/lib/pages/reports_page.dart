@@ -1,13 +1,18 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 
 import 'package:ebooking_desktop/config/app_theme.dart';
+import 'package:ebooking_desktop/models/report_model.dart';
 import 'package:ebooking_desktop/providers/admin_provider.dart';
+import 'package:ebooking_desktop/services/auth_service.dart';
+import 'package:ebooking_desktop/services/api_response_handler.dart';
+import 'package:ebooking_desktop/services/report_service.dart';
 import 'package:ebooking_desktop/services/report_generator.dart';
 import 'package:ebooking_desktop/widgets/app_shell.dart';
 import 'package:ebooking_desktop/widgets/nocturne.dart';
@@ -24,6 +29,57 @@ class ReportsPage extends StatefulWidget {
 
 class _ReportsPageState extends State<ReportsPage> {
   String? _busyReport;
+
+  final ReportService _reportService =
+      ReportService(secureStorage: SecureStorage());
+  ReportInterval _interval = ReportInterval.month;
+  late DateTime _to = DateTime.now();
+  late DateTime _from = DateTime(_to.year - 1, _to.month + 1, 1);
+  ReportOverview? _overview;
+  String? _overviewError;
+  bool _overviewLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOverview();
+  }
+
+  Future<void> _loadOverview() async {
+    setState(() {
+      _overviewLoading = true;
+      _overviewError = null;
+    });
+    try {
+      final overview = await _reportService.overview(
+        from: _from,
+        to: _to,
+        interval: _interval,
+      );
+      if (!mounted) return;
+      setState(() => _overview = overview);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _overviewError = ApiResponseHandler.describe(e));
+    } finally {
+      if (mounted) setState(() => _overviewLoading = false);
+    }
+  }
+
+  Future<void> _pickRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      initialDateRange: DateTimeRange(start: _from, end: _to),
+    );
+    if (picked == null) return;
+    setState(() {
+      _from = picked.start;
+      _to = picked.end;
+    });
+    await _loadOverview();
+  }
 
   Future<void> _run({
     required String id,
@@ -78,6 +134,34 @@ class _ReportsPageState extends State<ReportsPage> {
               const NPageHeader(
                 title: 'Reports',
                 subtitle: 'Overviews ready for download and printing in .pdf format.',
+              ),
+              const SizedBox(height: AppSpace.x6),
+              _ServerOverviewReport(
+                overview: _overview,
+                loading: _overviewLoading,
+                error: _overviewError,
+                interval: _interval,
+                from: _from,
+                to: _to,
+                busy: _busyReport,
+                onIntervalChanged: (interval) {
+                  setState(() => _interval = interval);
+                  _loadOverview();
+                },
+                onPickRange: _pickRange,
+                onRetry: _loadOverview,
+                onDownload: () => _run(
+                  id: 'overview',
+                  print: false,
+                  filename: 'ebooking-growth-turnover-${_stamp()}.pdf',
+                  build: () => ReportGenerator.serverOverview(_overview!),
+                ),
+                onPrint: () => _run(
+                  id: 'overview',
+                  print: true,
+                  filename: 'ebooking-growth-turnover-${_stamp()}.pdf',
+                  build: () => ReportGenerator.serverOverview(_overview!),
+                ),
               ),
               const SizedBox(height: AppSpace.x6),
               _TopRatedReport(
@@ -397,6 +481,163 @@ class _ByCityReport extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _ServerOverviewReport extends StatelessWidget {
+  final ReportOverview? overview;
+  final bool loading;
+  final String? error;
+  final ReportInterval interval;
+  final DateTime from;
+  final DateTime to;
+  final String? busy;
+  final ValueChanged<ReportInterval> onIntervalChanged;
+  final VoidCallback onPickRange;
+  final VoidCallback onRetry;
+  final VoidCallback onDownload;
+  final VoidCallback onPrint;
+
+  const _ServerOverviewReport({
+    required this.overview,
+    required this.loading,
+    required this.error,
+    required this.interval,
+    required this.from,
+    required this.to,
+    required this.busy,
+    required this.onIntervalChanged,
+    required this.onPickRange,
+    required this.onRetry,
+    required this.onDownload,
+    required this.onPrint,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('dd.MM.yyyy');
+    final report = overview;
+    final money = NumberFormat.currency(
+        locale: 'en', symbol: '${report?.currency ?? 'USD'} ', decimalDigits: 2);
+
+    return NCard(
+      padding: EdgeInsets.zero,
+      clip: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _ReportCardHeader(
+            kicker: 'Report 00',
+            title: 'Growth and payment turnover',
+            busy: busy == 'overview',
+            enabled: report != null && !loading,
+            disabledReason: report == null
+                ? 'Report unavailable until the server data is loaded.'
+                : null,
+            onDownload: onDownload,
+            onPrint: onPrint,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpace.x4),
+            child: Wrap(
+              spacing: AppSpace.x3,
+              runSpacing: AppSpace.x2,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                SegmentedButton<ReportInterval>(
+                  segments: [
+                    for (final value in ReportInterval.values)
+                      ButtonSegment(value: value, label: Text(value.label)),
+                  ],
+                  selected: {interval},
+                  onSelectionChanged: loading
+                      ? null
+                      : (selection) => onIntervalChanged(selection.first),
+                ),
+                OutlinedButton.icon(
+                  onPressed: loading ? null : onPickRange,
+                  icon: Icon(PhosphorIcons.calendarBlank(), size: 14),
+                  label: Text(
+                      '${dateFormat.format(from)} – ${dateFormat.format(to)}'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpace.x4),
+          if (loading && report == null)
+            const Padding(
+              padding: EdgeInsets.all(AppSpace.x6),
+              child: NLoading(label: 'Generating the report on the server…'),
+            )
+          else if (error != null && report == null)
+            Padding(
+              padding: const EdgeInsets.all(AppSpace.x4),
+              child: NErrorState(message: error!, onRetry: onRetry),
+            )
+          else if (report != null) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpace.x4),
+              child: Row(
+                children: [
+                  _Stat(label: 'New properties', value: '${report.newAccommodations}'),
+                  _Stat(label: 'New users', value: '${report.newUsers}'),
+                  _Stat(label: 'Payment turnover', value: money.format(report.totalRevenue)),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpace.x4),
+            _ServerChart(svg: report.growthSvg),
+            _ServerChart(svg: report.topCustomersSvg),
+            _ServerChart(svg: report.topAccommodationsSvg),
+            const SizedBox(height: AppSpace.x4),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Stat extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _Stat({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          NKicker(label),
+          const SizedBox(height: AppSpace.x1),
+          Text(value, style: textTheme.titleLarge),
+        ],
+      ),
+    );
+  }
+}
+
+class _ServerChart extends StatelessWidget {
+  final String svg;
+
+  const _ServerChart({required this.svg});
+
+  @override
+  Widget build(BuildContext context) {
+    if (svg.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          AppSpace.x4, AppSpace.x2, AppSpace.x4, AppSpace.x2),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: AspectRatio(
+          aspectRatio: 800 / 360,
+          child: SvgPicture.string(svg, fit: BoxFit.contain),
+        ),
       ),
     );
   }

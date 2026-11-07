@@ -10,6 +10,7 @@ import 'package:ebooking/models/catalog_model.dart';
 import 'package:ebooking/providers/accommodation_provider.dart';
 import 'package:ebooking/providers/catalog_provider.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+import 'package:ebooking/utils/accommodation_rules.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ebooking/providers/location_provider.dart';
@@ -125,6 +126,9 @@ class AddAccommodationScreenState extends State<AddAccommodationScreen> {
         return;
       }
     }
+    if (_currentStep == 2) {
+      if (!(_formKey.currentState?.validate() ?? false)) return;
+    }
     if (_currentStep == 3) {
       _submit();
       return;
@@ -153,10 +157,11 @@ class AddAccommodationScreenState extends State<AddAccommodationScreen> {
       );
       return;
     }
-    if (_bedsController.text.isEmpty) {
+    final bedsProblem = AccommodationRules.beds(_bedsController.text);
+    if (bedsProblem != null) {
       setState(() => _currentStep = 2);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter the number of beds.')),
+        SnackBar(content: Text('$bedsProblem.')),
       );
       return;
     }
@@ -197,11 +202,11 @@ class AddAccommodationScreenState extends State<AddAccommodationScreen> {
         images: accommodationImages,
         name: _nameController.text.trim(),
         pricePerNight: double.parse(_priceController.text),
-        description: _descriptionController.text,
+        description: _descriptionController.text.trim(),
         location: location,
         accommodationTypeId: typeId,
         accommodationDetails: AccommodationDetails(
-          numberOfBeds: int.parse(_bedsController.text),
+          numberOfBeds: int.parse(_bedsController.text.trim()),
           amenities: catalog.amenities
               .where((amenity) => _selectedAmenityIds.contains(amenity.id))
               .toList(),
@@ -416,9 +421,7 @@ class _BasicsStep extends StatelessWidget {
           decoration: const InputDecoration(labelText: 'Name'),
           // Trimmed: a name of nothing but spaces used to pass this step and
           // reach the server as a blank listing title.
-          validator: (value) => (value ?? '').trim().isEmpty
-              ? 'Please enter a name'
-              : null,
+          validator: AccommodationRules.name,
         ),
         const SizedBox(height: 14),
         DropdownButtonFormField<String>(
@@ -444,20 +447,15 @@ class _BasicsStep extends StatelessWidget {
             prefixText: '\$ ',
           ),
           keyboardType: TextInputType.number,
-          validator: (value) {
-            if (value == null || value.isEmpty) return 'Please enter a price';
-            if (double.tryParse(value) == null) return 'Enter a valid number';
-            return null;
-          },
+          validator: AccommodationRules.price,
         ),
         const SizedBox(height: 14),
         TextFormField(
           controller: descriptionController,
           decoration: const InputDecoration(labelText: 'Description'),
           maxLines: 4,
-          validator: (value) => (value == null || value.isEmpty)
-              ? 'Please enter a description'
-              : null,
+          maxLength: AccommodationRules.descriptionMax,
+          validator: AccommodationRules.description,
         ),
       ],
     );
@@ -554,9 +552,7 @@ class _AmenitiesStep extends StatelessWidget {
           controller: bedsController,
           decoration: const InputDecoration(labelText: 'Number of beds'),
           keyboardType: TextInputType.number,
-          validator: (value) => (value == null || value.isEmpty)
-              ? 'Please enter the number of beds'
-              : null,
+          validator: AccommodationRules.beds,
         ),
         const SizedBox(height: 20),
         Text(

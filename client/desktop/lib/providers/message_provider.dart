@@ -10,6 +10,13 @@ class MessageProvider with ChangeNotifier {
 
   List<ChatGET> _chats = [];
   final Map<String, List<MessageGET>> _messages = {};
+  final Map<String, int> _loadedPage = {};
+  final Map<String, bool> _hasMore = {};
+  final Set<String> _loadingOlder = {};
+
+  bool hasOlderMessages(String chatId) => _hasMore[chatId] ?? false;
+
+  bool isLoadingOlder(String chatId) => _loadingOlder.contains(chatId);
 
   bool _isLoading = false;
   String? _error;
@@ -38,15 +45,41 @@ class MessageProvider with ChangeNotifier {
   }
 
   Future<void> getMessages(String chatId) async {
-    _messages[chatId] = await signalRService.getMessages(chatId);
+    final page = await signalRService.getMessages(chatId);
+    _messages[chatId] = page.items;
+    _loadedPage[chatId] = page.page;
+    _hasMore[chatId] = page.hasMore;
     notifyListeners();
   }
 
-  /// Podiže SignalR vezu, povlači razgovore i poruke.
-  ///
-  /// Razgovori i poruke se povlače paralelno kroz `Future.wait` — serijska
-  /// petlja bi kod 20 razgovora značila 40 uzastopnih round-tripova prije
-  /// nego se prvi ekran uopšte prikaže.
+  Future<void> loadOlderMessages(String chatId) async {
+    if (_loadingOlder.contains(chatId) || !hasOlderMessages(chatId)) return;
+    _loadingOlder.add(chatId);
+    notifyListeners();
+    try {
+      final next = (_loadedPage[chatId] ?? 1) + 1;
+      final page = await signalRService.getMessages(chatId, page: next);
+      _messages[chatId] = [...page.items, ...?_messages[chatId]];
+      _loadedPage[chatId] = page.page;
+      _hasMore[chatId] = page.hasMore;
+    } finally {
+      _loadingOlder.remove(chatId);
+      notifyListeners();
+    }
+  }
+
+  Future<void> openChat(String chatId) async {
+    await getMessages(chatId);
+    await readMessages(chatId);
+  }
+
+  ChatGET? _chat(String chatId) {
+    for (final chat in _chats) {
+      if (chat.id == chatId) return chat;
+    }
+    return null;
+  }
+
   Future<void> bootstrap() async {
     _isLoading = true;
     _error = null;
@@ -55,10 +88,6 @@ class MessageProvider with ChangeNotifier {
     try {
       await startSignalR();
       await getChats();
-      await Future.wait([
-        for (final chat in _chats) getMessages(chat.id),
-        for (final chat in _chats) addToChat(chat.id),
-      ]);
     } catch (e) {
       _error = 'Messenger is unavailable: could not connect to the messaging '
           'service. The rest of the application works normally.';
@@ -79,18 +108,15 @@ class MessageProvider with ChangeNotifier {
       final data = signalRService.handleIncomingMessage(args);
       if (data == null) return;
 
-      // BUGFIX: ranije `_messages[data.chatId]!.add(...)` — `!` na mapi koja
-      // još nema ključ za taj chat baca `NoSuchMethodError` na null.
-      // Dešavalo se svaki put kad stigne poruka u razgovor koji nije bio
-      // otvoren u ovoj sesiji.
-      _messages.putIfAbsent(data.chatId, () => <MessageGET>[]).add(data);
+      _messages[data.chatId]?.add(data);
 
-      for (final chat in _chats) {
-        if (chat.id == data.chatId) {
-          chat.messages.add(data);
-          break;
-        }
+      final chat = _chat(data.chatId);
+      if (chat == null) {
+        getChats();
+        return;
       }
+      chat.lastMessage = data;
+      if (!data.isCurrent && !data.isRead) chat.unreadCount++;
       notifyListeners();
     });
 
@@ -100,18 +126,11 @@ class MessageProvider with ChangeNotifier {
       if (data == null || data.isEmpty) return;
 
       final chatId = data.first.chatId;
-      final existing = _messages[chatId];
-      if (existing != null) {
-        for (final message in existing) {
-          message.isRead = data.first.isRead;
-        }
+      for (final message in _messages[chatId] ?? const <MessageGET>[]) {
+        if (message.isCurrent) message.isRead = true;
       }
-      for (final chat in _chats) {
-        if (chat.id == chatId) {
-          chat.messages = data;
-          break;
-        }
-      }
+      final last = _chat(chatId)?.lastMessage;
+      if (last != null && last.isCurrent) last.isRead = true;
       notifyListeners();
     });
   }
@@ -123,11 +142,9 @@ class MessageProvider with ChangeNotifier {
 
   Future<void> readMessages(String chatId) async {
     await signalRService.readMessages(chatId);
+    final chat = _chat(chatId);
+    if (chat != null) chat.unreadCount = 0;
     notifyListeners();
-  }
-
-  Future<void> addToChat(String chatId) async {
-    await signalRService.addToChat(chatId);
   }
 
   /// Otvara (ili kreira) razgovor sa datim korisnikom i priprema ga da bude
@@ -144,7 +161,6 @@ class MessageProvider with ChangeNotifier {
       _chats[existingIndex] = chat;
     } else {
       _chats.add(chat);
-      await addToChat(chat.id);
     }
 
     _pendingChatId = chat.id;
@@ -153,22 +169,9 @@ class MessageProvider with ChangeNotifier {
 
   Future<void> stopSignalR() => signalRService.stopConnection();
 
-  /// Broj nepročitanih poruka u razgovoru za trenutnog korisnika.
-  /// Ranije se ovo računalo u `build()` metodi kroz pomoćnu listu mapa;
-  /// ovdje je jedna metoda koju i lista i badge dijele.
-  int unreadCount(String chatId, String currentUserId) {
-    final chat = _chats.where((c) => c.id == chatId);
-    if (chat.isEmpty) return 0;
-    return chat.first.messages
-        .where((m) => !m.isRead && m.sender != currentUserId)
-        .length;
-  }
+  int unreadCount(String chatId, String currentUserId) =>
+      _chat(chatId)?.unreadCount ?? 0;
 
-  int totalUnread(String currentUserId) {
-    var total = 0;
-    for (final chat in _chats) {
-      total += unreadCount(chat.id, currentUserId);
-    }
-    return total;
-  }
+  int totalUnread(String currentUserId) =>
+      _chats.fold(0, (sum, chat) => sum + chat.unreadCount);
 }

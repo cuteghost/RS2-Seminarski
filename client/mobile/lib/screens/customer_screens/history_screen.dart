@@ -59,7 +59,9 @@ class _ReservationHistoryPageState extends State<ReservationHistoryPage> {
     listen: false,
   ).fetchMyReservations();
 
-  void _reload() => setState(() => _trips = _load());
+  void _reload() => setState(() {
+    _trips = _load();
+  });
 
   Future<void> _cancel(ReservationGET reservation) async {
     final reason = await _confirmCancellation(reservation);
@@ -100,53 +102,15 @@ class _ReservationHistoryPageState extends State<ReservationHistoryPage> {
     _reload();
   }
 
-  Future<String?> _confirmCancellation(ReservationGET reservation) async {
-    final controller = TextEditingController();
-    final textTheme = Theme.of(context).textTheme;
-
-    try {
-      return await showDialog<String>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          backgroundColor: AppColors.surface,
-          title: const Text('Cancel this stay?'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Cancelling ${reservation.accommodation?.name ?? 'this stay'} '
-                'cannot be undone. The dates are released and the booking '
-                'stays cancelled.',
-                style: textTheme.bodySmall,
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: controller,
-                maxLength: 500,
-                decoration: const InputDecoration(
-                  labelText: 'Reason (optional)',
-                  helperText: 'The host is told why.',
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Keep it'),
-            ),
-            TextButton(
-              onPressed: () =>
-                  Navigator.of(dialogContext).pop(controller.text.trim()),
-              child: const Text('Cancel stay'),
-            ),
-          ],
-        ),
-      );
-    } finally {
-      controller.dispose();
-    }
+  /// The dialog owns its text controller: disposing it right after `pop` would
+  /// tear it down while the closing animation still rebuilds the TextField.
+  Future<String?> _confirmCancellation(ReservationGET reservation) {
+    return showDialog<String>(
+      context: context,
+      builder: (_) => _CancelStayDialog(
+        accommodationName: reservation.accommodation?.name ?? 'this stay',
+      ),
+    );
   }
 
   @override
@@ -231,8 +195,14 @@ class _ReservationHistoryPageState extends State<ReservationHistoryPage> {
                         for (final r in upcoming) ...[
                           _TripCard(
                             reservation: r,
-                            onCancel: () => _cancel(r),
-                            onPay: r.isPaid ? null : () => _pay(r),
+                            // A paid stay has no refund flow, so the server
+                            // refuses to cancel it; do not offer the button.
+                            onCancel: r.isPaid ? null : () => _cancel(r),
+                            onPay:
+                                r.isPaid ||
+                                    r.status != ReservationStatus.confirmed
+                                ? null
+                                : () => _pay(r),
                           ),
                           const SizedBox(height: 14),
                         ],
@@ -266,6 +236,7 @@ class _ReservationHistoryPageState extends State<ReservationHistoryPage> {
                                     MaterialPageRoute(
                                       builder: (context) => ReviewScreen(
                                         accommodationId: r.accommodationId,
+                                        reservationId: r.id,
                                         accommodationName:
                                             r.accommodation?.name ?? '',
                                       ),
@@ -346,8 +317,9 @@ class _TripCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final accommodation = reservation.accommodation;
+    final checkIn = reservation.checkInTime;
     final dateRange =
-        '${DateFormat('d MMM').format(reservation.startDate)} – ${DateFormat('d MMM').format(reservation.endDate)}';
+        '${DateFormat('d MMM').format(reservation.startDate)} – ${DateFormat('d MMM').format(reservation.endDate)}${checkIn == null ? '' : ' · check-in $checkIn'}';
     final nights = reservation.endDate.difference(reservation.startDate).inDays;
     final daysUntil = reservation.startDate.difference(DateTime.now()).inDays;
     final canCancel = startsAfterToday(reservation.startDate);
@@ -533,6 +505,7 @@ class _ReviewPromptCard extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => FeedbackPage(
                     accommodationID: reservation.accommodationId,
+                    reservationId: reservation.id,
                   ),
                 ),
               );
@@ -541,6 +514,64 @@ class _ReviewPromptCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CancelStayDialog extends StatefulWidget {
+  const _CancelStayDialog({required this.accommodationName});
+
+  final String accommodationName;
+
+  @override
+  State<_CancelStayDialog> createState() => _CancelStayDialogState();
+}
+
+class _CancelStayDialogState extends State<_CancelStayDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return AlertDialog(
+      backgroundColor: AppColors.surface,
+      title: const Text('Cancel this stay?'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Cancelling ${widget.accommodationName} cannot be undone. The '
+            'dates are released and the booking stays cancelled.',
+            style: textTheme.bodySmall,
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            controller: _controller,
+            maxLength: 500,
+            decoration: const InputDecoration(
+              labelText: 'Reason (optional)',
+              helperText: 'The host is told why.',
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Keep it'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(_controller.text.trim()),
+          child: const Text('Cancel stay'),
+        ),
+      ],
     );
   }
 }

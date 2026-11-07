@@ -2,6 +2,8 @@ import 'package:ebooking/config/app_theme.dart';
 import 'package:ebooking/models/accommodation_model.dart';
 import 'package:ebooking/models/feedback_model.dart';
 import 'package:ebooking/providers/feedback_provider.dart';
+import 'package:ebooking/providers/suggestion_provider.dart';
+import 'package:ebooking/screens/customer_screens/discover_screen.dart';
 import 'package:ebooking/services/api_client.dart';
 import 'package:ebooking/utils/rating.dart';
 import 'package:ebooking/widgets/amenity_icons.dart';
@@ -35,13 +37,31 @@ class AccommodationDetailsScreenState
   final PageController _galleryController = PageController();
   final ScrollController _pageScrollController = ScrollController();
   int _galleryIndex = 0;
+  List<AccommodationGET>? _similar;
 
   @override
   void initState() {
     super.initState();
     accommodation = widget.accommodation;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadReviews());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadReviews();
+      _loadSimilar();
+    });
     _pageScrollController.addListener(_onScroll);
+  }
+
+  Future<void> _loadSimilar() async {
+    try {
+      final similar = await Provider.of<SuggestionProvider>(
+        context,
+        listen: false,
+      ).similarTo(accommodation.id);
+      if (!mounted) return;
+      setState(() => _similar = similar);
+    } on ApiException catch (_) {
+      if (!mounted) return;
+      setState(() => _similar = const <AccommodationGET>[]);
+    }
   }
 
   Future<void> _loadReviews() async {
@@ -286,6 +306,45 @@ class AccommodationDetailsScreenState
                           location: accommodation.location,
                           markerTitle: accommodation.name,
                         ),
+                        if (_similar?.isNotEmpty ?? false) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 18, bottom: 18),
+                            child: Divider(color: AppColors.divider, height: 1),
+                          ),
+                          Text(
+                            'You might also like',
+                            style: textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            height: 258,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: _similar!.length,
+                              itemBuilder: (context, index) {
+                                final similar = _similar![index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 12),
+                                  child: NearbyPropertyCard(
+                                    accommodation: similar,
+                                    distanceKm: null,
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              AccommodationDetailsScreen(
+                                                accommodation: similar,
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 20),
                       ],
                     ),
@@ -417,12 +476,24 @@ class _ReviewCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(
-            review.comment,
-            style: textTheme.bodySmall?.copyWith(
-              color: AppColors.text.withValues(alpha: 0.85),
+          if (review.comment.trim().isNotEmpty)
+            Text(
+              review.comment,
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.text.withValues(alpha: 0.85),
+              ),
             ),
-          ),
+          if (review.imageUrl != null) ...[
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: RemoteImage(
+                path: review.imageUrl,
+                width: double.infinity,
+                height: 160,
+              ),
+            ),
+          ],
           if (review.wouldRecommend) ...[
             const SizedBox(height: 6),
             Text(

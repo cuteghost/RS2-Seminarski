@@ -8,15 +8,17 @@ public interface IPaymentService
 
     Task<Payment> AttachProviderOrder(Guid paymentId, string providerOrderId);
 
-    Task<Payment> CompletePayment(string providerOrderId, string providerCaptureId, decimal capturedAmount, string currency);
+    Task<Payment> GetOwnedByProviderOrder(string providerOrderId, Guid reservationId, Guid customerId);
 
-    Task<Payment> FailPayment(string providerOrderId, string reason);
+    Task<Payment> CompletePayment(Guid paymentId, string providerCaptureId, decimal capturedAmount, string currency);
+
+    Task<Payment> FailPayment(Guid paymentId, string reason);
 
     Task<Payment?> GetForReservation(Guid reservationId);
 
-    Task<Payment?> GetByProviderOrder(string providerOrderId);
-
     Task<HashSet<Guid>> GetPaidReservationIds(IReadOnlyCollection<Guid> reservationIds);
+
+    Task<bool> IsPaid(Guid reservationId);
 
     Task<decimal> CalculateAmount(Guid reservationId);
 

@@ -171,7 +171,7 @@ class PartnerProfilePageState extends State<PartnerProfilePage> {
       appBar: _appBar(context),
       body: Center(child: child),
       bottomNavigationBar: const CustomPartnerBottomNavigationBar(
-        currentIndex: 3,
+        currentIndex: 4,
       ),
     );
   }
@@ -537,7 +537,7 @@ class PartnerProfilePageState extends State<PartnerProfilePage> {
         ),
       ),
       bottomNavigationBar: const CustomPartnerBottomNavigationBar(
-        currentIndex: 3,
+        currentIndex: 4,
       ),
     );
   }

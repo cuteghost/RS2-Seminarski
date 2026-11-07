@@ -67,7 +67,7 @@ public class SearchController : Controller
             .And(c => c.Status)
             .And(_reservationService.AvailableBetween(checkIn, checkOut));
 
-        var (items, totalCount) = await _accommodationRepo.GetPaged(predicate, page, pageSize, false,
+        var (items, totalCount) = await _accommodationRepo.GetPaged(predicate, c => c.PricePerNight, false, page, pageSize, false,
             c => c.AccommodationDetails, c => c.AccommodationType, c => c.Location, c => c.Location.City, c => c.Location.City.Country);
 
         var mapped = _mapper.Map<List<AccommodationGET>>(items);
@@ -93,7 +93,9 @@ public class SearchController : Controller
             }
         }
 
-        return ids.Count > 0 ? ids : null;
+        var distinct = ids.Distinct().ToList();
+
+        return distinct.Count > 0 ? distinct : null;
     }
 
     /// <summary>

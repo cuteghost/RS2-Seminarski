@@ -19,6 +19,9 @@ class AccommodationGET {
   String reviews;
   int imageCount;
   List<String> imageUrls;
+  bool isPromoted;
+  String? recommendationReason;
+  List<String> recommendationReasons;
 
   AccommodationGET({
     required this.id,
@@ -34,6 +37,9 @@ class AccommodationGET {
     required this.accommodationDetails,
     required this.imageCount,
     required this.imageUrls,
+    this.isPromoted = false,
+    this.recommendationReason,
+    this.recommendationReasons = const <String>[],
   });
 
   String? get firstImageUrl => imageUrls.isEmpty ? null : imageUrls.first;
@@ -57,6 +63,11 @@ class AccommodationGET {
       imageUrls:
           (json['imageUrls'] as List?)?.whereType<String>().toList() ??
           const <String>[],
+      isPromoted: json['isPromoted'] as bool? ?? false,
+      recommendationReason: json['reason'] as String?,
+      recommendationReasons:
+          (json['reasons'] as List?)?.whereType<String>().toList() ??
+          const <String>[],
     );
   }
 
@@ -75,6 +86,7 @@ class AccommodationGET {
       'reviews': reviews,
       'imageCount': imageCount,
       'imageUrls': imageUrls,
+      'isPromoted': isPromoted,
     };
   }
 }
@@ -138,7 +150,6 @@ class AccommodationImages {
 class AccommodationPATCH {
   String id;
   String name;
-  bool status;
   String accommodationTypeId;
   double pricePerNight;
   String description;
@@ -151,7 +162,6 @@ class AccommodationPATCH {
 
   AccommodationPATCH({
     required this.id,
-    required this.status,
     required this.name,
     required this.accommodationTypeId,
     required this.pricePerNight,
@@ -164,7 +174,6 @@ class AccommodationPATCH {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> body = {
       'id': id,
-      'status': status,
       'name': name,
       'accommodationTypeId': accommodationTypeId,
       'pricePerNight': pricePerNight,

@@ -48,8 +48,6 @@ services:
         condition: service_healthy
       webapi:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/8080' || exit 1"]
       interval: 10s
@@ -89,6 +87,47 @@ services:
       timeout: 5s
       retries: 10
       start_period: 15s
+
+  worker:
+    build:
+      context: .
+      dockerfile: ebooking-api/EBooking.Worker/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DB_SERVER=$DB_SERVER
+      - DB_NAME=$DB_NAME
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - RABBITMQ_HOST=$RABBITMQ_HOST
+      - RABBITMQ_USERNAME=$RABBITMQ_USERNAME
+      - RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD
+      - RABBITMQ_VIRTUALHOST=$RABBITMQ_VIRTUALHOST
+      - RABBITMQ_PORT=$RABBITMQ_PORT
+      - SMTP_HOST=${SMTP_HOST:-mailpit}
+      - SMTP_PORT=${SMTP_PORT:-1025}
+      - SMTP_FROM=${SMTP_FROM:-no-reply@ebooking.local}
+      - SMTP_USERNAME=${SMTP_USERNAME:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_ENABLE_SSL=${SMTP_ENABLE_SSL:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+      webapi:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit:v1.20
+    container_name: mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:3.13-management

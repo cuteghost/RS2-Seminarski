@@ -1,15 +1,14 @@
-﻿using Models.Domain;
+using Models.Domain;
 using Models.DTO.MessengerDTO;
 
-namespace Profiles.CityProfile;
+namespace Messenger.Profiles;
 
 public class MessageProfiles : AutoMapper.Profile
 {
     public MessageProfiles()
     {
-        CreateMap<Message, MessagePOST>().ReverseMap();
-        CreateMap<Message, MessageGET>().ReverseMap();
-        CreateMap<Chat, ChatPOST>().ReverseMap();
-        CreateMap<Chat, ChatGET>().ReverseMap();
+        CreateMap<Message, MessageGET>()
+            .ForMember(dest => dest.TimeStamp, opt => opt.MapFrom(src => src.Timestamp))
+            .ForMember(dest => dest.isCurrent, opt => opt.Ignore());
     }
 }

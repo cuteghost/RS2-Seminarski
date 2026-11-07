@@ -26,6 +26,7 @@ class _MessengerPageState extends State<MessengerPage> {
   String _query = '';
   bool _sending = false;
   int _lastMessageCount = 0;
+  bool _keepScrollPosition = false;
 
   @override
   void initState() {
@@ -50,10 +51,24 @@ class _MessengerPageState extends State<MessengerPage> {
   void _scrollToBottomIfNeeded(int messageCount) {
     if (messageCount == _lastMessageCount) return;
     _lastMessageCount = messageCount;
+    if (_keepScrollPosition) {
+      _keepScrollPosition = false;
+      return;
+    }
 
+    _jumpToBottom();
+  }
+
+  /// ListView lays rows out lazily, so the first maxScrollExtent is only an
+  /// estimate; keep jumping for a few frames until the real bottom is reached.
+  void _jumpToBottom([int attempts = 5]) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_scrollController.hasClients) return;
-      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      if (!mounted || !_scrollController.hasClients) return;
+      final position = _scrollController.position;
+      if (position.pixels != position.maxScrollExtent) {
+        _scrollController.jumpTo(position.maxScrollExtent);
+      }
+      if (attempts > 1) _jumpToBottom(attempts - 1);
     });
   }
 
@@ -63,7 +78,7 @@ class _MessengerPageState extends State<MessengerPage> {
       _lastMessageCount = 0;
     });
     _draftController.clear();
-    await context.read<MessageProvider>().readMessages(chatId);
+    await context.read<MessageProvider>().openChat(chatId);
   }
 
   Future<void> _send() async {
@@ -172,8 +187,9 @@ class _MessengerPageState extends State<MessengerPage> {
                       ? const _NoChatSelected()
                       : Builder(
                           builder: (context) {
+                            final selected = activeChat!;
                             final thread =
-                                messages.messages[activeChat!.id] ?? const [];
+                                messages.messages[selected.id] ?? const [];
                             // BUGFIX: ovo se ranije zvalo IZ `build()`-a
                             // widgeta `_ChatThread` — dijete je mijenjalo
                             // stanje roditelja i zakazivalo novi frame usred
@@ -183,13 +199,21 @@ class _MessengerPageState extends State<MessengerPage> {
                             // ovog Statea.
                             _scrollToBottomIfNeeded(thread.length);
                             return _ChatThread(
-                              chat: activeChat,
+                              chat: selected,
                               messages: thread,
                               currentUserId: currentUserId,
                               scrollController: _scrollController,
                               draftController: _draftController,
                               sending: _sending,
                               onSend: _send,
+                              hasOlder:
+                                  messages.hasOlderMessages(selected.id),
+                              loadingOlder:
+                                  messages.isLoadingOlder(selected.id),
+                              onLoadOlder: () {
+                                _keepScrollPosition = true;
+                                messages.loadOlderMessages(selected.id);
+                              },
                             );
                           },
                         ),
@@ -407,6 +431,9 @@ class _ChatThread extends StatelessWidget {
   final TextEditingController draftController;
   final bool sending;
   final VoidCallback onSend;
+  final bool hasOlder;
+  final bool loadingOlder;
+  final VoidCallback onLoadOlder;
 
   const _ChatThread({
     required this.chat,
@@ -416,6 +443,9 @@ class _ChatThread extends StatelessWidget {
     required this.draftController,
     required this.sending,
     required this.onSend,
+    required this.hasOlder,
+    required this.loadingOlder,
+    required this.onLoadOlder,
   });
 
   @override
@@ -442,7 +472,9 @@ class _ChatThread extends StatelessWidget {
                     Text(chat.user2,
                         style: Theme.of(context).textTheme.titleMedium),
                     Text(
-                      '${messages.length} messages in the conversation',
+                      hasOlder
+                          ? 'Showing the latest ${messages.length} messages'
+                          : '${messages.length} messages in the conversation',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -459,9 +491,19 @@ class _ChatThread extends StatelessWidget {
               : ListView.builder(
                   controller: scrollController,
                   padding: const EdgeInsets.all(AppSpace.x6),
-                  itemCount: messages.length,
+                  itemCount: messages.length + (hasOlder ? 1 : 0),
                   itemBuilder: (context, index) {
-                    final message = messages[index];
+                    if (hasOlder && index == 0) {
+                      return Center(
+                        child: TextButton(
+                          onPressed: loadingOlder ? null : onLoadOlder,
+                          child: Text(loadingOlder
+                              ? 'Loading...'
+                              : 'Load earlier messages'),
+                        ),
+                      );
+                    }
+                    final message = messages[hasOlder ? index - 1 : index];
                     final isMine = message.sender == currentUserId;
                     return _MessageBubble(
                       message: message,

@@ -36,16 +36,20 @@ class DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
   String? _nearbyError;
   List<AccommodationGET>? _suggested;
   String? _suggestedError;
+  List<AccommodationGET> _featured = const <AccommodationGET>[];
+  late final Future<void> _locating = _getCurrentLocation();
   ReservationGET? _nextTrip;
 
   final ScrollController _nearbyController = ScrollController();
   final ScrollController _suggestedController = ScrollController();
+  final ScrollController _featuredController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _loadNearby();
     _loadSuggested();
+    _loadFeatured();
     _getNextTrip().then((value) {
       if (!mounted) return;
       setState(() => _nextTrip = value);
@@ -56,14 +60,30 @@ class DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
   void dispose() {
     _nearbyController.dispose();
     _suggestedController.dispose();
+    _featuredController.dispose();
     super.dispose();
   }
 
+  /// Never throws and never waits forever: both "Near you" and "Suggested for
+  /// you" await this, so a device without a fresh GPS fix must not leave the
+  /// home screen spinning. Falls back to the last known position, then to none.
   Future<void> _getCurrentLocation() async {
-    final Position position = await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
-    );
-    if (mounted) {
+    Position? position;
+    try {
+      position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+    } catch (_) {
+      try {
+        position = await Geolocator.getLastKnownPosition();
+      } catch (_) {
+        position = null;
+      }
+    }
+    if (mounted && position != null) {
       setState(() => _currentPosition = position);
     }
   }
@@ -71,7 +91,7 @@ class DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
   /// The list has three outcomes and the section shows all three: still
   /// loading, the reason it failed, or the results (possibly none).
   Future<void> _loadNearby() async {
-    await _getCurrentLocation();
+    await _locating;
     if (!mounted) return;
     if (_currentPosition == null) {
       setState(() => _nearbyAccommodations = <AccommodationGET>[]);
@@ -101,12 +121,33 @@ class DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
   /// Same three outcomes as the nearby row, and the same reason for showing
   /// all three: an empty row after a server error would read as "nothing to
   /// suggest".
-  Future<void> _loadSuggested() async {
+  Future<void> _loadFeatured() async {
     try {
-      final suggested = await Provider.of<SuggestionProvider>(
+      final featured = await Provider.of<AccommodationProvider>(
         context,
         listen: false,
-      ).suggest();
+      ).fetchPromoted();
+      if (!mounted) return;
+      setState(() => _featured = featured);
+    } on ApiException catch (_) {
+      return;
+    }
+  }
+
+  Future<void> _loadSuggested() async {
+    final suggestions = Provider.of<SuggestionProvider>(context, listen: false);
+    Position? position;
+    try {
+      await _locating;
+      position = _currentPosition;
+    } on Exception {
+      position = null;
+    }
+    try {
+      final suggested = await suggestions.suggest(
+        latitude: position?.latitude,
+        longitude: position?.longitude,
+      );
       if (!mounted) return;
       setState(() => _suggested = suggested);
     } on ApiException catch (e) {
@@ -347,6 +388,42 @@ class DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
                   ),
                 ),
               ],
+              if (_featured.isNotEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 26, 20, 12),
+                  child: Text('Featured stays', style: textTheme.titleLarge),
+                ),
+                SizedBox(
+                  height: 258,
+                  child: ListView.builder(
+                    controller: _featuredController,
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: _featured.length,
+                    itemBuilder: (context, index) {
+                      final accommodation = _featured[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: NearbyPropertyCard(
+                          accommodation: accommodation,
+                          distanceKm: null,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    AccommodationDetailsScreen(
+                                      accommodation: accommodation,
+                                    ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 26, 20, 12),
                 child: Row(
@@ -373,7 +450,7 @@ class DiscoverPropertiesPageState extends State<DiscoverPropertiesPage> {
                 ),
               ),
               SizedBox(
-                height: 238,
+                height: 258,
                 child: _suggested == null
                     ? const Center(child: CircularProgressIndicator())
                     : _suggested!.isEmpty
@@ -571,6 +648,12 @@ class NearbyPropertyCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppColors.radiusMd),
                   child: RemoteImage(path: image, height: 148, width: 214),
                 ),
+                if (accommodation.isPromoted)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: FeaturedBadge(),
+                  ),
                 if (accommodation.reviewScore > 0)
                   Positioned(
                     top: 8,
@@ -618,6 +701,18 @@ class NearbyPropertyCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
+            if ((accommodation.recommendationReason ?? '').isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  accommodation.recommendationReason!,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: AppColors.accentLink,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             const SizedBox(height: 3),
             RichText(
               text: TextSpan(
@@ -636,6 +731,36 @@ class NearbyPropertyCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class FeaturedBadge extends StatelessWidget {
+  const FeaturedBadge({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.accent,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            PhosphorIcons.sparkle(PhosphorIconsStyle.fill),
+            size: 11,
+            color: AppColors.bg,
+          ),
+          const SizedBox(width: 4),
+          const Text(
+            'Featured',
+            style: TextStyle(fontSize: 11, color: AppColors.bg),
+          ),
+        ],
       ),
     );
   }

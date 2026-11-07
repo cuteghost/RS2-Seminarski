@@ -443,6 +443,7 @@ public static class SeedData
                 AccommodationDetailsId = SeedIds.AccommodationDetails(number),
                 AccommodationImagesId = SeedIds.AccommodationImages(number),
                 IsDeleted = false,
+                IsPromoted = false,
             });
         }
 
@@ -597,6 +598,7 @@ public static class SeedData
                     Id = SeedIds.Review(((accommodation - 1) * ReviewsPerAccommodation) + index + 1),
                     AccommodationId = SeedIds.Accommodation(accommodation),
                     CustomerId = SeedIds.Customer(customer),
+                    ReservationId = SeedIds.Reservation(((accommodation - 1) * ReservationsPerAccommodation) + index + 1),
                     Rating = rating,
                     Satisfaction = rating >= SatisfiedFromRating,
                     WouldRecommend = rating >= SatisfiedFromRating,

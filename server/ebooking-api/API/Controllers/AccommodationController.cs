@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Models.Constants;
 using Models.Domain;
 using Models.DTO.AccommodationDTO;
-using Models.DTO.LocationDTO;
 using Repository.Interfaces;
 using Services.CurrentUserService;
 using Services.LocationService;
@@ -22,12 +21,10 @@ namespace Controllers;
 public class AccommodationController : Controller
 {
     private const double DefaultNearbyRadiusInKilometers = 10;
-    private const int AddressMaxLength = 200;
 
     private readonly IGenericRepository<Accommodation> _accommodationRepo;
     private readonly IGenericRepository<Partner> _partnerRepo;
     private readonly IGenericRepository<Reservation> _reservationRepo;
-    private readonly IGenericRepository<City> _cityRepo;
     private readonly ICurrentUserService _currentUser;
     private readonly IMapper _mapper;
     private readonly ILocationService _locationService;
@@ -37,7 +34,6 @@ public class AccommodationController : Controller
 
     public AccommodationController(IGenericRepository<Accommodation> accommodationRepo, ICurrentUserService currentUser,
                                    IGenericRepository<Partner> partnerRepo, IGenericRepository<Reservation> reservationRepo,
-                                   IGenericRepository<City> cityRepo,
                                    IMapper mapper, ILocationService locationService,
                                    IAccommodationImageService imageService,
                                    IAccommodationCatalogService catalog,
@@ -46,7 +42,6 @@ public class AccommodationController : Controller
         _accommodationRepo = accommodationRepo;
         _partnerRepo = partnerRepo;
         _reservationRepo = reservationRepo;
-        _cityRepo = cityRepo;
         _currentUser = currentUser;
         _mapper = mapper;
         _locationService = locationService;
@@ -60,29 +55,29 @@ public class AccommodationController : Controller
     public async Task<IActionResult> Add([FromBody] AccommodationPOST accommodationDto)
     {
         var partnerId = await _currentUser.GetPartnerIdAsync();
-        var partner = await _partnerRepo.Get(c => c.Id == partnerId, false);
-        if (partner == null)
+        if (partnerId == Guid.Empty || !await _partnerRepo.Any(p => p.Id == partnerId))
             throw new BusinessException("Only a partner can add an accommodation. The logged-in account is not registered as a partner.");
 
-        await _catalog.EnsureTypeExists(accommodationDto.AccommodationTypeId);
+        var input = new AccommodationInput(accommodationDto.Name, accommodationDto.Description,
+                                           accommodationDto.PricePerNight, accommodationDto.AccommodationTypeId);
 
-        var accommodation = _mapper.Map<Accommodation>(accommodationDto);
-        accommodation.Id = Guid.NewGuid();
-        accommodation.OwnerId = partner.Id;
+        var details = accommodationDto.AccommodationDetails != null
+            ? new AccommodationDetailsUpdate(accommodationDto.AccommodationDetails.NumberOfBeds,
+                                             accommodationDto.AccommodationDetails.AmenityIds)
+            : null;
 
-        await _accommodationRepo.Add(accommodation);
+        var location = accommodationDto.Location != null
+            ? new AccommodationLocationUpdate(accommodationDto.Location.Address, accommodationDto.Location.Latitude,
+                                              accommodationDto.Location.Longitude, accommodationDto.Location.CityId)
+            : null;
 
-        if (accommodation.AccommodationDetails != null && accommodationDto.AccommodationDetails != null)
-            await _catalog.SetAmenities(accommodation.AccommodationDetails.Id, accommodationDto.AccommodationDetails.AmenityIds);
+        var images = accommodationDto.AccommodationImages != null
+            ? _mapper.Map<AccommodationImages>(accommodationDto.AccommodationImages)
+            : null;
 
-        var created = await _accommodationRepo.Get(c => c.Id == accommodation.Id, false,
-            c => c.AccommodationDetails, c => c.AccommodationType, c => c.Location, c => c.Location.City, c => c.Location.City.Country);
+        var id = await _writeService.Create(partnerId, input, details, location, images);
 
-        var addedDto = _mapper.Map<AccommodationGET>(created);
-        await _imageService.Attach(new[] { addedDto });
-        await _catalog.AttachAmenities(new[] { addedDto });
-
-        return Ok(new BaseResponse<AccommodationGET>("Accommodation added successfully.", addedDto));
+        return Ok(new BaseResponse<AccommodationGET>("Accommodation added successfully.", await LoadDto(id)));
     }
 
     [HttpPatch]
@@ -95,12 +90,11 @@ public class AccommodationController : Controller
         if (existing == null)
             throw new NotFoundException($"Accommodation with identifier {accommodationDto.Id} does not exist.");
 
-        if (existing.OwnerId != partnerId)
+        if (partnerId == Guid.Empty || existing.OwnerId != partnerId)
             throw new BusinessException("You can only modify an accommodation if you are its owner.");
 
-        await _catalog.EnsureTypeExists(accommodationDto.AccommodationTypeId);
-
-        var accommodation = _mapper.Map<Accommodation>(accommodationDto);
+        var input = new AccommodationInput(accommodationDto.Name, accommodationDto.Description,
+                                           accommodationDto.PricePerNight, accommodationDto.AccommodationTypeId);
 
         var images = accommodationDto.AccommodationImages != null
             ? _mapper.Map<AccommodationImages>(accommodationDto.AccommodationImages)
@@ -111,54 +105,16 @@ public class AccommodationController : Controller
                                              accommodationDto.AccommodationDetails.AmenityIds)
             : null;
 
-        var location = await BuildLocationUpdate(accommodationDto.Location);
+        var location = accommodationDto.Location != null
+            ? new AccommodationLocationUpdate(accommodationDto.Location.Address, accommodationDto.Location.Latitude,
+                                              accommodationDto.Location.Longitude, accommodationDto.Location.CityId)
+            : null;
 
-        await _writeService.Update(accommodation, images, details, location);
+        await _writeService.Update(accommodationDto.Id, input, images, details, location);
 
-        var updated = await _accommodationRepo.Get(c => c.Id == accommodation.Id, false,
-            c => c.AccommodationDetails, c => c.AccommodationType, c => c.Location, c => c.Location.City, c => c.Location.City.Country);
-
-        var updatedDto = _mapper.Map<AccommodationGET>(updated);
-        await _imageService.Attach(new[] { updatedDto });
-        await _catalog.AttachAmenities(new[] { updatedDto });
-
-        return Ok(new BaseResponse<AccommodationGET>("Accommodation updated successfully.", updatedDto));
+        return Ok(new BaseResponse<AccommodationGET>("Accommodation updated successfully.", await LoadDto(accommodationDto.Id)));
     }
 
-    /// <summary>
-    /// Adresa i njene koordinate stižu samo kada ih klijent zaista mijenja. Grad se provjerava
-    /// ovdje jer je strani ključ lokacije, pa bi nepostojeći identifikator inače pao tek u bazi.
-    /// </summary>
-    private async Task<AccommodationLocationUpdate?> BuildLocationUpdate(LocationPATCH? locationDto)
-    {
-        if (locationDto == null)
-            return null;
-
-        var address = locationDto.Address?.Trim() ?? string.Empty;
-
-        if (address.Length == 0)
-            throw new BusinessException("Accommodation address is required and must not be blank.");
-
-        if (address.Length > AddressMaxLength)
-            throw new BusinessException($"Accommodation address must not exceed {AddressMaxLength} characters.");
-
-        if (locationDto.Latitude < -90 || locationDto.Latitude > 90)
-            throw new BusinessException("Latitude must be between -90 and 90.");
-
-        if (locationDto.Longitude < -180 || locationDto.Longitude > 180)
-            throw new BusinessException("Longitude must be between -180 and 180.");
-
-        var city = await _cityRepo.Get(c => c.Id == locationDto.CityId, false);
-        if (city == null)
-            throw new NotFoundException($"City with identifier {locationDto.CityId} does not exist.");
-
-        return new AccommodationLocationUpdate(address, locationDto.Latitude, locationDto.Longitude, locationDto.CityId);
-    }
-
-    /// <summary>
-    /// Meko brisanje. Rezervacije iz prošlosti ne blokiraju brisanje i ostaju vezane za meko
-    /// obrisan zapis.
-    /// </summary>
     [HttpDelete]
     [Route("Delete/{id}")]
     public async Task<IActionResult> Delete([FromRoute] Guid id)
@@ -174,15 +130,60 @@ public class AccommodationController : Controller
                 throw new BusinessException("Only its owner or an administrator can delete an accommodation.");
         }
 
-        var today = DateTime.UtcNow.Date;
-        var activeReservations = await _reservationRepo.Count(r => r.AccommodationId == id && r.EndDate >= today);
+        var activeReservations = await _reservationRepo.Count(ReservationPolicy.HoldsTerm(id, DateTime.UtcNow));
         if (activeReservations > 0)
             throw new BusinessException(
-                $"Accommodation \"{accommodation.Name}\" cannot be deleted because it has reservations that are ongoing or upcoming (total: {activeReservations}).");
+                $"Accommodation \"{accommodation.Name}\" cannot be deleted because it has pending or confirmed reservations that are ongoing or upcoming (total: {activeReservations}).");
 
         await _accommodationRepo.Delete(c => c.Id == id);
 
         return Ok(new BaseResponse<object>("Accommodation deleted successfully.", null));
+    }
+
+    [Authorize(Roles = Roles.Administrator)]
+    [HttpPatch]
+    [Route("Promote/{id}")]
+    public async Task<IActionResult> SetPromoted([FromRoute] Guid id, [FromQuery] bool promoted)
+    {
+        await _writeService.SetPromoted(id, promoted);
+
+        var updated = await LoadDto(id);
+        var message = promoted
+            ? $"Accommodation \"{updated.Name}\" is now promoted."
+            : $"Accommodation \"{updated.Name}\" is no longer promoted.";
+
+        return Ok(new BaseResponse<AccommodationGET>(message, updated));
+    }
+
+    [HttpGet]
+    [Route("GetPromoted")]
+    public async Task<IActionResult> GetPromoted([FromQuery] int page = 1, [FromQuery] int pageSize = Pagination.DefaultPageSize)
+    {
+        (page, pageSize) = Pagination.Normalize(page, pageSize);
+
+        var (items, totalCount) = await _accommodationRepo.GetPaged(
+            c => c.IsPromoted && c.Status, c => c.PromotedAt, true, page, pageSize, false,
+            c => c.AccommodationDetails, c => c.AccommodationType, c => c.Location, c => c.Location.City, c => c.Location.City.Country);
+
+        var accommodations = _mapper.Map<List<AccommodationGET>>(items);
+        await _imageService.Attach(accommodations);
+        await _catalog.AttachAmenities(accommodations);
+
+        return Ok(new PagedResponse<AccommodationGET>("Promoted accommodations retrieved successfully.", accommodations, page, pageSize, totalCount));
+    }
+
+    private async Task<AccommodationGET> LoadDto(Guid id)
+    {
+        var entity = await _accommodationRepo.Get(c => c.Id == id, false,
+            c => c.AccommodationDetails, c => c.AccommodationType, c => c.Location, c => c.Location.City, c => c.Location.City.Country);
+        if (entity == null)
+            throw new NotFoundException($"Accommodation with identifier {id} does not exist.");
+
+        var dto = _mapper.Map<AccommodationGET>(entity);
+        await _imageService.Attach(new[] { dto });
+        await _catalog.AttachAmenities(new[] { dto });
+
+        return dto;
     }
 
     /// <summary>
@@ -206,16 +207,11 @@ public class AccommodationController : Controller
 
         await _writeService.SetStatus(id, status);
 
-        var updated = await _accommodationRepo.Get(c => c.Id == id, false,
-            c => c.AccommodationDetails, c => c.AccommodationType, c => c.Location, c => c.Location.City, c => c.Location.City.Country);
-
-        var updatedDto = _mapper.Map<AccommodationGET>(updated);
-        await _imageService.Attach(new[] { updatedDto });
-        await _catalog.AttachAmenities(new[] { updatedDto });
+        var updatedDto = await LoadDto(id);
 
         var message = status
-            ? $"Accommodation \"{updated.Name}\" has been activated."
-            : $"Accommodation \"{updated.Name}\" has been deactivated.";
+            ? $"Accommodation \"{updatedDto.Name}\" has been activated."
+            : $"Accommodation \"{updatedDto.Name}\" has been deactivated.";
 
         return Ok(new BaseResponse<AccommodationGET>(message, updatedDto));
     }

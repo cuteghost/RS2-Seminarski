@@ -9,4 +9,5 @@ public class AccommodationReviewGET
     public bool Satisfaction { get; set; }
     public bool WouldRecommend { get; set; }
     public string Comment { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
 }

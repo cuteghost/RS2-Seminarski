@@ -6,6 +6,7 @@ class AccommodationReview {
   final bool satisfaction;
   final bool wouldRecommend;
   final String comment;
+  final String? imageUrl;
 
   const AccommodationReview({
     required this.id,
@@ -15,6 +16,7 @@ class AccommodationReview {
     required this.satisfaction,
     required this.wouldRecommend,
     required this.comment,
+    this.imageUrl,
   });
 
   factory AccommodationReview.fromJson(Map<String, dynamic> json) {
@@ -27,6 +29,7 @@ class AccommodationReview {
       satisfaction: json['satisfaction'] == true,
       wouldRecommend: json['wouldRecommend'] == true,
       comment: json['comment']?.toString() ?? '',
+      imageUrl: json['imageUrl']?.toString(),
     );
   }
 }

@@ -395,6 +395,18 @@ class AdminProvider with ChangeNotifier {
     return message;
   }
 
+  Future<String> setAccommodationPromoted({
+    required String accommodationId,
+    required bool promoted,
+  }) async {
+    final message = await adminService.setAccommodationPromoted(
+      accommodationId: accommodationId,
+      promoted: promoted,
+    );
+    await loadProperties();
+    return message;
+  }
+
   /// Briše smještaj i osvježava trenutnu stranicu, plus puni skup koji koriste
   /// dashboard i izvještaji.
   Future<String> deleteAccommodation(String accommodationId) async {

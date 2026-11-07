@@ -1,6 +1,7 @@
 using API.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Models.Domain;
 
 namespace Database.Services.AccountService;
 
@@ -25,6 +26,10 @@ public class AccountService : IAccountService
             throw new BusinessException(
                 "Administrator accounts cannot be deleted from the application. Please contact another administrator.");
 
+        await EnsureNoOpenReservations(userId);
+
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
         var closure = await CloseRoleRows(userId);
         if (!closure.WasCustomer && !closure.WasPartner)
             throw new NotFoundException(
@@ -34,6 +39,7 @@ public class AccountService : IAccountService
         user.TokenVersion += 1;
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         _logger.LogInformation(
             "Nalog {UserId} je obrisan na vlastiti zahtjev. Kupac: {IsCustomer}, partner: {IsPartner}, zatvorenih smještaja: {Accommodations}.",
@@ -49,16 +55,58 @@ public class AccountService : IAccountService
         if (user == null)
             throw new NotFoundException($"User with identifier {targetUserId} does not exist.");
 
+        await EnsureNoOpenReservations(targetUserId);
+
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
         var closure = await CloseRoleRows(targetUserId);
 
         user.IsDeleted = true;
         user.TokenVersion += 1;
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         _logger.LogInformation(
             "Administrator {ActorId} je obrisao nalog {UserId}. Kupac: {IsCustomer}, partner: {IsPartner}, administrator: {IsAdministrator}, zatvorenih smještaja: {Accommodations}.",
             actorUserId, targetUserId, closure.WasCustomer, closure.WasPartner, closure.WasAdministrator, closure.ClosedAccommodations);
+    }
+
+    private async Task EnsureNoOpenReservations(Guid userId)
+    {
+        var now = DateTime.UtcNow;
+
+        var customerId = await _context.Customers
+            .Where(c => c.User.Id == userId && !c.IsDeleted)
+            .Select(c => (Guid?)c.Id)
+            .FirstOrDefaultAsync();
+
+        if (customerId.HasValue)
+        {
+            var open = await _context.Reservations
+                .Where(r => !r.IsDeleted)
+                .CountAsync(ReservationPolicy.BlocksCustomerClosure(customerId.Value, now));
+
+            if (open > 0)
+                throw new BusinessException(
+                    $"The account cannot be deleted while it has pending or confirmed reservations that are ongoing or upcoming (total: {open}). Cancel them or wait until the stays are over.");
+        }
+
+        var partnerId = await _context.Partners
+            .Where(p => p.User!.Id == userId && !p.IsDeleted)
+            .Select(p => (Guid?)p.Id)
+            .FirstOrDefaultAsync();
+
+        if (partnerId.HasValue)
+        {
+            var open = await _context.Reservations
+                .Where(r => !r.IsDeleted)
+                .CountAsync(ReservationPolicy.BlocksPartnerClosure(partnerId.Value, now));
+
+            if (open > 0)
+                throw new BusinessException(
+                    $"The account cannot be deleted while its accommodations have pending or confirmed reservations that are ongoing or upcoming (total: {open}). Resolve those reservations first.");
+        }
     }
 
     private async Task<(bool WasCustomer, bool WasPartner, bool WasAdministrator, int ClosedAccommodations)> CloseRoleRows(Guid userId)

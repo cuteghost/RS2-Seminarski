@@ -29,6 +29,10 @@ dependencies:
   pdf: ^3.11.0
   printing: ^5.13.0
 
+  # Prikaz grafova koje server generiše kao SVG (Upute: izvještaj sa grafom
+  # generisanim na serveru; desktop ga samo preuzme i prikaže).
+  flutter_svg: ^2.0.10
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

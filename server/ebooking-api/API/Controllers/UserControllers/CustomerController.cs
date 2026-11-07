@@ -1,4 +1,5 @@
-﻿using API.Exceptions;
+using Database.Services.ImageValidation;
+using API.Exceptions;
 using AutoMapper;
 using Database.Services.AccountService;
 using Database.Services.ProfileService;
@@ -68,6 +69,8 @@ public class CustomerController : Controller
 
         if (!LettersOnly.IsMatch(customerDto.LastName))
             throw new BusinessException("Last name is required and may contain only letters, without digits, spaces or special characters.");
+
+        ImageContentValidator.EnsureValid(customerDto.Image, "Profile image");
 
         var user = _mapper.Map<User>(customerDto);
         var customer = _mapper.Map<Customer>(customerDto);

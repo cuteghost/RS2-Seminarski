@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ebooking/providers/auth_provider.dart';
 import 'package:ebooking/providers/message_provider.dart';
+import 'package:ebooking/providers/notification_provider.dart';
 import 'package:ebooking/providers/profile_provider.dart';
 import 'package:ebooking/utils/navigation_utils.dart';
 import 'package:flutter/material.dart';
@@ -34,21 +35,25 @@ class _Session {
     required this.auth,
     required this.profile,
     required this.messages,
+    required this.notifications,
   });
 
   factory _Session.of(BuildContext context) => _Session(
     auth: Provider.of<AuthProvider>(context, listen: false),
     profile: Provider.of<ProfileProvider>(context, listen: false),
     messages: Provider.of<MessageProvider>(context, listen: false),
+    notifications: Provider.of<NotificationProvider>(context, listen: false),
   );
 
   final AuthProvider auth;
   final ProfileProvider profile;
   final MessageProvider messages;
+  final NotificationProvider notifications;
 
   Future<void> clear() async {
     auth.clearSession();
     profile.clear();
+    notifications.clear();
     await messages.clear();
   }
 }
